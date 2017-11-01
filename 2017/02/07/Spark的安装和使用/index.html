@@ -1,0 +1,1202 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Spark," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="不卑不亢不慌不忙" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Spark可以独立安装使用，也可以和Hadoop一起安装使用。本教程中，我们采用和Hadoop一起安装使用，这样，就可以让Spark使用HDFS存取数据。需要说明的是，当安装好Spark以后，里面就自带了scala环境，不需要额外安装scala，因此，“Spark安装”这个部分的教程，假设读者的计算机上，没有安装Scala，也没有安装Java（当然了，如果已经安装Java和Scala，也没有关系，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark入门 第二章 第一节 Spark的安装和使用">
+<meta property="og:url" content="http://Melodylican.github.io/2017/02/07/Spark的安装和使用/index.html">
+<meta property="og:site_name" content="不卑不亢不慌不忙">
+<meta property="og:description" content="Spark可以独立安装使用，也可以和Hadoop一起安装使用。本教程中，我们采用和Hadoop一起安装使用，这样，就可以让Spark使用HDFS存取数据。需要说明的是，当安装好Spark以后，里面就自带了scala环境，不需要额外安装scala，因此，“Spark安装”这个部分的教程，假设读者的计算机上，没有安装Scala，也没有安装Java（当然了，如果已经安装Java和Scala，也没有关系，">
+<meta property="og:image" content="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2017/02/Spark2.1.0%E5%AE%98%E7%BD%91%E4%B8%8B%E8%BD%BD%E9%A1%B5%E9%9D%A2.png">
+<meta property="og:image" content="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2017/02/Spark2.1.0Shell%E5%90%AF%E5%8A%A8%E7%95%8C%E9%9D%A2.png">
+<meta property="og:image" content="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/01/spark-quick-start-guide-07-directory-structure.png">
+<meta property="og:image" content="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/07/3-1.png">
+<meta property="og:updated_time" content="2017-06-27T11:56:24.166Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark入门 第二章 第一节 Spark的安装和使用">
+<meta name="twitter:description" content="Spark可以独立安装使用，也可以和Hadoop一起安装使用。本教程中，我们采用和Hadoop一起安装使用，这样，就可以让Spark使用HDFS存取数据。需要说明的是，当安装好Spark以后，里面就自带了scala环境，不需要额外安装scala，因此，“Spark安装”这个部分的教程，假设读者的计算机上，没有安装Scala，也没有安装Java（当然了，如果已经安装Java和Scala，也没有关系，">
+<meta name="twitter:image" content="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2017/02/Spark2.1.0%E5%AE%98%E7%BD%91%E4%B8%8B%E8%BD%BD%E9%A1%B5%E9%9D%A2.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://Melodylican.github.io/2017/02/07/Spark的安装和使用/"/>
+
+
+
+
+
+  <title> Spark入门 第二章 第一节 Spark的安装和使用 | 不卑不亢不慌不忙 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b882a8b6fdb7e13666299576d25a043a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">不卑不亢不慌不忙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">life is struggle</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-collect">
+          <a href="/collect" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-flag"></i> <br />
+            
+            收集
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/02/07/Spark的安装和使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Spark入门 第二章 第一节 Spark的安装和使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-07T00:00:00+08:00">
+                2017-02-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/02/07/Spark的安装和使用/" class="leancloud_visitors" data-flag-title="Spark入门 第二章 第一节 Spark的安装和使用">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Spark可以独立安装使用，也可以和Hadoop一起安装使用。本教程中，我们采用和Hadoop一起安装使用，这样，就可以让Spark使用HDFS存取数据。需要说明的是，当安装好Spark以后，里面就自带了scala环境，不需要额外安装scala，因此，“Spark安装”这个部分的教程，假设读者的计算机上，没有安装Scala，也没有安装Java（当然了，如果已经安装Java和Scala，也没有关系，依然可以继续按照本教程进行安装），也就是说，你的计算机目前只有Linux系统，其他的软件和环境都没有安装（没有Java，没有Scala，没有Hadoop，没有Spark），需要从零开始安装所有大数据相关软件。下面，需要你在自己的Linux系统上（笔者采用的Linux系统是Ubuntu16.04），首先安装Java和Hadoop，然后再安装Spark（Spark安装好以后，里面就默认包含了Scala解释器）。本教程的具体运行环境如下：<br>Ubuntu16.04以上<br>Hadoop 2.7.1以上<br>Java JDK 1.7以上<br>Spark 2.1.0<br><a id="more"></a><br><div class="note success"><h2 id="一、安装Hadoop"><a href="#一、安装Hadoop" class="headerlink" title="一、安装Hadoop"></a>一、安装Hadoop</h2></div><br>如果你的计算机上已经安装了Hadoop，本步骤可以略过。这里假设没有安装。如果没有安装Hadoop，<a href="http://dblab.xmu.edu.cn/blog/install-hadoop/" target="_blank" rel="external">请访问Hadoop安装教程_单机/伪分布式配置_Hadoop2.6.0/Ubuntu14.04,依照教程</a>学习安装即可。注意，在这个Hadoop安装教程中，就包含了Java的安装，所以，按照这个教程，就可以完成JDK和Hadoop这二者的安装。</p>
+<div class="note success"><h2 id="二、安装-Spark"><a href="#二、安装-Spark" class="headerlink" title="二、安装 Spark"></a>二、安装 Spark</h2></div>
+<p>在Linux系统中打开浏览器，访问Spark官方下载地址，按照如下图下载。<br><img src="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2017/02/Spark2.1.0%E5%AE%98%E7%BD%91%E4%B8%8B%E8%BD%BD%E9%A1%B5%E9%9D%A2.png" alt=""><br>由于我们已经自己安装了Hadoop，所以，在“Choose a package type”后面需要选择“Pre-build with user-provided Hadoop [can use with most Hadoop distributions]”，然后，点击“Download Spark”后面的“spark-2.1.0-bin-without-hadoop.tgz”下载即可。下载的文件，默认会被浏览器保存在“/home/hadoop/下载”目录下。需要说明的是，Pre-build with user-provided Hadoop: 属于“Hadoop free”版，这样，下载到的Spark，可应用到任意Hadoop 版本。</p>
+<p>Spark部署模式主要有四种：Local模式（单机模式）、Standalone模式（使用Spark自带的简单集群管理器）、YARN模式（使用YARN作为集群管理器）和Mesos模式（使用Mesos作为集群管理器）。<br>这里介绍Local模式（单机模式）的 Spark安装。我们选择Spark 2.1.0版本，并且假设当前使用用户名hadoop登录了Linux操作系统。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">sudo tar -zxf ~/下载/spark-2.1.0-bin-without-hadoop.tgz -C /usr/local/</div><div class="line">cd /usr/local</div><div class="line">sudo mv ./spark-2.1.0-bin-without-hadoop/ ./spark</div><div class="line">sudo chown -R hadoop:hadoop ./spark          # 此处的 hadoop 为你的用户名</div></pre></td></tr></table></figure></p>
+<p>安装后，还需要修改Spark的配置文件spark-env.sh<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark</div><div class="line">cp ./conf/spark-env.sh.template ./conf/spark-env.sh</div></pre></td></tr></table></figure></p>
+<p>编辑spark-env.sh文件(vim ./conf/spark-env.sh)，在第一行添加以下配置信息:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">export SPARK_DIST_CLASSPATH=$(/usr/local/hadoop/bin/hadoop classpath)</div></pre></td></tr></table></figure></p>
+<p>有了上面的配置信息以后，Spark就可以把数据存储到Hadoop分布式文件系统HDFS中，也可以从HDFS中读取数据。如果没有配置上面信息，Spark就只能读写本地数据，无法读写HDFS数据。<br>配置完成后就可以直接使用，不需要像Hadoop运行启动命令。<br>通过运行Spark自带的示例，验证Spark是否安装成功。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark</div><div class="line">bin/run-example SparkPi</div></pre></td></tr></table></figure></p>
+<p>执行时会输出非常多的运行信息，输出结果不容易找到，可以通过 grep 命令进行过滤（命令中的 2&gt;&amp;1 可以将所有的信息都输出到 stdout 中，否则由于输出日志的性质，还是会输出到屏幕中）:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/run-example SparkPi 2&gt;&amp;1 | grep &quot;Pi is&quot;</div></pre></td></tr></table></figure></p>
+<p>这里涉及到Linux Shell中管道的知识，详情可以参考Linux Shell中的管道命令<br>过滤后的运行结果如下图示，可以得到π 的 5 位小数近似值：</p>
+<div class="note success"><h2 id="三、在-Spark-Shell-中运行代码"><a href="#三、在-Spark-Shell-中运行代码" class="headerlink" title="三、在 Spark Shell 中运行代码"></a>三、在 Spark Shell 中运行代码</h2></div>
+<p>学习Spark程序开发，建议首先通过spark-shell交互式学习，加深Spark程序开发的理解。<br>这里介绍Spark Shell 的基本使用。Spark shell 提供了简单的方式来学习 API，并且提供了交互的方式来分析数据。你可以输入一条语句，Spark shell会立即执行语句并返回结果，这就是我们所说的REPL（Read-Eval-Print Loop，交互式解释器），为我们提供了交互式执行环境，表达式计算完成就会输出结果，而不必等到整个程序运行完毕，因此可即时查看中间结果，并对程序进行修改，这样可以在很大程度上提升开发效率。<br>Spark Shell 支持 Scala 和 Python，这里使用 Scala 来进行介绍。</p>
+<p>前面已经安装了Hadoop和Spark，如果Spark不使用HDFS和YARN，那么就不用启动Hadoop也可以正常使用Spark。如果在使用Spark的过程中需要用到 HDFS，就要首先启动 Hadoop（启动Hadoop的方法可以参考上面给出的Hadoop安装教程）。<br>这里假设不需要用到HDFS，因此，就没有启动Hadoop。现在我们直接开始使用Spark。<br>spark-shell命令及其常用的参数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/spark-shell --master &lt;master-url&gt;</div></pre></td></tr></table></figure></p>
+<p>Spark的运行模式取决于传递给SparkContext的Master URL的值。Master URL可以是以下任一种形式：</p>
+<ul>
+<li>local 使用一个Worker线程本地化运行SPARK(完全不并行)</li>
+<li>local[*] 使用逻辑CPU个数数量的线程来本地化运行Spark</li>
+<li>local[K] 使用K个Worker线程本地化运行Spark（理想情况下，K应该根据运行机器的CPU核数设定）</li>
+<li>spark://HOST:PORT 连接到指定的Spark standalone master。默认端口是7077.</li>
+<li>yarn-client 以客户端模式连接YARN集群。集群的位置可以在HADOOP_CONF_DIR 环境变量中找到。</li>
+<li>yarn-cluster 以集群模式连接YARN集群。集群的位置可以在HADOOP_CONF_DIR 环境变量中找到。</li>
+<li>mesos://HOST:PORT 连接到指定的Mesos集群。默认接口是5050。</li>
+</ul>
+<p>需要强调的是，这里我们采用“本地模式”（local）运行Spark，关于如何在集群模式下运行Spark，可以参考后面的“<a href="http://dblab.xmu.edu.cn/blog/1217-2/" target="_blank" rel="external">在集群上运行Spark应用程序</a>”。<br>在Spark中采用本地模式启动Spark Shell的命令主要包含以下参数：<br>–master：这个参数表示当前的Spark Shell要连接到哪个master，如果是local[*]，就是使用本地模式启动spark-shell，其中，中括号内的星号表示需要使用几个CPU核心(core)；<br>–jars： 这个参数用于把相关的JAR包添加到CLASSPATH中；如果有多个jar包，可以使用逗号分隔符连接它们；</p>
+<p>比如，要采用本地模式，在4个CPU核心上运行spark-shell：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark</div><div class="line">./bin/spark-shell --master local[4]</div></pre></td></tr></table></figure></p>
+<p>或者，可以在CLASSPATH中添加code.jar，命令如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark</div><div class="line">./bin/spark-shell --master local[4] --jars code.jar</div></pre></td></tr></table></figure></p>
+<p>可以执行“spark-shell –help”命令，获取完整的选项列表，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark</div><div class="line">./bin/spark-shell --help</div></pre></td></tr></table></figure></p>
+<p>上面是命令使用方法介绍，下面正式使用命令进入spark-shell环境，可以通过下面命令启动spark-shell环境：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/spark-shell</div></pre></td></tr></table></figure></p>
+<p>该命令省略了参数，这时，系统默认是“bin/spark-shell –master local[*]”，也就是说，是采用本地模式运行，并且使用本地所有的CPU核心。</p>
+<p>启动spark-shell后，就会进入“scala&gt;”命令提示符状态,如下图所示：<br><img src="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2017/02/Spark2.1.0Shell%E5%90%AF%E5%8A%A8%E7%95%8C%E9%9D%A2.png" alt=""><br>现在，你就可以在里面输入scala代码进行调试了。</p>
+<p>比如，下面在命令提示符后面输入一个表达式“8 * 2 + 5”，然后回车，就会立即得到结果：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="number">8</span>*<span class="number">2</span>+<span class="number">5</span></div><div class="line">res0: <span class="type">Int</span> = <span class="number">21</span></div></pre></td></tr></table></figure></p>
+<p>最后，可以使用命令“:quit”退出Spark Shell，如下所示：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scala&gt;:quit</div></pre></td></tr></table></figure></p>
+<p>或者，也可以直接使用“Ctrl+D”组合键，退出Spark Shell。</p>
+<div class="note success"><h2 id="四、Spark独立应用程序编程"><a href="#四、Spark独立应用程序编程" class="headerlink" title="四、Spark独立应用程序编程"></a>四、Spark独立应用程序编程</h2></div>
+<p>接着我们通过一个简单的应用程序 SimpleApp 来演示如何通过 Spark API 编写一个独立应用程序。使用 Scala 编写的程序需要使用 sbt 进行编译打包，相应的，Java 程序使用 Maven 编译打包，而 Python 程序通过 spark-submit 直接提交。</p>
+<div class="note success"><h2 id="（一）编写Scala独立应用程序"><a href="#（一）编写Scala独立应用程序" class="headerlink" title="（一）编写Scala独立应用程序"></a>（一）编写Scala独立应用程序</h2></div>
+<h3 id="1-安装sbt"><a href="#1-安装sbt" class="headerlink" title="1.安装sbt"></a>1.安装sbt</h3><p>sbt是一款Spark用来对scala编写程序进行打包的工具，这里简单介绍sbt的安装过程，感兴趣的读者可以参考官网资料了解更多关于sbt的内容。<br>Spark 中没有自带 sbt，这里直接给出<a href="https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.11/sbt-launch.jar" target="_blank" rel="external">sbt-launch.jar</a>的下载地址，直接点击下载即可。<br>我们选择安装在 /usr/local/sbt 中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">sudo mkdir /usr/local/sbt</div><div class="line">sudo chown -R hadoop /usr/local/sbt      # 此处的 hadoop 为你的用户名</div><div class="line">cd /usr/local/sbt</div></pre></td></tr></table></figure></p>
+<p>下载后，执行如下命令拷贝至 /usr/local/sbt 中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cp ~/下载/sbt-launch.jar .</div></pre></td></tr></table></figure></p>
+<p>接着在 /usr/local/sbt 中创建 sbt 脚本（vim ./sbt），添加如下内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">#!/bin/bash</div><div class="line">SBT_OPTS=&quot;-Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M&quot;</div><div class="line">java $SBT_OPTS -jar `dirname $0`/sbt-launch.jar &quot;$@&quot;</div></pre></td></tr></table></figure></p>
+<p>保存后，为 ./sbt 脚本增加可执行权限：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">chmod u+x ./sbt</div></pre></td></tr></table></figure></p>
+<p>最后运行如下命令，检验 sbt 是否可用（请确保电脑处于联网状态，首次运行会处于 “Getting org.scala-sbt sbt 0.13.11 …” 的下载状态，请耐心等待。笔者等待了 7 分钟才出现第一条下载提示）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./sbt sbt-version</div></pre></td></tr></table></figure></p>
+<p>只要能得到如下图的版本信息就没问题：<br><a href="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/07/4.png" target="_blank" rel="external">http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/07/4.png</a></p>
+<h3 id="2-编写Scala应用程序"><a href="#2-编写Scala应用程序" class="headerlink" title="2.编写Scala应用程序"></a>2.编写Scala应用程序</h3><p>在终端中执行如下命令创建一个文件夹 sparkapp 作为应用程序根目录：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cd ~           # 进入用户主文件夹</div><div class="line">mkdir ./sparkapp        # 创建应用程序根目录</div><div class="line">mkdir -p ./sparkapp/src/main/scala     # 创建所需的文件夹结构</div></pre></td></tr></table></figure></p>
+<p>在 ./sparkapp/src/main/scala 下建立一个名为 SimpleApp.scala 的文件（vim ./sparkapp/src/main/scala/SimpleApp.scala），添加代码如下（目前不需要理解代码的具体含义，只需要理解如何编译运行代码就可以）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* SimpleApp.scala */</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span>._</div><div class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkConf</span></div><div class="line"> </div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">SimpleApp</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</div><div class="line">        <span class="keyword">val</span> logFile = <span class="string">"file:///usr/local/spark/README.md"</span> <span class="comment">// Should be some file on your system</span></div><div class="line">        <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">"Simple Application"</span>)</div><div class="line">        <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</div><div class="line">        <span class="keyword">val</span> logData = sc.textFile(logFile, <span class="number">2</span>).cache()</div><div class="line">        <span class="keyword">val</span> numAs = logData.filter(line =&gt; line.contains(<span class="string">"a"</span>)).count()</div><div class="line">        <span class="keyword">val</span> numBs = logData.filter(line =&gt; line.contains(<span class="string">"b"</span>)).count()</div><div class="line">        println(<span class="string">"Lines with a: %s, Lines with b: %s"</span>.format(numAs, numBs))</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>该程序计算 /usr/local/spark/README 文件中包含 “a” 的行数 和包含 “b” 的行数。代码第8行的 /usr/local/spark 为 Spark 的安装目录，如果不是该目录请自行修改。不同于 Spark shell，独立应用程序需要通过 val sc = new SparkContext(conf) 初始化 SparkContext，SparkContext 的参数 SparkConf 包含了应用程序的信息。</p>
+<h3 id="3-使用sbt打包Scala程序"><a href="#3-使用sbt打包Scala程序" class="headerlink" title="3.使用sbt打包Scala程序"></a>3.使用sbt打包Scala程序</h3><p>该程序依赖 Spark API，因此我们需要通过 sbt 进行编译打包。 请在./sparkapp 中新建文件 simple.sbt（vim ./sparkapp/simple.sbt），添加内容如下，声明该独立应用程序的信息以及与 Spark 的依赖关系：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">name := &quot;Simple Project&quot;</div><div class="line">version := &quot;1.0&quot;</div><div class="line">scalaVersion := &quot;2.11.8&quot;</div><div class="line">libraryDependencies += &quot;org.apache.spark&quot; %% &quot;spark-core&quot; % &quot;2.1.0&quot;</div></pre></td></tr></table></figure></p>
+<p>文件 simple.sbt 需要指明 Spark 和 Scala 的版本。在上面的配置信息中，scalaVersion用来指定scala的版本，sparkcore用来指定spark的版本，这两个版本信息都可以在之前的启动 Spark shell 的过程中，从屏幕的显示信息中找到。下面就是笔者在启动过程当中，看到的相关版本信息（备注：屏幕显示信息会很长，需要往回滚动屏幕仔细寻找信息）。</p>
+<p>为保证 sbt 能正常运行，先执行如下命令检查整个应用程序的文件结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd ~/sparkapp</div><div class="line">find .</div></pre></td></tr></table></figure></p>
+<p>文件结构应如下图所示：<br><img src="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/01/spark-quick-start-guide-07-directory-structure.png" alt=""><br>SimpleApp的文件结构</p>
+<p>接着，我们就可以通过如下代码将整个应用程序打包成 JAR（首次运行同样需要下载依赖包 ）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/usr/local/sbt/sbt package</div></pre></td></tr></table></figure></p>
+<p>对于刚安装好的Spark和sbt而言，第一次运行上面的打包命令时，会需要几分钟的运行时间，因为系统会自动从网络上下载各种文件。后面再次运行上面命令，就会很快，因为不再需要下载相关文件。<br>打包成功的话，会输出如下内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">hadoop@dblab:~/sparkapp$ /usr/local/sbt/sbt package</div><div class="line">OpenJDK 64-Bit Server VM warning: ignoring option MaxPermSize=256M; support was removed in 8.0</div><div class="line">[info] Set current project to Simple Project (in build file:/home/hadoop/sparkapp/)</div><div class="line">[success] Total time: 2 s, completed 2017-2-19 15:45:29</div></pre></td></tr></table></figure></p>
+<p>生成的 jar 包的位置为 ~/sparkapp/target/scala-2.11/simple-project_2.11-1.0.jar。</p>
+<h3 id="4-通过-spark-submit-运行程序"><a href="#4-通过-spark-submit-运行程序" class="headerlink" title="4.通过 spark-submit 运行程序"></a>4.通过 spark-submit 运行程序</h3><p>最后，我们就可以将生成的 jar 包通过 spark-submit 提交到 Spark 中运行了，命令如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">/usr/local/spark/bin/spark-submit --class &quot;SimpleApp&quot; ~/sparkapp/target/scala-2.11/simple-project_2.11-1.0.jar</div><div class="line">#上面命令执行后会输出太多信息，可以不使用上面命令，而使用下面命令查看想要的结果</div><div class="line">/usr/local/spark/bin/spark-submit --class &quot;SimpleApp&quot; ~/sparkapp/target/scala-2.11/simple-project_2.11-1.0.jar 2&gt;&amp;1 | grep &quot;Lines with a:&quot;</div></pre></td></tr></table></figure></p>
+<p>最终得到的结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Lines with a: 62, Lines with b: 30</div></pre></td></tr></table></figure></p>
+<p>自此，你就完成了你的第一个 Spark 应用程序了。</p>
+<div class="note success"><h2 id="（二）Java独立应用编程"><a href="#（二）Java独立应用编程" class="headerlink" title="（二）Java独立应用编程"></a>（二）Java独立应用编程</h2></div>
+<h3 id="1-安装maven"><a href="#1-安装maven" class="headerlink" title="1.安装maven"></a>1.安装maven</h3><p>ubuntu中没有自带安装maven，需要手动安装maven。可以访问maven官方下载自己下载。这里直接给出apache-maven-3.3.9-bin.zip的下载地址,直接点击下载即可。<br>选择安装在/usr/local/maven中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">sudo unzip ~/下载/apache-maven-3.3.9-bin.zip -d /usr/local</div><div class="line">cd /usr/local</div><div class="line">sudo mv apache-maven-3.3.9/ ./maven</div><div class="line">sudo chown -R hadoop ./maven</div></pre></td></tr></table></figure></p>
+<h3 id="2-Java应用程序代码"><a href="#2-Java应用程序代码" class="headerlink" title="2.Java应用程序代码"></a>2.Java应用程序代码</h3><p>在终端执行如下命令创建一个文件夹sparkapp2作为应用程序根目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd ~ #进入用户主文件夹</div><div class="line">mkdir -p ./sparkapp2/src/main/java</div></pre></td></tr></table></figure></p>
+<p>在 ./sparkapp2/src/main/java 下建立一个名为 SimpleApp.java 的文件（vim ./sparkapp2/src/main/java/SimpleApp.java），添加代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*** SimpleApp.java ***/</span></div><div class="line">    <span class="keyword">import</span> org.apache.spark.api.java.*;</div><div class="line">    <span class="keyword">import</span> org.apache.spark.api.java.function.Function;</div><div class="line"> </div><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SimpleApp</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">            String logFile = <span class="string">"file:///usr/local/spark/README.md"</span>; <span class="comment">// Should be some file on your system</span></div><div class="line">            JavaSparkContext sc = <span class="keyword">new</span> JavaSparkContext(<span class="string">"local"</span>, <span class="string">"Simple App"</span>,</div><div class="line">                <span class="string">"file:///usr/local/spark/"</span>, <span class="keyword">new</span> String[]&#123;<span class="string">"target/simple-project-1.0.jar"</span>&#125;);</div><div class="line">            JavaRDD&lt;String&gt; logData = sc.textFile(logFile).cache();</div><div class="line"> </div><div class="line">            <span class="keyword">long</span> numAs = logData.filter(<span class="keyword">new</span> Function&lt;String, Boolean&gt;() &#123;</div><div class="line">                <span class="function"><span class="keyword">public</span> Boolean <span class="title">call</span><span class="params">(String s)</span> </span>&#123; <span class="keyword">return</span> s.contains(<span class="string">"a"</span>); &#125;</div><div class="line">            &#125;).count();</div><div class="line"> </div><div class="line">            <span class="keyword">long</span> numBs = logData.filter(<span class="keyword">new</span> Function&lt;String, Boolean&gt;() &#123;</div><div class="line">                <span class="function"><span class="keyword">public</span> Boolean <span class="title">call</span><span class="params">(String s)</span> </span>&#123; <span class="keyword">return</span> s.contains(<span class="string">"b"</span>); &#125;</div><div class="line">            &#125;).count();</div><div class="line"> </div><div class="line">            System.out.println(<span class="string">"Lines with a: "</span> + numAs + <span class="string">", lines with b: "</span> + numBs);</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>该程序依赖Spark Java API,因此我们需要通过Maven进行编译打包。在./sparkapp2中新建文件pom.xml(vim ./sparkapp2/pom.xml),添加内容如下，声明该独立应用程序的信息以及与Spark的依赖关系：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">&lt;project&gt;</div><div class="line">    &lt;groupId&gt;edu.berkeley&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;simple-project&lt;/artifactId&gt;</div><div class="line">    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">    &lt;name&gt;Simple Project&lt;/name&gt;</div><div class="line">    &lt;packaging&gt;jar&lt;/packaging&gt;</div><div class="line">    &lt;version&gt;1.0&lt;/version&gt;</div><div class="line">    &lt;repositories&gt;</div><div class="line">        &lt;repository&gt;</div><div class="line">            &lt;id&gt;Akka repository&lt;/id&gt;</div><div class="line">            &lt;url&gt;http://repo.akka.io/releases&lt;/url&gt;</div><div class="line">        &lt;/repository&gt;</div><div class="line">    &lt;/repositories&gt;</div><div class="line">    &lt;dependencies&gt;</div><div class="line">        &lt;dependency&gt; &lt;!-- Spark dependency --&gt;</div><div class="line">            &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</div><div class="line">            &lt;artifactId&gt;spark-core_2.11&lt;/artifactId&gt;</div><div class="line">            &lt;version&gt;2.1.0&lt;/version&gt;</div><div class="line">        &lt;/dependency&gt;</div><div class="line">    &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
+<p>关于Spark dependency的依赖关系，可以访问The Central Repository。搜索spark-core可以找到相关依赖关系信息。</p>
+<h3 id="3-使用maven打包java程序"><a href="#3-使用maven打包java程序" class="headerlink" title="3.使用maven打包java程序"></a>3.使用maven打包java程序</h3><p>为了保证maven能够正常运行，先执行如下命令检查整个应用程序的文件结构:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd ~/sparkapp2</div><div class="line">find</div></pre></td></tr></table></figure></p>
+<p>文件结构如下图：<br><img src="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/07/3-1.png" alt=""></p>
+<p>接着，我们可以通过如下代码将这整个应用程序打包成Jar(注意：电脑需要保持连接网络的状态，而且首次运行mvn package命令时，系统会自动从网络下载相关的依赖包，同样消耗几分钟的时间，后面再次运行mvn package命令，速度就会快很多):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/usr/local/maven/bin/mvn package</div></pre></td></tr></table></figure></p>
+<p>如果运行上面命令后出现类似下面的信息，说明生成Jar包成功：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[INFO] ------------------------------------------------------------------------</div><div class="line">[INFO] BUILD SUCCESS</div><div class="line">[INFO] ------------------------------------------------------------------------</div><div class="line">[INFO] Total time: 6.583 s</div><div class="line">[INFO] Finished at: 2017-02-19T15:52:08+08:00</div><div class="line">[INFO] Final Memory: 15M/121M</div><div class="line">[INFO] ------------------------------------------------------------------------</div></pre></td></tr></table></figure></p>
+<h3 id="4-通过spark-submit-运行程序"><a href="#4-通过spark-submit-运行程序" class="headerlink" title="4.通过spark-submit 运行程序"></a>4.通过spark-submit 运行程序</h3><p>可以通过spark-submit提交应用程序，该命令的格式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">./bin/spark-submit </div><div class="line">  --class &lt;main-class&gt;  //需要运行的程序的主类，应用程序的入口点</div><div class="line">  --master &lt;master-url&gt;  //Master URL，下面会有具体解释</div><div class="line">  --deploy-mode &lt;deploy-mode&gt;   //部署模式</div><div class="line">  ... # other options  //其他参数</div><div class="line">  &lt;application-jar&gt;  //应用程序JAR包</div><div class="line">  [application-arguments] //传递给主类的主方法的参数</div></pre></td></tr></table></figure></p>
+<p>deploy-mode这个参数用来指定应用程序的部署模式，部署模式有两种：client和cluster，默认是client。当采用client部署模式时，就是直接在本地运行Driver Program，当采用cluster模式时，会在Worker节点上运行Driver Program。比较常用的部署策略是从网关机器提交你的应用程序，这个网关机器和你的Worker集群进行协作。在这种设置下，比较适合采用client模式，在client模式下，Driver直接在spark-submit进程中启动，这个进程直接作为集群的客户端，应用程序的输入和输出都和控制台相连接。因此，这种模式特别适合涉及REPL的应用程序。另一种选择是，如果你的应用程序从一个和Worker机器相距很远的机器上提交，那么采用cluster模式会更加合适，它可以减少Driver和Executor之间的网络迟延。</p>
+<p>Spark的运行模式取决于传递给SparkContext的Master URL的值。Master URL可以是以下任一种形式：</p>
+<ul>
+<li>local 使用一个Worker线程本地化运行SPARK(完全不并行)</li>
+<li>local[*] 使用逻辑CPU个数数量的线程来本地化运行Spark</li>
+<li>local[K] 使用K个Worker线程本地化运行Spark（理想情况下，K应该根据运行机器的CPU核数设定）</li>
+<li>spark://HOST:PORT 连接到指定的Spark standalone master。默认端口是7077.</li>
+<li>yarn-client 以客户端模式连接YARN集群。集群的位置可以在HADOOP_CONF_DIR 环境变量中找到。</li>
+<li>yarn-cluster 以集群模式连接YARN集群。集群的位置可以在HADOOP_CONF_DIR 环境变量中找到。</li>
+<li>mesos://HOST:PORT 连接到指定的Mesos集群。默认接口是5050。</li>
+</ul>
+<p>最后，针对上面编译打包得到的应用程序，可以通过将生成的jar包通过spark-submit提交到Spark中运行，如下命令：</p>
+<p>/usr/local/spark/bin/spark-submit –class “SimpleApp” ~/sparkapp2/target/simple-project-1.0.jar</p>
+<p>#上面命令执行后会输出太多信息，可以不使用上面命令，而使用下面命令查看想要的结果<br>/usr/local/spark/bin/spark-submit –class “SimpleApp” ~/sparkapp2/target/simple-project-1.0.jar 2&gt;&amp;1 | grep “Lines with a”<br>Shell 命令<br>最后得到的结果如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Lines with a: 62, Lines with b: 30</div></pre></td></tr></table></figure></p>
+<font color="grey">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/img/wechat.png" alt="Melodylican WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/img/zhifubao.png" alt="Melodylican Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/05/Spark的部署模式/" rel="next" title="Spark入门 第一章 第四节 Spark的部署模式">
+                <i class="fa fa-chevron-left"></i> Spark入门 第一章 第四节 Spark的部署模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/10/第一个Spark应用程序：WordCount/" rel="prev" title="Spark入门 第二章 第二节 第一个Spark应用程序：WordCount">
+                Spark入门 第二章 第二节 第一个Spark应用程序：WordCount <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Melodylican" />
+          <p class="site-author-name" itemprop="name">Melodylican</p>
+           
+              <p class="site-description motion-element" itemprop="description">life is struggle</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">84</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">57</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/your-user-name" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/your-user-name" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3235750572" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.baidu.com/" title="MacTalk" target="_blank">MacTalk</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://example.com/" title="Title" target="_blank">Title</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、安装Hadoop"><span class="nav-number">1.</span> <span class="nav-text">一、安装Hadoop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、安装-Spark"><span class="nav-number">2.</span> <span class="nav-text">二、安装 Spark</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、在-Spark-Shell-中运行代码"><span class="nav-number">3.</span> <span class="nav-text">三、在 Spark Shell 中运行代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、Spark独立应用程序编程"><span class="nav-number">4.</span> <span class="nav-text">四、Spark独立应用程序编程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#（一）编写Scala独立应用程序"><span class="nav-number">5.</span> <span class="nav-text">（一）编写Scala独立应用程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装sbt"><span class="nav-number">5.1.</span> <span class="nav-text">1.安装sbt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-编写Scala应用程序"><span class="nav-number">5.2.</span> <span class="nav-text">2.编写Scala应用程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-使用sbt打包Scala程序"><span class="nav-number">5.3.</span> <span class="nav-text">3.使用sbt打包Scala程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-通过-spark-submit-运行程序"><span class="nav-number">5.4.</span> <span class="nav-text">4.通过 spark-submit 运行程序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#（二）Java独立应用编程"><span class="nav-number">6.</span> <span class="nav-text">（二）Java独立应用编程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装maven"><span class="nav-number">6.1.</span> <span class="nav-text">1.安装maven</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Java应用程序代码"><span class="nav-number">6.2.</span> <span class="nav-text">2.Java应用程序代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-使用maven打包java程序"><span class="nav-number">6.3.</span> <span class="nav-text">3.使用maven打包java程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-通过spark-submit-运行程序"><span class="nav-number">6.4.</span> <span class="nav-text">4.通过spark-submit 运行程序</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Powered By <a href="#">Melodylican</a></span>
+</div>
+
+
+<div class="powered-by">
+    个人专属
+</div>
+
+<div class="theme-info">
+  博客 
+  
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2128487"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="local-search-pop-overlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("nCYvmPGeqGhuuM0qkwvIf2k1-gzGzoHsz", "dnC7e97rmSEwVQKrjxAE7oRR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+  
+  
+	<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+<!-- 小红心 -->
+<script type="text/javascript" src="/js/src/love.js"></script>
+</body>
+</html>

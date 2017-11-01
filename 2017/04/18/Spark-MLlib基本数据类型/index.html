@@ -1,0 +1,1136 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Spark," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="不卑不亢不慌不忙" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="MLLib提供了一系列基本数据类型以支持底层的机器学习算法。主要的数据类型包括：本地向量、标注点（Labeled Point）、本地矩阵、分布式矩阵等。单机模式存储的本地向量与矩阵，以及基于一个或多个RDD的分布式矩阵。其中本地向量与本地矩阵作为公共接口提供简单数据模型，底层的线性代数操作由Breeze库和jblas库提供。标注点类型用来表示监督学习（Supervised Learning）中的一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark入门 第六章 第二节 Spark - MLlib基本数据类型1">
+<meta property="og:url" content="http://Melodylican.github.io/2017/04/18/Spark-MLlib基本数据类型/index.html">
+<meta property="og:site_name" content="不卑不亢不慌不忙">
+<meta property="og:description" content="MLLib提供了一系列基本数据类型以支持底层的机器学习算法。主要的数据类型包括：本地向量、标注点（Labeled Point）、本地矩阵、分布式矩阵等。单机模式存储的本地向量与矩阵，以及基于一个或多个RDD的分布式矩阵。其中本地向量与本地矩阵作为公共接口提供简单数据模型，底层的线性代数操作由Breeze库和jblas库提供。标注点类型用来表示监督学习（Supervised Learning）中的一">
+<meta property="og:updated_time" content="2017-07-21T07:29:35.348Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark入门 第六章 第二节 Spark - MLlib基本数据类型1">
+<meta name="twitter:description" content="MLLib提供了一系列基本数据类型以支持底层的机器学习算法。主要的数据类型包括：本地向量、标注点（Labeled Point）、本地矩阵、分布式矩阵等。单机模式存储的本地向量与矩阵，以及基于一个或多个RDD的分布式矩阵。其中本地向量与本地矩阵作为公共接口提供简单数据模型，底层的线性代数操作由Breeze库和jblas库提供。标注点类型用来表示监督学习（Supervised Learning）中的一">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://Melodylican.github.io/2017/04/18/Spark-MLlib基本数据类型/"/>
+
+
+
+
+
+  <title> Spark入门 第六章 第二节 Spark - MLlib基本数据类型1 | 不卑不亢不慌不忙 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b882a8b6fdb7e13666299576d25a043a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">不卑不亢不慌不忙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">life is struggle</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-collect">
+          <a href="/collect" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-flag"></i> <br />
+            
+            收集
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/04/18/Spark-MLlib基本数据类型/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Spark入门 第六章 第二节 Spark - MLlib基本数据类型1
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-18T00:00:00+08:00">
+                2017-04-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/04/18/Spark-MLlib基本数据类型/" class="leancloud_visitors" data-flag-title="Spark入门 第六章 第二节 Spark - MLlib基本数据类型1">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>MLLib提供了一系列基本数据类型以支持底层的机器学习算法。主要的数据类型包括：本地向量、标注点（Labeled Point）、本地矩阵、分布式矩阵等。单机模式存储的本地向量与矩阵，以及基于一个或多个RDD的分布式矩阵。其中本地向量与本地矩阵作为公共接口提供简单数据模型，底层的线性代数操作由<em>Breeze</em>库和<em>jblas</em>库提供。标注点类型用来表示<em>监督学习（Supervised Learning）</em>中的一个训练样本。<br><a id="more"></a></p>
+<p>在正式学习机器学习算法之前，让我们先了解下这些数据类型的用法。</p>
+<div class="note success"><h2 id="本地向量（Local-Vector）"><a href="#本地向量（Local-Vector）" class="headerlink" title="本地向量（Local Vector）"></a>本地向量（Local Vector）</h2></div>
+<p><strong>本地向量</strong>存储在单机上，其拥有整型、从0开始的索引值以及浮点型的元素值。MLlib提供了两种类型的本地向量，<strong>稠密向量</strong>DenseVector和<strong>稀疏向量</strong>SparseVector。稠密向量使用一个双精度浮点型数组来表示其中每一维元素，而稀疏向量则是基于一个整型索引数组和一个双精度浮点型的值数组。例如，向量(1.0, 0.0, 3.0)的稠密向量表示形式是[1.0,0.0,3.0]，而稀疏向量形式则是(3, [0,2], [1.0, 3.0])，其中，3是向量的长度，[0,2]是向量中非0维度的索引值，表示位置为0、2的两个元素为非零值，而[1.0, 3.0]则是按索引排列的数组元素值。</p>
+<p>所有本地向量都以org.apache.spark.mllib.linalg.Vector为基类，DenseVector和SparseVector分别是它的两个实现类，故推荐使用Vectors工具类下定义的工厂方法来创建本地向量，请看如下实例（假设在Spark-shell中运行，下同）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">scala&gt;<span class="keyword">import</span> org.apache.spark.mllib.linalg.&#123;<span class="type">Vector</span>, <span class="type">Vectors</span>&#125;</div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.linalg.&#123;<span class="type">Vector</span>, <span class="type">Vectors</span>&#125;</div><div class="line"> </div><div class="line"><span class="comment">// 创建一个稠密本地向量</span></div><div class="line">scala&gt; <span class="keyword">val</span> dv: <span class="type">Vector</span> = <span class="type">Vectors</span>.dense(<span class="number">2.0</span>, <span class="number">0.0</span>, <span class="number">8.0</span>)</div><div class="line">dv: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = [<span class="number">2.0</span>,<span class="number">0.0</span>,<span class="number">8.0</span>]</div><div class="line"><span class="comment">// 创建一个稀疏本地向量</span></div><div class="line"><span class="comment">// 方法第二个参数数组指定了非零元素的索引，而第三个参数数组则给定了非零元素值</span></div><div class="line">scala&gt; <span class="keyword">val</span> sv1: <span class="type">Vector</span> = <span class="type">Vectors</span>.sparse(<span class="number">3</span>, <span class="type">Array</span>(<span class="number">0</span>, <span class="number">2</span>), <span class="type">Array</span>(<span class="number">2.0</span>, <span class="number">8.0</span>))</div><div class="line">sv1: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = (<span class="number">3</span>,[<span class="number">0</span>,<span class="number">2</span>],[<span class="number">2.0</span>,<span class="number">8.0</span>])</div><div class="line"><span class="comment">// 另一种创建稀疏本地向量的方法</span></div><div class="line"><span class="comment">// 方法的第二个参数是一个序列，其中每个元素都是一个非零值的元组：(index,elem)</span></div><div class="line">scala&gt; <span class="keyword">val</span> sv2: <span class="type">Vector</span> = <span class="type">Vectors</span>.sparse(<span class="number">3</span>, <span class="type">Seq</span>((<span class="number">0</span>, <span class="number">2.0</span>), (<span class="number">2</span>, <span class="number">8.0</span>)))</div><div class="line">sv2: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = (<span class="number">3</span>,[<span class="number">0</span>,<span class="number">2</span>],[<span class="number">2.0</span>,<span class="number">8.0</span>])</div></pre></td></tr></table></figure></p>
+<p>这里需要注意的是，Scala会默认引入<strong>scala.collection.immutable.Vector</strong>，我们要显式地引入<strong>org.apache.spark.mllib.linalg.Vector</strong>来使用MLlib提供的向量类型。</p>
+<div class="note success"><h2 id="标注点（Labeled-Point）"><a href="#标注点（Labeled-Point）" class="headerlink" title="标注点（Labeled Point）"></a>标注点（Labeled Point）</h2></div>
+<p><strong>标注点</strong>LabeledPoint是一种带有标签（Label/Response）的本地向量，它可以是稠密或者是稀疏的。在MLlib中，标注点在监督学习算法中被使用。由于标签是用双精度浮点型来存储的，故标注点类型在<strong>回归</strong>（Regression）和<strong>分类</strong>（Classification）问题上均可使用。例如，对于二分类问题，则正样本的标签为1，负样本的标签为0，而对于多类别的分类问题来说，标签则应是一个以0开始的索引序列:0, 1, 2 …</p>
+<p>标注点的实现类是org.apache.spark.mllib.regression.LabeledPoint，请注意它与前面介绍的本地向量不同，并不位于linalg包下，标注点的创建如下所示：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.mllib.linalg.<span class="type">Vectors</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.linalg.<span class="type">Vectors</span></div><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.mllib.regression.<span class="type">LabeledPoint</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.regression.<span class="type">LabeledPoint</span></div><div class="line"><span class="comment">//创建一个标签为1.0（分类中可视为正样本）的稠密向量标注点</span></div><div class="line">scala&gt; <span class="keyword">val</span> pos = <span class="type">LabeledPoint</span>(<span class="number">1.0</span>, <span class="type">Vectors</span>.dense(<span class="number">2.0</span>, <span class="number">0.0</span>, <span class="number">8.0</span>))</div><div class="line">pos: org.apache.spark.mllib.regression.<span class="type">LabeledPoint</span> = (<span class="number">1.0</span>,[<span class="number">2.0</span>,<span class="number">0.0</span>,<span class="number">8.0</span>])</div><div class="line"><span class="comment">//创建一个标签为0.0（分类中可视为负样本）的稀疏向量标注点</span></div><div class="line">scala&gt; <span class="keyword">val</span> neg = <span class="type">LabeledPoint</span>(<span class="number">0.0</span>, <span class="type">Vectors</span>.sparse(<span class="number">3</span>, <span class="type">Array</span>(<span class="number">0</span>, <span class="number">2</span>), <span class="type">Array</span>(<span class="number">2.0</span>, <span class="number">8.0</span>)))</div><div class="line">neg: org.apache.spark.mllib.regression.<span class="type">LabeledPoint</span> = (<span class="number">0.0</span>,(<span class="number">3</span>,[<span class="number">0</span>,<span class="number">2</span>],[<span class="number">2.0</span>,<span class="number">8.0</span>]))</div></pre></td></tr></table></figure></p>
+<p>在实际的机器学习问题中，稀疏向量数据是非常常见的，MLlib提供了读取LIBSVM格式数据的支持，该格式被广泛用于LIBSVM、LIBLINEAR等机器学习库。在该格式下，每一个带标注的样本点由以下格式表示：</p>
+<p>label index1:value1 index2:value2 index3:value3 …<br>其中label是该样本点的标签值，一系列index:value对则代表了该样本向量中所有非零元素的索引和元素值。这里需要特别注意的是，index是以1开始并递增的。<br>MLlib在org.apache.spark.mllib.util.MLUtils工具类中提供了读取LIBSVM格式的方法loadLibSVMFile，其使用非常方便。<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.mllib.util.<span class="type">MLUtils</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.util.<span class="type">MLUtils</span></div><div class="line"> </div><div class="line"><span class="comment">// 用loadLibSVMFile方法读入LIBSVM格式数据</span></div><div class="line"><span class="comment">// sample_libsvm_data.txt为spark自带的一个示例，在以下地址可以找到：</span></div><div class="line"><span class="comment">// $SPARK_HOME$/data/mllib/sample_libsvm_data.txt</span></div><div class="line">scala&gt; <span class="keyword">val</span> examples = <span class="type">MLUtils</span>.loadLibSVMFile(sc, <span class="string">"/data/mllib/sample_libsvm_data.txt"</span>)</div><div class="line"><span class="comment">//返回的是组织成RDD的一系列LabeledPoint</span></div><div class="line">examples: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.regression.<span class="type">LabeledPoint</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">6</span>] at map at <span class="type">MLUtils</span>.scala:<span class="number">108</span></div></pre></td></tr></table></figure></p>
+<p>这里，sc是Spark-shell自动建立的SparkContext。我们可以查看下加载进来的标注点的值：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; examples.collect().head</div><div class="line">res7: org.apache.spark.mllib.regression.<span class="type">LabeledPoint</span> = (<span class="number">0.0</span>,(<span class="number">692</span>,[<span class="number">127</span>,<span class="number">128</span>,<span class="number">129</span>,<span class="number">130</span>,<span class="number">131</span>,<span class="number">154</span>,<span class="number">155</span>,<span class="number">156</span>,<span class="number">157</span>,<span class="number">158</span>,<span class="number">159</span>,<span class="number">181</span>,<span class="number">182</span>,<span class="number">183</span>,<span class="number">184</span>,<span class="number">185</span>,<span class="number">186</span>,<span class="number">187</span>,<span class="number">188</span>,<span class="number">189</span>,<span class="number">207</span>,<span class="number">208</span>,<span class="number">209</span>,<span class="number">210</span>,<span class="number">211</span>,<span class="number">212</span>,<span class="number">213</span>,<span class="number">214</span>,<span class="number">215</span>,<span class="number">216</span>,<span class="number">217</span>,<span class="number">235</span>,<span class="number">236</span>,<span class="number">237</span>,<span class="number">238</span>,<span class="number">239</span>,<span class="number">240</span>,<span class="number">241</span>,<span class="number">242</span>,<span class="number">243</span>,<span class="number">244</span>,<span class="number">245</span>,<span class="number">262</span>,<span class="number">263</span>,<span class="number">264</span>,<span class="number">265</span>,<span class="number">266</span>,<span class="number">267</span>,<span class="number">268</span>,<span class="number">269</span>,<span class="number">270</span>,<span class="number">271</span>,<span class="number">272</span>,<span class="number">273</span>,<span class="number">289</span>,<span class="number">290</span>,<span class="number">291</span>,<span class="number">292</span>,<span class="number">293</span>,<span class="number">294</span>,<span class="number">295</span>,<span class="number">296</span>,<span class="number">297</span>,<span class="number">300</span>,<span class="number">301</span>,<span class="number">302</span>,<span class="number">316</span>,<span class="number">317</span>,<span class="number">318</span>,<span class="number">319</span>,<span class="number">320</span>,<span class="number">321</span>,<span class="number">328</span>,<span class="number">329</span>,<span class="number">330</span>,<span class="number">343</span>,<span class="number">344</span>,<span class="number">345</span>,<span class="number">346</span>,<span class="number">347</span>,<span class="number">348</span>,<span class="number">349</span>,<span class="number">356</span>,<span class="number">357</span>,<span class="number">358</span>,<span class="number">371</span>,<span class="number">372</span>,<span class="number">373</span>,<span class="number">374</span>,<span class="number">384</span>,<span class="number">385</span>,<span class="number">386</span>,<span class="number">399</span>,<span class="number">400</span>,<span class="number">401</span>,<span class="number">412</span>,<span class="number">413</span>,<span class="number">414</span>,<span class="number">426</span>,<span class="number">427</span>,<span class="number">428</span>,<span class="number">429</span>,<span class="number">440</span>,<span class="number">441</span>,<span class="number">442</span>,<span class="number">454</span>,<span class="number">455</span>,<span class="number">456</span>,<span class="number">457</span>,<span class="number">466</span>,<span class="number">467</span>,<span class="number">468</span>,<span class="number">469</span>,<span class="number">470</span>,<span class="number">482</span>,<span class="number">483</span>,<span class="number">484</span>,<span class="number">493</span>,<span class="number">494</span>,<span class="number">495</span>,<span class="number">496</span>,<span class="number">497</span>,<span class="number">510</span>,<span class="number">511</span>,<span class="number">512</span>,<span class="number">520</span>,<span class="number">521</span>,<span class="number">522</span>,<span class="number">523</span>,<span class="number">538</span>,<span class="number">539</span>,<span class="number">540</span>,<span class="number">547</span>,<span class="number">548</span>,<span class="number">549</span>,<span class="number">550</span>,<span class="number">566</span>,<span class="number">567</span>,<span class="number">568</span>,<span class="number">569</span>,<span class="number">570</span>,<span class="number">571</span>,<span class="number">572</span>,<span class="number">573</span>,<span class="number">574</span>,<span class="number">575</span>,<span class="number">576</span>,<span class="number">577</span>,<span class="number">578</span>,<span class="number">594</span>,<span class="number">595</span>,<span class="number">596</span>,<span class="number">597</span>,<span class="number">598</span>,<span class="number">599</span>,<span class="number">600</span>,<span class="number">601</span>,<span class="number">602</span>,<span class="number">603</span>,<span class="number">604</span>,<span class="number">622</span>,<span class="number">623</span>,<span class="number">624</span>,<span class="number">625</span>,<span class="number">626</span>,<span class="number">627</span>,<span class="number">628</span>,<span class="number">629</span>,<span class="number">630</span>,<span class="number">651</span>,<span class="number">652</span>,<span class="number">653</span>,<span class="number">654</span>,<span class="number">655</span>,<span class="number">656</span>,<span class="number">657</span>],[<span class="number">51.0</span>,<span class="number">159.0</span>,<span class="number">253.0</span>,<span class="number">159.0</span>,<span class="number">50.</span>..</div></pre></td></tr></table></figure></p>
+<p>这里，examples.collect()把rdd转换为了向量，并取第一个元素的值。每个标注点共有692个维，其中第127列对应的值是51.0，第128列对应的值是159.0，依此类推。</p>
+<div class="note success"><h2 id="本地矩阵（Local-Matrix）"><a href="#本地矩阵（Local-Matrix）" class="headerlink" title="本地矩阵（Local Matrix）"></a>本地矩阵（Local Matrix）</h2></div>
+<p><strong>本地矩阵</strong>具有整型的行、列索引值和双精度浮点型的元素值，它存储在单机上。MLlib支持<strong>稠密矩阵</strong>DenseMatrix和<strong>稀疏矩阵</strong>Sparse Matrix两种本地矩阵，稠密矩阵将所有元素的值存储在一个列优先（Column-major）的双精度型数组中，而稀疏矩阵则将非零元素以列优先的CSC（Compressed Sparse Column）模式进行存储，关于CSC等稀疏矩阵存储方式的具体实现，可以参看<a href="http://www.cs.colostate.edu/~mcrob/toolbox/c++/sparseMatrix/sparse_matrix_compression.html" target="_blank" rel="external">Sparse Matrix Compression Formats</a>一文。</p>
+<p>本地矩阵的基类是org.apache.spark.mllib.linalg.Matrix，DenseMatrix和SparseMatrix均是它的实现类，和本地向量类似，MLlib也为本地矩阵提供了相应的工具类Matrices，调用工厂方法即可创建实例：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">scala&gt;<span class="keyword">import</span> org.apache.spark.mllib.linalg.&#123;<span class="type">Matrix</span>, <span class="type">Matrices</span>&#125;</div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.linalg.&#123;<span class="type">Matrix</span>, <span class="type">Matrices</span>&#125;</div><div class="line"><span class="comment">// 创建一个3行2列的稠密矩阵[ [1.0,2.0], [3.0,4.0], [5.0,6.0] ]</span></div><div class="line"><span class="comment">// 请注意，这里的数组参数是列先序的！</span></div><div class="line">scala&gt; <span class="keyword">val</span> dm: <span class="type">Matrix</span> = <span class="type">Matrices</span>.dense(<span class="number">3</span>, <span class="number">2</span>, <span class="type">Array</span>(<span class="number">1.0</span>, <span class="number">3.0</span>, <span class="number">5.0</span>, <span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>))</div><div class="line">dm: org.apache.spark.mllib.linalg.<span class="type">Matrix</span> =</div><div class="line"><span class="number">1.0</span>  <span class="number">2.0</span></div><div class="line"><span class="number">3.0</span>  <span class="number">4.0</span></div><div class="line"><span class="number">5.0</span>  <span class="number">6.0</span></div></pre></td></tr></table></figure></p>
+<p>这里可以看出列优先的排列方式，即按照列的方式从数组中提取元素。也可以创建稀疏矩阵：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 创建一个3行2列的稀疏矩阵[ [9.0,0.0], [0.0,8.0], [0.0,6.0]]</span></div><div class="line"><span class="comment">// 第一个数组参数表示列指针，即每一列元素的开始索引值</span></div><div class="line"><span class="comment">// 第二个数组参数表示行索引，即对应的元素是属于哪一行</span></div><div class="line"><span class="comment">// 第三个数组即是按列先序排列的所有非零元素，通过列指针和行索引即可判断每个元素所在的位置</span></div><div class="line">scala&gt; <span class="keyword">val</span> sm: <span class="type">Matrix</span> = <span class="type">Matrices</span>.sparse(<span class="number">3</span>, <span class="number">2</span>, <span class="type">Array</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>), <span class="type">Array</span>(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>), <span class="type">Array</span>(<span class="number">9</span>, <span class="number">6</span>, <span class="number">8</span>))</div><div class="line">sm: org.apache.spark.mllib.linalg.<span class="type">Matrix</span> =</div><div class="line"><span class="number">3</span> x <span class="number">2</span> <span class="type">CSCMatrix</span></div><div class="line">(<span class="number">0</span>,<span class="number">0</span>) <span class="number">9.0</span></div><div class="line">(<span class="number">2</span>,<span class="number">1</span>) <span class="number">6.0</span></div><div class="line">(<span class="number">1</span>,<span class="number">1</span>) <span class="number">8.0</span></div></pre></td></tr></table></figure></p>
+<p>这里，创建一个3行2列的稀疏矩阵[ [9.0,0.0], [0.0,8.0], [0.0,6.0]]。Matrices.sparse的参数中，3表示行数，2表示列数。第1个数组参数表示列指针，即每一列元素的开始索引值， 第二个数组参数表示行索引，即对应的元素是属于哪一行；第三个数组即是按列先序排列的所有非零元素，通过列指针和行索引即可判断每个元素所在的位置。比如取每个数组的第2个元素为2,1,6，表示第2列第1行的元素值是6.0。</p>
+<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/img/wechat.png" alt="Melodylican WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/img/zhifubao.png" alt="Melodylican Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/15/Spark-MLib简介/" rel="next" title="Spark入门 第六章 第一节 Spark - MLib简介">
+                <i class="fa fa-chevron-left"></i> Spark入门 第六章 第一节 Spark - MLib简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/22/Spark-MLlib基本数据类型2/" rel="prev" title="Spark入门 第六章 第三节 Spark - MLlib基本数据类型2">
+                Spark入门 第六章 第三节 Spark - MLlib基本数据类型2 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Melodylican" />
+          <p class="site-author-name" itemprop="name">Melodylican</p>
+           
+              <p class="site-description motion-element" itemprop="description">life is struggle</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">84</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">57</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/your-user-name" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/your-user-name" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3235750572" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.baidu.com/" title="MacTalk" target="_blank">MacTalk</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://example.com/" title="Title" target="_blank">Title</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#本地向量（Local-Vector）"><span class="nav-number">1.</span> <span class="nav-text">本地向量（Local Vector）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标注点（Labeled-Point）"><span class="nav-number">2.</span> <span class="nav-text">标注点（Labeled Point）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本地矩阵（Local-Matrix）"><span class="nav-number">3.</span> <span class="nav-text">本地矩阵（Local Matrix）</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Powered By <a href="#">Melodylican</a></span>
+</div>
+
+
+<div class="powered-by">
+    个人专属
+</div>
+
+<div class="theme-info">
+  博客 
+  
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2128487"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="local-search-pop-overlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("nCYvmPGeqGhuuM0qkwvIf2k1-gzGzoHsz", "dnC7e97rmSEwVQKrjxAE7oRR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+  
+  
+	<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+<!-- 小红心 -->
+<script type="text/javascript" src="/js/src/love.js"></script>
+</body>
+</html>

@@ -1,0 +1,1171 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Spark," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="不卑不亢不慌不忙" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="除了可以对本地文件系统进行读写以外，Spark还支持很多其他常见的文件格式（如文本文件、JSON、SequenceFile等）和文件系统（如HDFS、Amazon S3等）和数据库（如MySQL、HBase、Hive等）。数据库的读写我们将在Spark SQL部分介绍，因此，这里只介绍文件系统的读写和不同文件格式的读写。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark入门 第三章 第四节 Spark 文件数据读写">
+<meta property="og:url" content="http://Melodylican.github.io/2017/02/27/Spark文件数据读写/index.html">
+<meta property="og:site_name" content="不卑不亢不慌不忙">
+<meta property="og:description" content="除了可以对本地文件系统进行读写以外，Spark还支持很多其他常见的文件格式（如文本文件、JSON、SequenceFile等）和文件系统（如HDFS、Amazon S3等）和数据库（如MySQL、HBase、Hive等）。数据库的读写我们将在Spark SQL部分介绍，因此，这里只介绍文件系统的读写和不同文件格式的读写。">
+<meta property="og:updated_time" content="2017-07-06T02:12:05.693Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark入门 第三章 第四节 Spark 文件数据读写">
+<meta name="twitter:description" content="除了可以对本地文件系统进行读写以外，Spark还支持很多其他常见的文件格式（如文本文件、JSON、SequenceFile等）和文件系统（如HDFS、Amazon S3等）和数据库（如MySQL、HBase、Hive等）。数据库的读写我们将在Spark SQL部分介绍，因此，这里只介绍文件系统的读写和不同文件格式的读写。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://Melodylican.github.io/2017/02/27/Spark文件数据读写/"/>
+
+
+
+
+
+  <title> Spark入门 第三章 第四节 Spark 文件数据读写 | 不卑不亢不慌不忙 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b882a8b6fdb7e13666299576d25a043a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">不卑不亢不慌不忙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">life is struggle</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-collect">
+          <a href="/collect" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-flag"></i> <br />
+            
+            收集
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/02/27/Spark文件数据读写/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Spark入门 第三章 第四节 Spark 文件数据读写
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-27T00:00:00+08:00">
+                2017-02-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/02/27/Spark文件数据读写/" class="leancloud_visitors" data-flag-title="Spark入门 第三章 第四节 Spark 文件数据读写">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>除了可以对本地文件系统进行读写以外，Spark还支持很多其他常见的文件格式（如文本文件、JSON、SequenceFile等）和文件系统（如HDFS、Amazon S3等）和数据库（如MySQL、HBase、Hive等）。数据库的读写我们将在Spark SQL部分介绍，因此，这里只介绍文件系统的读写和不同文件格式的读写。<br><a id="more"></a><br>请进入Linux系统，打开“终端”，进入Shell命令提示符状态，然后，在“/usr/local/spark/mycode”目录下，新建一个wordcount子目录（如果已经存在就不用创建），并在“/usr/local/spark/mycode/wordcount”目录下新建一个包含了一些语句的文本文件word.txt（你可以在文本文件中随意输入一些单词，用空格隔开）。</p>
+<p>首先，请登录Linux系统(要注意记住登录采用的用户名，本教程统一采用hadoop用户名进行登录)，打开“终端”（可以在Linux系统中使用Ctrl+Alt+T组合键开启终端），进入shell命令提示符状态，然后执行以下命令进入spark-shell：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark</div><div class="line">./bin/spark-shell</div><div class="line">....#这里省略启动过程显示的一大堆信息</div><div class="line">scala&gt;</div></pre></td></tr></table></figure></p>
+<p>启动进入spark-shell需要一点时间，在进入spark-shell后，我们可能还需要到Linux文件系统中对相关目录下的文件进行编辑和操作（比如要查看spark程序执行过程生成的文件），这个无法在park-shell中完成，因此，这里再打开第二个终端，用来在Linux系统的Shell命令提示符下操作。<br><div class="note success"><h2 id="文件系统的数据读写"><a href="#文件系统的数据读写" class="headerlink" title="文件系统的数据读写"></a>文件系统的数据读写</h2></div><br>下面分别介绍本地文件系统的数据读写和分布式文件系统HDFS的数据读写。<br><div class="note success"><h3 id="本地文件系统的数据读写"><a href="#本地文件系统的数据读写" class="headerlink" title="本地文件系统的数据读写"></a>本地文件系统的数据读写</h3></div><br>首先，请在第二个终端窗口下操作，用下面命令到达“/usr/local/spark/mycode/wordcount”目录，查看一下上面已经建好的word.txt的内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark/mycode/wordcount</div><div class="line">cat word.txt</div></pre></td></tr></table></figure></p>
+<p>cat命令会把word.txt文件的内容全部显示到屏幕上。</p>
+<p>现有让我们切换回到第一个终端，也就是spark-shell，然后输入下面命令：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"file:///usr/local/spark/mycode/wordcount/word.txt"</span>)</div></pre></td></tr></table></figure></p>
+<p>上面代码中，val后面的是变量textFile，而sc.textFile()中的这个textFile是sc的一个方法名称，这个方法用来加载文件数据。这两个textFile不是一个东西，不要混淆。实际上，val后面的是变量textFile，你完全可以换个变量名称，比如,val lines = sc.textFile(“file:///usr/local/spark/mycode/wordcount/word.txt”)。这里使用相同名称，就是有意强调二者的区别。<br>注意，要加载本地文件，必须采用“file:///”开头的这种格式。执行上上面这条命令以后，并不会马上显示结果，因为，Spark采用惰性机制，只有遇到“行动”类型的操作，才会从头到尾执行所有操作。所以，下面我们执行一条“行动”类型的语句，就可以看到结果：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scala&gt; textFile.first()</div></pre></td></tr></table></figure></p>
+<p>first()是一个“行动”（Action）类型的操作，会启动真正的计算过程，从文件中加载数据到变量textFile中，并取出第一行文本。屏幕上会显示很多反馈信息，这里不再给出，你可以从这些结果信息中，找到word.txt文件中的第一行的内容。</p>
+<p>正因为Spark采用了惰性机制，在执行转换操作的时候，即使我们输入了错误的语句，spark-shell也不会马上报错，而是等到执行“行动”类型的语句时启动真正的计算，那个时候“转换”操作语句中的错误就会显示出来，比如：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">val</span> textFile = sc.textFile(<span class="string">"file:///usr/local/spark/mycode/wordcount/word123.txt"</span>)</div></pre></td></tr></table></figure></p>
+<p>上面我们使用了一个根本就不存在的word123.txt，执行上面语句时，spark-shell根本不会报错，因为，没有遇到“行动”类型的first()操作之前，这个加载操作时不会真正执行的。然后，我们执行一个“行动”类型的操作first()，如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scala&gt; textFile.first()</div></pre></td></tr></table></figure></p>
+<p>执行上面语句后，你会发现，会返回错误信息，其中有四个醒目的中文文字“拒绝连接”，因为，这个word123.txt文件根本就不存在。</p>
+<p>好了，现在我们可以练习一下如何把textFile变量中的内容再次写回到另外一个文本文件wordback.txt中：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"file:///usr/local/spark/mycode/wordcount/word.txt"</span>)</div><div class="line">scala&gt; textFile.saveAsTextFile(<span class="string">"file:///usr/local/spark/mycode/wordcount/writeback.txt"</span>)</div></pre></td></tr></table></figure></p>
+<p>saveAsTextFile()是一个“行动”（Action）类型的操作，所以，马上会执行真正的计算过程，从word.txt中加载数据到变量textFile中，然后，又把textFile中的数据写回到writeback.txt中。现在我们到/usr/local/spark/mycode/wordcount/目录看一下，会发现，确实多了一个writeback.txt，但是，和我们预期的不一样，它不是一个文件，而是一个文件夹（writeback.txt作为文件夹名称当然是没有问题的，虽然不符合我们平时的习惯）。现在让我们切换到Linux Shell命令提示符窗口中，执行下面命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark/mycode/wordcount/writeback.txt/</div><div class="line">ls</div></pre></td></tr></table></figure></p>
+<p>执行结果中可以看到，writeback.txt这个目录下面包含两个文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">part-00000</div><div class="line">_SUCCESS</div></pre></td></tr></table></figure></p>
+<p>也就是说，该目录下包含两个文件，我们可以使用cat命令查看一下part-00000文件（注意:part-后面是五个零）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cat part-00000</div></pre></td></tr></table></figure></p>
+<p>显示结果，是和上面word.txt中的内容一样的。<br>现在的问题是，我们如果想再次把数据加载在RDD中，应该使用哪个文件呢？答案很简单，只要使用writeback.txt这个目录即可，如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"file:///usr/local/spark/mycode/wordcount/writeback.txt"</span>)</div></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="分布式文件系统HDFS的数据读写"><a href="#分布式文件系统HDFS的数据读写" class="headerlink" title="分布式文件系统HDFS的数据读写"></a>分布式文件系统HDFS的数据读写</h3></div>
+<p>为了能够读取HDFS中的文件，请首先启动Hadoop中的HDFS组件。注意，之前我们在“Spark安装”这章内容已经介绍了如何安装Hadoop和Spark，所以，这里我们可以使用以下命令直接启动Hadoop中的HDFS组件（由于用不到MapReduce组件，所以，不需要启动MapReduce或者YARN）。请到第二个终端窗口，使用Linux Shell命令提示符状态，然后输入下面命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/hadoop</div><div class="line">./sbin/start-dfs.sh</div></pre></td></tr></table></figure></p>
+<p>启动结束后，HDFS开始进入可用状态。如果你在HDFS文件系统中，还没有为当前Linux登录用户创建目录(本教程统一使用用户名hadoop登录Linux系统)，请使用下面命令创建：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -mkdir -p /user/hadoop</div></pre></td></tr></table></figure></p>
+<p>也就是说，HDFS文件系统为Linux登录用户开辟的默认目录是“/user/用户名”（注意：是user，不是usr），本教程统一使用用户名hadoop登录Linux系统，所以，上面创建了“/user/hadoop”目录，再次强调，这个目录是在HDFS文件系统中，不在本地文件系统中。创建好以后，下面我们使用命令查看一下HDFS文件系统中的目录和文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -ls .</div></pre></td></tr></table></figure></p>
+<p>上面命令中，最后一个点号“.”，表示要查看Linux当前登录用户hadoop在HDFS文件系统中与hadoop对应的目录下的文件，也就是查看HDFS文件系统中“/user/hadoop/”目录下的文件，所以，下面两条命令是等价的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -ls .</div><div class="line">./bin/hdfs dfs -ls /user/hadoop</div></pre></td></tr></table></figure></p>
+<p>如果要查看HDFS文件系统根目录下的内容，需要使用下面命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -ls /</div></pre></td></tr></table></figure></p>
+<p>下面，我们把本地文件系统中的“/usr/local/spark/mycode/wordcount/word.txt”上传到分布式文件系统HDFS中（放到hadoop用户目录下）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -put /usr/local/spark/mycode/wordcount/word.txt .</div></pre></td></tr></table></figure></p>
+<p>然后，用命令查看一下HDFS的hadoop用户目录下是否多了word.txt文件，可以使用下面命令列出hadoop目录下的内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -ls .</div></pre></td></tr></table></figure></p>
+<p>可以看到，确实多了一个word.txt文件，我们使用cat命令查看一个HDFS中的word.txt文件的内容，命令如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -cat ./word.txt</div></pre></td></tr></table></figure></p>
+<p>上面命令执行后，就会看到HDFS中word.txt的内容了。</p>
+<p>现在，让我们切换回到spark-shell窗口，编写语句从HDFS中加载word.txt文件，并显示第一行文本内容：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"hdfs://localhost:9000/user/hadoop/word.txt"</span>)</div><div class="line">scala&gt; textFile.first()</div></pre></td></tr></table></figure></p>
+<p>执行上面语句后，就可以看到HDFS文件系统中（不是本地文件系统）的word.txt的第一行内容了。</p>
+<p>需要注意的是，sc.textFile(“hdfs://localhost:9000/user/hadoop/word.txt”)中，“hdfs://localhost:9000/”是前面介绍Hadoop安装内容时确定下来的端口地址9000。实际上，也可以省略不写，如下三条语句都是等价的：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"hdfs://localhost:9000/user/hadoop/word.txt"</span>)</div><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"/user/hadoop/word.txt"</span>)</div><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"word.txt"</span>)</div></pre></td></tr></table></figure></p>
+<p>下面，我们再把textFile的内容写回到HDFS文件系统中（写到hadoop用户目录下）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"word.txt"</span>)</div><div class="line">scala&gt; textFile.saveAsTextFile(<span class="string">"writeback.txt"</span>)</div></pre></td></tr></table></figure></p>
+<p>执行上面命令后，文本内容会被写入到HDFS文件系统的“/user/hadoop/writeback.txt”目录下，我们可以切换到Linux Shell命令提示符窗口查看一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -ls .</div></pre></td></tr></table></figure></p>
+<p>执行上述命令后，在执行结果中，可以看到有个writeback.txt目录，下面我们查看该目录下有什么文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -ls ./writeback.txt</div></pre></td></tr></table></figure></p>
+<p>执行结果中，可以看到存在两个文件：part-00000和_SUCCESS。我们使用下面命令输出part-00000文件的内容（注意：part-00000里面有五个零）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hdfs dfs -cat ./writeback.txt/part-00000</div></pre></td></tr></table></figure></p>
+<p>执行结果中，就可以看到和word.txt文件中一样的文本内容。</p>
+<p>当需要再次把writeback.txt中的内容加载到RDD中时，只需要加载writeback.txt目录即可，不需要使用part-00000文件，如下所示：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> textFile = sc.textFile(<span class="string">"hdfs://localhost:9000/user/hadoop/writeback.txt"</span>)</div></pre></td></tr></table></figure></p>
+<div class="note success"><h2 id="不同文件格式的读写"><a href="#不同文件格式的读写" class="headerlink" title="不同文件格式的读写"></a>不同文件格式的读写</h2></div>
+<div class="note success"><h3 id="文本文件"><a href="#文本文件" class="headerlink" title="文本文件"></a>文本文件</h3></div>
+<p>实际上，我们在上面演示的都是文本文件的读写，因此，这里不再赘述，只是简单再总结一下。<br>把本地文件系统中的文本文件加载到RDD中的语句如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> rdd = sc.textFile(<span class="string">"file:///usr/local/spark/mycode/wordcount/word.txt"</span>)</div></pre></td></tr></table></figure></p>
+<p>当我们给textFile()函数传递一个“包含完整路径的文件名”时，就会把这个文件加载到RDD中。如果我们给textFile()函数传递的不是文件名，而是一个目录，则该目录下的所有文件内容都会被读取到RDD中。</p>
+<p>关于把RDD中的数据保存到文本文件，可以采用采用如下语句：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scala&gt; rdd.saveAsTextFile(<span class="string">"file:///usr/local/spark/mycode/wordcount/outputFile"</span>)</div></pre></td></tr></table></figure></p>
+<p>正像上面我们已经介绍的那样，我们在saveAsTextFile()函数的参数中给出的是目录，不是文件名，RDD中的数据会被保存到给定的目录下。<br><div class="note success"><h3 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h3></div><br>JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式。<br>Spark提供了一个JSON样例数据文件，存放在“/usr/local/spark/examples/src/main/resources/people.json”中。people.json文件的内容如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;name&quot;:&quot;Michael&quot;&#125;</div><div class="line">&#123;&quot;name&quot;:&quot;Andy&quot;, &quot;age&quot;:30&#125;</div><div class="line">&#123;&quot;name&quot;:&quot;Justin&quot;, &quot;age&quot;:19&#125;</div></pre></td></tr></table></figure></p>
+<p>我们下面可以对这个样例数据文件进行解析。<br>下面请在Linux系统的Shell命令提示符下操作，请进入“/usr/local/spark/mycode”目录，并新建一个json子目录，代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark/mycode</div><div class="line">mkdir json</div><div class="line">cd json</div></pre></td></tr></table></figure></p>
+<p>在编写解析程序之前，我们首先来看一下把本地文件系统中的people.json文件加载到RDD中以后，数据是什么形式，请在spark-shell中执行如下操作：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">val</span> jsonStr = sc.textFile(<span class="string">"file:///usr/local/spark/examples/src/main/resources/people.json"</span>)</div><div class="line">jsonStr: org.apache.spark.rdd.<span class="type">RDD</span>[<span class="type">String</span>] = file:<span class="comment">///usr/local/spark/examples/src/main/resources/people.json MapPartitionsRDD[3] at textFile at &lt;console&gt;:28</span></div><div class="line">scala&gt; jsonStr.foreach(println)</div><div class="line">&#123;<span class="string">"name"</span>:<span class="string">"Michael"</span>&#125;</div><div class="line">&#123;<span class="string">"name"</span>:<span class="string">"Andy"</span>, <span class="string">"age"</span>:<span class="number">30</span>&#125;</div><div class="line">&#123;<span class="string">"name"</span>:<span class="string">"Justin"</span>, <span class="string">"age"</span>:<span class="number">19</span>&#125;</div></pre></td></tr></table></figure></p>
+<p>从上面执行结果可以看出，people.json文件加载到RDD中以后，在RDD中存在三个字符串。我们下面要做的事情，就是把这三个JSON格式的字符串解析出来，比如说，第一个字符串{“name”:”Michael”}，经过解析后，解析得到key是”name”，value是”Michael”。<br>现在我们编写程序完成对上面字符串的解析工作。<br>Scala中有一个自带的JSON库——scala.util.parsing.json.JSON，可以实现对JSON数据的解析。JSON.parseFull(jsonString:String)函数，以一个JSON字符串作为输入并进行解析，如果解析成功则返回一个Some(map: Map[String, Any])，如果解析失败则返回None。<br>因此，我们可以使用模式匹配来处理解析结果（备注：关于模式匹配，请参考前面的教程：模式匹配）：</p>
+<p>请执行以下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark/mycode/json</div><div class="line">mkdir -p src/main/scala</div><div class="line">cd src/main/scala</div><div class="line">vim testjson.scala</div></pre></td></tr></table></figure></p>
+<p>在testjson.scala代码文件中输入以下内容：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span>._</div><div class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkConf</span></div><div class="line"><span class="keyword">import</span> scala.util.parsing.json.<span class="type">JSON</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">JSONApp</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</div><div class="line">        <span class="keyword">val</span> inputFile =  <span class="string">"file:///usr/local/spark/examples/src/main/resources/people.json"</span></div><div class="line">        <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">"JSONApp"</span>)</div><div class="line">        <span class="keyword">val</span> sc = <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</div><div class="line">        <span class="keyword">val</span> jsonStrs = sc.textFile(inputFile)</div><div class="line">        <span class="keyword">val</span> result = jsonStrs.map(s =&gt; <span class="type">JSON</span>.parseFull(s))</div><div class="line">        result.foreach( &#123;r =&gt; r <span class="keyword">match</span> &#123;</div><div class="line">                        <span class="keyword">case</span> <span class="type">Some</span>(map: <span class="type">Map</span>[<span class="type">String</span>, <span class="type">Any</span>]) =&gt; println(map)</div><div class="line">                        <span class="keyword">case</span> <span class="type">None</span> =&gt; println(<span class="string">"Parsing failed"</span>)</div><div class="line">                        <span class="keyword">case</span> other =&gt; println(<span class="string">"Unknown data structure: "</span> + other)</div><div class="line">                &#125;</div><div class="line">        &#125;</div><div class="line">        )</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>保存退出vim编辑器。这样就生成了一个testjson.scala代码文件。<br>如果testjson.scala没有调用SparkAPI，那么，只要使用scalac命令编译后执行即可。但是，这个testjson.scala程序依赖Spark API，因此我们需要通过sbt进行编译打包（前面的“Spark的安装和使用”这个章节已经介绍过如何使用sbt进行编译打包）。下面我们再演示一次。</p>
+<p>请执行如下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark/mycode/json</div><div class="line">vim simple.sbt</div></pre></td></tr></table></figure></p>
+<p>通过上面代码，新建一个simple.sbt文件，请在该文件中输入下面代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">name := &quot;JSON Project&quot;</div><div class="line"></div><div class="line">version := &quot;1.0&quot;</div><div class="line"></div><div class="line">scalaVersion := &quot;2.11.8&quot;</div></pre></td></tr></table></figure></p>
+<p>libraryDependencies += “org.apache.spark” %% “spark-core” % “2.1.0”<br>下面我们使用 sbt 打包 Scala 程序。为保证 sbt 能正常运行，先执行如下命令检查整个应用程序的文件结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark/mycode/json/</div><div class="line">find .</div></pre></td></tr></table></figure></p>
+<p>应该是类似下面的文件结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">.</div><div class="line">./src</div><div class="line">./src/main</div><div class="line">./src/main/scala</div><div class="line">./src/main/scala/testjson.scala</div><div class="line">./simple.sbt</div></pre></td></tr></table></figure></p>
+<p>接着，我们就可以通过如下代码将整个应用程序打包成 JAR（首次运行同样需要下载依赖包 ）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/spark/mycode/json/  //请一定把这目录设置为当前目录</div><div class="line">/usr/local/sbt/sbt package</div></pre></td></tr></table></figure></p>
+<p>生成的 jar 包的位置为 /usr/local/spark/mycode/json/target/scala-2.11/json-project_2.11-1.0.jar。<br>最后，通过 spark-submit 运行程序。我们就可以将生成的 jar 包通过 spark-submit 提交到 Spark 中运行了，命令如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/usr/local/spark/bin/spark-submit --class &quot;JSONApp&quot;  /usr/local/spark/mycode/json/target/scala-2.11/json-project_2.11-1.0.jar</div></pre></td></tr></table></figure></p>
+<p>执行后可以在屏幕上的大量输出信息中找到如下结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Map(name -&gt; Michael)</div><div class="line">Map(name -&gt; Andy, age -&gt; 30.0)</div><div class="line">Map(name -&gt; Justin, age -&gt; 19.0)</div></pre></td></tr></table></figure></p>
+<font color="grey">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/img/wechat.png" alt="Melodylican WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/img/zhifubao.png" alt="Melodylican Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/25/Spark共享变量/" rel="next" title="Spark入门 第三章 第三节 Spark 共享变量">
+                <i class="fa fa-chevron-left"></i> Spark入门 第三章 第三节 Spark 共享变量
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/01/Spark读取HBase数据/" rel="prev" title="Spark入门 第三章 第五节 Spark读写HBase数据">
+                Spark入门 第三章 第五节 Spark读写HBase数据 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Melodylican" />
+          <p class="site-author-name" itemprop="name">Melodylican</p>
+           
+              <p class="site-description motion-element" itemprop="description">life is struggle</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">84</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">57</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/your-user-name" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/your-user-name" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3235750572" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.baidu.com/" title="MacTalk" target="_blank">MacTalk</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://example.com/" title="Title" target="_blank">Title</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#文件系统的数据读写"><span class="nav-number">1.</span> <span class="nav-text">文件系统的数据读写</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#本地文件系统的数据读写"><span class="nav-number">1.1.</span> <span class="nav-text">本地文件系统的数据读写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式文件系统HDFS的数据读写"><span class="nav-number">1.2.</span> <span class="nav-text">分布式文件系统HDFS的数据读写</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不同文件格式的读写"><span class="nav-number">2.</span> <span class="nav-text">不同文件格式的读写</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#文本文件"><span class="nav-number">2.1.</span> <span class="nav-text">文本文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JSON"><span class="nav-number">2.2.</span> <span class="nav-text">JSON</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Powered By <a href="#">Melodylican</a></span>
+</div>
+
+
+<div class="powered-by">
+    个人专属
+</div>
+
+<div class="theme-info">
+  博客 
+  
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2128487"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="local-search-pop-overlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("nCYvmPGeqGhuuM0qkwvIf2k1-gzGzoHsz", "dnC7e97rmSEwVQKrjxAE7oRR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+  
+  
+	<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+<!-- 小红心 -->
+<script type="text/javascript" src="/js/src/love.js"></script>
+</body>
+</html>

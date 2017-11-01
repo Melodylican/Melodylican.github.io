@@ -1,0 +1,1152 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Java,线段树," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="不卑不亢不慌不忙" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="结构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线段树">
+<meta property="og:url" content="http://Melodylican.github.io/2014/02/18/线段树/index.html">
+<meta property="og:site_name" content="不卑不亢不慌不忙">
+<meta property="og:description" content="结构">
+<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%BA%BF%E6%AE%B5%E6%A0%91.png">
+<meta property="og:updated_time" content="2017-04-10T08:34:35.408Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线段树">
+<meta name="twitter:description" content="结构">
+<meta name="twitter:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%BA%BF%E6%AE%B5%E6%A0%91.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://Melodylican.github.io/2014/02/18/线段树/"/>
+
+
+
+
+
+  <title> 线段树 | 不卑不亢不慌不忙 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b882a8b6fdb7e13666299576d25a043a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">不卑不亢不慌不忙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">life is struggle</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-collect">
+          <a href="/collect" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-flag"></i> <br />
+            
+            收集
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2014/02/18/线段树/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                线段树
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2014-02-18T00:00:00+08:00">
+                2014-02-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/算法/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2014/02/18/线段树/" class="leancloud_visitors" data-flag-title="线段树">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p><center><br><img src="http://ojwkevhas.bkt.clouddn.com/%E7%BA%BF%E6%AE%B5%E6%A0%91.png" alt=""><br></center><br><a id="more"></a><br>特点：</p>
+<ol>
+<li>完全二叉树</li>
+<li>每个节点代表一个区间，孩子节点分别代表两个子区间</li>
+<li>节点保存着 <strong>该区间内问题的解</strong>，以及求解需要的其他数据<br>用一个数组保存，和 heap 结构类似。</li>
+</ol>
+<p>分治，要求能够从若干子区间的解推导出父区间的解，且对父区间的更新可以传导给子区间</p>
+<p>适用于区间查询 / 区间维护等问题</p>
+<h2 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h2><p>线段树支持以下操作：</p>
+<ol>
+<li>构造</li>
+<li>更新 <ul>
+<li>单点更新</li>
+<li>区间更新</li>
+</ul>
+</li>
+<li>区间查询</li>
+</ol>
+<p>以区间和问题为例：</p>
+<h2 id="构造"><a href="#构造" class="headerlink" title="构造"></a>构造</h2><p>O(N)<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">tree = <span class="keyword">None</span></div><div class="line"><span class="comment">#### Utils</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">eval</span><span class="params">(i)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    由孩子节点计算某节点的 sum</div><div class="line">    """</div><div class="line">    tree[i][<span class="string">'sum'</span>] = tree[lc(i)][<span class="string">'sum'</span>] + tree[rc(i)][<span class="string">'sum'</span>]    </div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">lc</span><span class="params">(i)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    左孩子</div><div class="line">    """</div><div class="line">    <span class="keyword">return</span> <span class="number">2</span>*(i+<span class="number">1</span>) - <span class="number">1</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">rc</span><span class="params">(i)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    右孩子</div><div class="line">    """</div><div class="line">    <span class="keyword">return</span> <span class="number">2</span>*(i+<span class="number">1</span>)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">mid</span><span class="params">(i)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    计算节点所代表区间的中间位置</div><div class="line">    """</div><div class="line">    <span class="keyword">return</span> tree[i][<span class="string">'start'</span>] + (tree[i][<span class="string">'end'</span>]-tree[i][<span class="string">'start'</span>])/<span class="number">2</span></div><div class="line"><span class="comment">####</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">init</span><span class="params">(array)</span>:</span></div><div class="line">    <span class="keyword">global</span> tree</div><div class="line"></div><div class="line">    <span class="comment"># 计算线段树节点个数，完全二叉树的节点数 = 2^(height+1) - 1</span></div><div class="line">    length = len(array) <span class="comment"># range length</span></div><div class="line">    height = math.ceil(math.log(length,<span class="number">2</span>)) </div><div class="line">    maxSize = int(math.pow(<span class="number">2</span>,height + <span class="number">1</span>) - <span class="number">1</span>) </div><div class="line"></div><div class="line">    _init(array,<span class="number">0</span>,<span class="number">0</span>,length - <span class="number">1</span>) <span class="comment"># 默认区间为数组下标区间</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_init</span><span class="params">(array,i,s,e)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    构造一棵线段树，节点格式：&#123;start:1,end:2,sum:8&#125;</div><div class="line">    array -- 原始数组</div><div class="line">    i -- 根节点</div><div class="line">    s -- 根节点代表的区间开始处</div><div class="line">    e -- 根节点代表的区间结束处</div><div class="line">    """</div><div class="line">    tree[i] = &#123;<span class="string">'start'</span>:s,<span class="string">'end'</span>:e,<span class="string">'sum'</span>:<span class="keyword">None</span>&#125;</div><div class="line">    <span class="comment">## 如果是原子区间，即叶子节点</span></div><div class="line">    <span class="keyword">if</span> s == e:</div><div class="line">        tree[i][<span class="string">'sum'</span>] = array[s]</div><div class="line">        <span class="keyword">return</span></div><div class="line"></div><div class="line">    _init(array, lc(i), s, mid(i))</div><div class="line">    _init(array, rc(i), mid(i) + <span class="number">1</span>, e)</div><div class="line">    eval(i)</div></pre></td></tr></table></figure></p>
+<h2 id="单点更新"><a href="#单点更新" class="headerlink" title="单点更新"></a>单点更新</h2><p>O(log2N)<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">update</span><span class="params">(i,value)</span>:</span>    </div><div class="line">    _update(<span class="number">0</span>,i,value)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_update</span><span class="params">(root,i,value)</span>:</span></div><div class="line">    <span class="comment"># 找到了这个点，更新其sum并返回</span></div><div class="line">    <span class="keyword">if</span> tree[root][<span class="string">'start'</span>] == i <span class="keyword">and</span> tree[root][<span class="string">'end'</span>] == i:</div><div class="line">        tree[root][<span class="string">'sum'</span>] = value</div><div class="line">        <span class="keyword">return</span></div><div class="line">    <span class="keyword">if</span> i&lt;= mid(root):</div><div class="line">        _update(lc(root),i,value)</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        _update(rc(root),i,value)</div><div class="line">    eval(root)</div></pre></td></tr></table></figure></p>
+<h2 id="区间更新"><a href="#区间更新" class="headerlink" title="区间更新"></a>区间更新</h2><p>O(log2N)</p>
+<p>基本思路是将要修改的区间顺着根一层一层往下查找，直到找到一批子区间刚好组成目标区间，再将更新动作应用在这些区间内。比如文章开始的线段树中，如果要更新[1,7]，则可以在树中找到节点[1,5], [6,7]刚好凑成[1,7]，更新这两个区间，重新计算二者祖先节点值即可。</p>
+<p>问题是[1,5]并不是叶子节点，如果将以它为根的整个子树全部更新，那么一次更新的动作涉及到的节点就很多了。因此引入延迟更新的思路：</p>
+<blockquote>
+<p>当更新[1,5]时，只更新该节点，并给它加上一个更新动作的标记，子节点不更新。</p>
+<p>查询或修改时，如果碰到了节点[1,5]，并决定进入其子节点考察，为了不访问到错误的值，需要看[1,5]的更新标记，如果有，则将更新动作应用到子节点，并清除自身的标记。子节点的更新则继续 lazy 的思路。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">rangeUpdate</span><span class="params">(start,end,value)</span>:</span></div><div class="line">    _rangeUpdate(<span class="number">0</span>,start,end,value)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_rangeUpdate</span><span class="params">(root,start,end,value)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    线段树的区间update，必须满足父区间的update可以传递到左右子区间.</div><div class="line">    -- 即update(a,b)的效果 等价于 update(a,i) &amp; update(i+1,b).</div><div class="line"></div><div class="line">    lazy update后，其子树的data是过时的, 因此 rangeUpdate 和 query 时，在进入孩子节点考察前，必须先将父节点的 update 动作推送给它的左右孩子。</div><div class="line">    """</div><div class="line">    <span class="comment"># 到了某个最大组成子区间，lazy更新并返回</span></div><div class="line">    <span class="keyword">if</span> tree[root][<span class="string">'start'</span>] == start <span class="keyword">and</span> tree[root][<span class="string">'end'</span>] == end:</div><div class="line">        tree[root][<span class="string">'sum'</span>] = (end - start + <span class="number">1</span>) * value</div><div class="line">        tree[root][<span class="string">'update'</span>] = value    <span class="comment"># 标记</span></div><div class="line">        <span class="keyword">return</span></div><div class="line"></div><div class="line">    <span class="comment"># 推送更新动作到子区间</span></div><div class="line">    _pushDownUpdate(root)</div><div class="line"></div><div class="line">    <span class="comment"># 更新子区间</span></div><div class="line">    <span class="keyword">if</span> end &lt;= mid(root):</div><div class="line">        _rangeUpdate(lc(root),start,end,value)</div><div class="line">    <span class="keyword">elif</span> start &gt; mid(root):</div><div class="line">        _rangeUpdate(rc(root),start,end,value)</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        _rangeUpdate(lc(root),start,mid(root),value)</div><div class="line">        _rangeUpdate(rc(root),mid(root) + <span class="number">1</span>,end,value)</div><div class="line"></div><div class="line">    <span class="comment"># 子区间更新完毕，重新计算当前节点的值</span></div><div class="line">    eval(root)  </div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_pushDownUpdate</span><span class="params">(parent)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    将update动作传递给孩子</div><div class="line">    """</div><div class="line">    p = tree[parent] <span class="comment"># parent</span></div><div class="line">    <span class="keyword">if</span> <span class="string">'update'</span> <span class="keyword">in</span> p:</div><div class="line">        u = p[<span class="string">'update'</span>]</div><div class="line">        l = tree[lc(parent)] <span class="comment"># left child</span></div><div class="line">        r = tree[rc(parent)] <span class="comment"># right child</span></div><div class="line">        <span class="comment"># 给左右子区间记录update动作</span></div><div class="line">        l[<span class="string">'update'</span>] = r[<span class="string">'update'</span>] = u</div><div class="line">        <span class="comment"># 更新左右子区间</span></div><div class="line">        l[<span class="string">'sum'</span>] = (l[<span class="string">'end'</span>] - l[<span class="string">'start'</span>] + <span class="number">1</span>) * u</div><div class="line">        r[<span class="string">'sum'</span>] = (r[<span class="string">'end'</span>] - r[<span class="string">'start'</span>] + <span class="number">1</span>) * u</div><div class="line">        <span class="comment"># 清除父区间的update动作</span></div><div class="line">        <span class="keyword">del</span> p[<span class="string">'update'</span>]</div></pre></td></tr></table></figure></p>
+</blockquote>
+<h2 id="区间查询"><a href="#区间查询" class="headerlink" title="区间查询"></a>区间查询</h2><p>O(log2N)</p>
+<p>找最大组成子区间，merge结果<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">query</span><span class="params">(start,end)</span>:</span></div><div class="line">    <span class="keyword">return</span> _query(<span class="number">0</span>,start,end)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_query</span><span class="params">(root,start,end)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    对root的子区间进行查询, [start,end]必须是root所代表的子区间</div><div class="line">    """</div><div class="line">    <span class="comment"># 查询的区间就是root的区间时，直接返回root保存的data</span></div><div class="line">    <span class="keyword">if</span> tree[root][<span class="string">'start'</span>] == start <span class="keyword">and</span> tree[root][<span class="string">'end'</span>] == end:</div><div class="line">        <span class="keyword">return</span> tree[root][<span class="string">'sum'</span>]</div><div class="line"></div><div class="line">    _pushDownUpdate(root)</div><div class="line"></div><div class="line">    <span class="comment"># [start,end]:</span></div><div class="line">    <span class="comment"># 1. 如果在左子区间内，进入左子树</span></div><div class="line">    <span class="keyword">if</span> end &lt;= mid(root):</div><div class="line">        <span class="keyword">return</span> _query(lc(root),start,end)</div><div class="line"></div><div class="line">    <span class="comment"># 2. 如果在右子区间内，进入右子树</span></div><div class="line">    <span class="keyword">if</span> start &gt; mid(root):</div><div class="line">        <span class="keyword">return</span> _query(rc(root),start,end)</div><div class="line"></div><div class="line">    <span class="comment"># 3. 跨越了左右子区间，则将[start,end]拆分为[start,mid] &amp; [mid+1,end]，</span></div><div class="line">    <span class="comment">#    分别进入左右子树查询，并merge这两个区间上的查询结果</span></div><div class="line">    <span class="keyword">return</span> _query(lc(root),start,mid(root)) + _query(rc(root),mid(root) + <span class="number">1</span>,end)</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/img/wechat.png" alt="Melodylican WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/img/zhifubao.png" alt="Melodylican Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/线段树/" rel="tag"># 线段树</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/02/16/桶排序在排行榜中的应用/" rel="next" title="桶排序在排行榜中的应用">
+                <i class="fa fa-chevron-left"></i> 桶排序在排行榜中的应用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/02/20/贝叶斯/" rel="prev" title="贝叶斯">
+                贝叶斯 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Melodylican" />
+          <p class="site-author-name" itemprop="name">Melodylican</p>
+           
+              <p class="site-description motion-element" itemprop="description">life is struggle</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">84</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">57</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/your-user-name" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/your-user-name" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3235750572" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.baidu.com/" title="MacTalk" target="_blank">MacTalk</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://example.com/" title="Title" target="_blank">Title</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#结构"><span class="nav-number">1.</span> <span class="nav-text">结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作"><span class="nav-number">2.</span> <span class="nav-text">操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#构造"><span class="nav-number">3.</span> <span class="nav-text">构造</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单点更新"><span class="nav-number">4.</span> <span class="nav-text">单点更新</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#区间更新"><span class="nav-number">5.</span> <span class="nav-text">区间更新</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#区间查询"><span class="nav-number">6.</span> <span class="nav-text">区间查询</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Powered By <a href="#">Melodylican</a></span>
+</div>
+
+
+<div class="powered-by">
+    个人专属
+</div>
+
+<div class="theme-info">
+  博客 
+  
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2128487"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="local-search-pop-overlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("nCYvmPGeqGhuuM0qkwvIf2k1-gzGzoHsz", "dnC7e97rmSEwVQKrjxAE7oRR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+  
+  
+	<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+<!-- 小红心 -->
+<script type="text/javascript" src="/js/src/love.js"></script>
+</body>
+</html>

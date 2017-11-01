@@ -1,0 +1,1139 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Spark," />
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="不卑不亢不慌不忙" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="分布式矩阵（Distributed Matrix）
+分布式矩阵由长整型的行列索引值和双精度浮点型的元素值组成。它可以分布式地存储在一个或多个RDD上，MLlib提供了三种分布式矩阵的存储方案：行矩阵RowMatrix，索引行矩阵IndexedRowMatrix、坐标矩阵CoordinateMatrix和分块矩阵Block Matrix。它们都属于org.apache.spark.mllib.lin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark入门 第六章 第三节 Spark - MLlib基本数据类型2">
+<meta property="og:url" content="http://Melodylican.github.io/2017/04/22/Spark-MLlib基本数据类型2/index.html">
+<meta property="og:site_name" content="不卑不亢不慌不忙">
+<meta property="og:description" content="分布式矩阵（Distributed Matrix）
+分布式矩阵由长整型的行列索引值和双精度浮点型的元素值组成。它可以分布式地存储在一个或多个RDD上，MLlib提供了三种分布式矩阵的存储方案：行矩阵RowMatrix，索引行矩阵IndexedRowMatrix、坐标矩阵CoordinateMatrix和分块矩阵Block Matrix。它们都属于org.apache.spark.mllib.lin">
+<meta property="og:image" content="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/12/2.png">
+<meta property="og:updated_time" content="2017-07-25T03:24:25.712Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark入门 第六章 第三节 Spark - MLlib基本数据类型2">
+<meta name="twitter:description" content="分布式矩阵（Distributed Matrix）
+分布式矩阵由长整型的行列索引值和双精度浮点型的元素值组成。它可以分布式地存储在一个或多个RDD上，MLlib提供了三种分布式矩阵的存储方案：行矩阵RowMatrix，索引行矩阵IndexedRowMatrix、坐标矩阵CoordinateMatrix和分块矩阵Block Matrix。它们都属于org.apache.spark.mllib.lin">
+<meta name="twitter:image" content="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/12/2.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://Melodylican.github.io/2017/04/22/Spark-MLlib基本数据类型2/"/>
+
+
+
+
+
+  <title> Spark入门 第六章 第三节 Spark - MLlib基本数据类型2 | 不卑不亢不慌不忙 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b882a8b6fdb7e13666299576d25a043a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">不卑不亢不慌不忙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">life is struggle</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-collect">
+          <a href="/collect" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-flag"></i> <br />
+            
+            收集
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/04/22/Spark-MLlib基本数据类型2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Spark入门 第六章 第三节 Spark - MLlib基本数据类型2
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-22T00:00:00+08:00">
+                2017-04-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/04/22/Spark-MLlib基本数据类型2/" class="leancloud_visitors" data-flag-title="Spark入门 第六章 第三节 Spark - MLlib基本数据类型2">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <div class="note success"><h2 id="分布式矩阵（Distributed-Matrix）"><a href="#分布式矩阵（Distributed-Matrix）" class="headerlink" title="分布式矩阵（Distributed Matrix）"></a>分布式矩阵（Distributed Matrix）</h2></div>
+<p>分布式矩阵由长整型的行列索引值和双精度浮点型的元素值组成。它可以分布式地存储在一个或多个RDD上，MLlib提供了三种分布式矩阵的存储方案：<strong>行矩阵</strong>RowMatrix，<strong>索引行矩阵</strong>IndexedRowMatrix、<strong>坐标矩阵</strong>CoordinateMatrix和<strong>分块矩阵</strong>Block Matrix。它们都属于org.apache.spark.mllib.linalg.distributed包。<br><a id="more"></a><br><div class="note success"><h3 id="（一）行矩阵（RowMatrix）"><a href="#（一）行矩阵（RowMatrix）" class="headerlink" title="（一）行矩阵（RowMatrix）"></a>（一）行矩阵（RowMatrix）</h3></div><br><strong>行矩阵</strong>RowMatrix是最基础的分布式矩阵类型。每行是一个本地向量，行索引无实际意义（即无法直接使用）。数据存储在一个由行组成的RDD中，其中每一行都使用一个本地向量来进行存储。由于行是通过本地向量来实现的，故列数（即行的维度）被限制在普通整型（integer）的范围内。在实际使用时，由于单机处理本地向量的存储和通信代价，行维度更是需要被控制在一个更小的范围之内。RowMatrix可通过一个RDD[Vector]的实例来创建，如下代码所示：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.rdd.<span class="type">RDD</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.rdd.<span class="type">RDD</span></div><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.mllib.linalg.&#123;<span class="type">Vector</span>,<span class="type">Vectors</span>&#125;</div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.linalg.&#123;<span class="type">Vector</span>,<span class="type">Vectors</span>&#125;</div><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.<span class="type">RowMatrix</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.<span class="type">RowMatrix</span></div><div class="line"> </div><div class="line"><span class="comment">// 创建两个本地向量dv1 dv2</span></div><div class="line">scala&gt; <span class="keyword">val</span> dv1 : <span class="type">Vector</span> = <span class="type">Vectors</span>.dense(<span class="number">1.0</span>,<span class="number">2.0</span>,<span class="number">3.0</span>)</div><div class="line">dv1: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = [<span class="number">1.0</span>,<span class="number">2.0</span>,<span class="number">3.0</span>]</div><div class="line">scala&gt; <span class="keyword">val</span> dv2 : <span class="type">Vector</span> = <span class="type">Vectors</span>.dense(<span class="number">2.0</span>,<span class="number">3.0</span>,<span class="number">4.0</span>)</div><div class="line">dv2: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = [<span class="number">2.0</span>,<span class="number">3.0</span>,<span class="number">4.0</span>]</div><div class="line"><span class="comment">// 使用两个本地向量创建一个RDD[Vector]</span></div><div class="line">scala&gt; <span class="keyword">val</span> rows : <span class="type">RDD</span>[<span class="type">Vector</span>] = sc.parallelize(<span class="type">Array</span>(dv1,dv2))</div><div class="line">rows: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.linalg.<span class="type">Vector</span>] = <span class="type">ParallelCollectionRDD</span>[<span class="number">13</span>] at parallelize at &lt;console&gt;:<span class="number">38</span></div><div class="line"> </div><div class="line"><span class="comment">// 通过RDD[Vector]创建一个行矩阵</span></div><div class="line">scala&gt; <span class="keyword">val</span> mat : <span class="type">RowMatrix</span> = <span class="keyword">new</span> <span class="type">RowMatrix</span>(rows)</div><div class="line">mat: org.apache.spark.mllib.linalg.distributed.<span class="type">RowMatrix</span> = org.apache.spark.mllib.linalg.distributed.<span class="type">RowMatrix</span>@<span class="number">76</span>fc0fa</div><div class="line"><span class="comment">//可以使用numRows()和numCols()方法得到行数和列数</span></div><div class="line">scala&gt; mat.numRows()</div><div class="line">res0: <span class="type">Long</span> = <span class="number">2</span></div><div class="line">scala&gt; mat.numCols()</div><div class="line">res1: <span class="type">Long</span> = <span class="number">3</span></div><div class="line">scala&gt; mat.rows.foreach(println)</div><div class="line">[<span class="number">1.0</span>,<span class="number">2.0</span>,<span class="number">3.0</span>]</div><div class="line">[<span class="number">2.0</span>,<span class="number">3.0</span>,<span class="number">4.0</span>]</div></pre></td></tr></table></figure></p>
+<p>在获得RowMatrix的实例后，我们可以通过其自带的computeColumnSummaryStatistics()方法获取该矩阵的一些统计摘要信息，并可以对其进行QR分解，SVD分解和PCA分解，这一部分内容将在特征降维的章节详细解说，这里不再叙述。<br>统计摘要信息的获取如下代码段所示（接上代码段）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 通过computeColumnSummaryStatistics()方法获取统计摘要</span></div><div class="line">scala&gt; <span class="keyword">val</span> summary = mat.computeColumnSummaryStatistics()</div><div class="line"><span class="comment">// 可以通过summary实例来获取矩阵的相关统计信息，例如行数</span></div><div class="line">scala&gt; summary.count</div><div class="line">res2: <span class="type">Long</span> = <span class="number">2</span></div><div class="line"><span class="comment">// 最大向量</span></div><div class="line">scala&gt; summary.max</div><div class="line">res3: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = [<span class="number">2.0</span>,<span class="number">3.0</span>,<span class="number">4.0</span>]</div><div class="line"><span class="comment">// 方差向量</span></div><div class="line">scala&gt; summary.variance</div><div class="line">res4: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = [<span class="number">0.5</span>,<span class="number">0.5</span>,<span class="number">0.5</span>]</div><div class="line"><span class="comment">// 平均向量</span></div><div class="line">scala&gt; summary.mean</div><div class="line">res5: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = [<span class="number">1.5</span>,<span class="number">2.5</span>,<span class="number">3.5</span>]</div><div class="line"><span class="comment">// L1范数向量</span></div><div class="line">scala&gt; summary.normL1</div><div class="line">res6: org.apache.spark.mllib.linalg.<span class="type">Vector</span> = [<span class="number">3.0</span>,<span class="number">5.0</span>,<span class="number">7.0</span>]</div></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="（二）索引行矩阵（IndexedRowMatrix）"><a href="#（二）索引行矩阵（IndexedRowMatrix）" class="headerlink" title="（二）索引行矩阵（IndexedRowMatrix）"></a>（二）索引行矩阵（IndexedRowMatrix）</h3></div>
+<p>索引行矩阵IndexedRowMatrix与RowMatrix相似，但它的每一行都带有一个有意义的行索引值，这个索引值可以被用来识别不同行，或是进行诸如join之类的操作。其数据存储在一个由IndexedRow组成的RDD里，即每一行都是一个带长整型索引的本地向量。</p>
+<p>与RowMatrix类似，IndexedRowMatrix的实例可以通过RDD[IndexedRow]实例来创建。如下代码段所示（接上例）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">scala&gt;<span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.&#123;<span class="type">IndexedRow</span>, <span class="type">IndexedRowMatrix</span>&#125;</div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.&#123;<span class="type">IndexedRow</span>, <span class="type">IndexedRowMatrix</span>&#125;</div><div class="line"> </div><div class="line"> </div><div class="line"><span class="comment">// 通过本地向量dv1 dv2来创建对应的IndexedRow</span></div><div class="line"><span class="comment">// 在创建时可以给定行的索引值，如这里给dv1的向量赋索引值1，dv2赋索引值2</span></div><div class="line">scala&gt; <span class="keyword">val</span> idxr1 = <span class="type">IndexedRow</span>(<span class="number">1</span>,dv1)</div><div class="line">idxr1: org.apache.spark.mllib.linalg.distributed.<span class="type">IndexedRow</span> = <span class="type">IndexedRow</span>(<span class="number">1</span>,[<span class="number">1.0</span>,<span class="number">2.0</span>,<span class="number">3.0</span>])</div><div class="line">scala&gt; <span class="keyword">val</span> idxr2 = <span class="type">IndexedRow</span>(<span class="number">2</span>,dv2)</div><div class="line">idxr2: org.apache.spark.mllib.linalg.distributed.<span class="type">IndexedRow</span> = <span class="type">IndexedRow</span>(<span class="number">2</span>,[<span class="number">2.0</span>,<span class="number">3.0</span>,<span class="number">4.0</span>])</div><div class="line"> </div><div class="line"><span class="comment">// 通过IndexedRow创建RDD[IndexedRow]</span></div><div class="line">scala&gt; <span class="keyword">val</span> idxrows = sc.parallelize(<span class="type">Array</span>(idxr1,idxr2))</div><div class="line">idxrows: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.linalg.distributed.<span class="type">IndexedRow</span>] = <span class="type">ParallelCollectionRDD</span>[<span class="number">14</span>] at parallelize at &lt;console&gt;:<span class="number">45</span></div><div class="line"> </div><div class="line"><span class="comment">// 通过RDD[IndexedRow]创建一个索引行矩阵</span></div><div class="line">scala&gt; <span class="keyword">val</span> idxmat: <span class="type">IndexedRowMatrix</span> = <span class="keyword">new</span> <span class="type">IndexedRowMatrix</span>(idxrows)</div><div class="line">idxmat: org.apache.spark.mllib.linalg.distributed.<span class="type">IndexedRowMatrix</span> = org.apache.spark.mllib.linalg.distributed.<span class="type">IndexedRowMatrix</span>@<span class="number">532887</span>bc</div><div class="line"><span class="comment">//打印</span></div><div class="line">scala&gt; idxmat.rows.foreach(println)</div><div class="line">  <span class="type">IndexedRow</span>(<span class="number">1</span>,[<span class="number">1.0</span>,<span class="number">2.0</span>,<span class="number">3.0</span>])</div><div class="line">  <span class="type">IndexedRow</span>(<span class="number">2</span>,[<span class="number">2.0</span>,<span class="number">3.0</span>,<span class="number">4.0</span>])</div></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="（三）坐标矩阵（Coordinate-Matrix）"><a href="#（三）坐标矩阵（Coordinate-Matrix）" class="headerlink" title="（三）坐标矩阵（Coordinate Matrix）"></a>（三）坐标矩阵（Coordinate Matrix）</h3></div>
+<p>坐标矩阵CoordinateMatrix是一个基于矩阵项构成的RDD的分布式矩阵。每一个矩阵项MatrixEntry都是一个三元组：(i: Long, j: Long, value: Double)，其中i是行索引，j是列索引，value是该位置的值。坐标矩阵一般在矩阵的两个维度都很大，且矩阵非常稀疏的时候使用。</p>
+<p>CoordinateMatrix实例可通过RDD[MatrixEntry]实例来创建，其中每一个矩阵项都是一个(rowIndex, colIndex, elem)的三元组：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.&#123;<span class="type">CoordinateMatrix</span>, <span class="type">MatrixEntry</span>&#125;</div><div class="line"> </div><div class="line"><span class="comment">// 创建两个矩阵项ent1和ent2，每一个矩阵项都是由索引和值构成的三元组</span></div><div class="line">scala&gt; <span class="keyword">val</span> ent1 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">0</span>,<span class="number">1</span>,<span class="number">0.5</span>)</div><div class="line">ent1: org.apache.spark.mllib.linalg.distributed.<span class="type">MatrixEntry</span> = <span class="type">MatrixEntry</span>(<span class="number">0</span>,<span class="number">1</span>,<span class="number">0.5</span>)</div><div class="line">scala&gt; <span class="keyword">val</span> ent2 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1.8</span>)</div><div class="line">ent2: org.apache.spark.mllib.linalg.distributed.<span class="type">MatrixEntry</span> = <span class="type">MatrixEntry</span>(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1.8</span>)</div><div class="line"><span class="comment">// 创建RDD[MatrixEntry]</span></div><div class="line">scala&gt; <span class="keyword">val</span> entries : <span class="type">RDD</span>[<span class="type">MatrixEntry</span>] = sc.parallelize(<span class="type">Array</span>(ent1,ent2))</div><div class="line">entries: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.linalg.distributed.<span class="type">MatrixEntry</span>] = <span class="type">ParallelCollectionRDD</span>[<span class="number">15</span>] at parallelize at &lt;console&gt;:<span class="number">42</span></div><div class="line"><span class="comment">// 通过RDD[MatrixEntry]创建一个坐标矩阵</span></div><div class="line">scala&gt; <span class="keyword">val</span> coordMat: <span class="type">CoordinateMatrix</span> = <span class="keyword">new</span> <span class="type">CoordinateMatrix</span>(entries)</div><div class="line">coordMat: org.apache.spark.mllib.linalg.distributed.<span class="type">CoordinateMatrix</span> = org.apache.spark.mllib.linalg.distributed.<span class="type">CoordinateMatrix</span>@<span class="number">25</span>b2d465</div><div class="line"><span class="comment">//打印</span></div><div class="line">scala&gt; coordMat.entries.foreach(println)</div><div class="line"><span class="type">MatrixEntry</span>(<span class="number">0</span>,<span class="number">1</span>,<span class="number">0.5</span>)</div><div class="line"><span class="type">MatrixEntry</span>(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1.8</span>)</div></pre></td></tr></table></figure></p>
+<p>坐标矩阵可以通过transpose()方法对矩阵进行转置操作，并可以通过自带的toIndexedRowMatrix()方法转换成索引行矩阵IndexedRowMatrix。但目前暂不支持CoordinateMatrix的其他计算操作。<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 将coordMat进行转置</span></div><div class="line">scala&gt; <span class="keyword">val</span> transMat: <span class="type">CoordinateMatrix</span> = coordMat.transpose()</div><div class="line">transMat: org.apache.spark.mllib.linalg.distributed.<span class="type">CoordinateMatrix</span> = org.apache.spark.mllib.linalg.distributed.<span class="type">CoordinateMatrix</span><span class="meta">@c</span>1ee50</div><div class="line">scala&gt; transMat.entries.foreach(println)</div><div class="line">  <span class="type">MatrixEntry</span>(<span class="number">1</span>,<span class="number">0</span>,<span class="number">0.5</span>)</div><div class="line"><span class="type">MatrixEntry</span>(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1.8</span>)</div><div class="line"><span class="comment">// 将坐标矩阵转换成一个索引行矩阵</span></div><div class="line">scala&gt; <span class="keyword">val</span> indexedRowMatrix = transMat.toIndexedRowMatrix()</div><div class="line">indexedRowMatrix: org.apache.spark.mllib.linalg.distributed.<span class="type">IndexedRowMatrix</span> = org.apache.spark.mllib.linalg.distributed.<span class="type">IndexedRowMatrix</span>@<span class="number">7</span>ee7e1bb</div><div class="line">scala&gt; indexedRowMatrix.rows.foreach(println)</div><div class="line"><span class="type">IndexedRow</span>(<span class="number">1</span>,(<span class="number">3</span>,[<span class="number">0</span>],[<span class="number">0.5</span>]))</div><div class="line"><span class="type">IndexedRow</span>(<span class="number">2</span>,(<span class="number">3</span>,[<span class="number">2</span>],[<span class="number">1.8</span>]))</div></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="（四）分块矩阵（Block-Matrix）"><a href="#（四）分块矩阵（Block-Matrix）" class="headerlink" title="（四）分块矩阵（Block Matrix）"></a>（四）分块矩阵（Block Matrix）</h3></div>
+<p>分块矩阵是基于矩阵块MatrixBlock构成的RDD的分布式矩阵，其中每一个矩阵块MatrixBlock都是一个元组((Int, Int), Matrix)，其中(Int, Int)是块的索引，而Matrix则是在对应位置的子矩阵（sub-matrix），其尺寸由rowsPerBlock和colsPerBlock决定，默认值均为1024。分块矩阵支持和另一个分块矩阵进行加法操作和乘法操作，并提供了一个支持方法validate()来确认分块矩阵是否创建成功。</p>
+<p>分块矩阵可由索引行矩阵IndexedRowMatrix或坐标矩阵CoordinateMatrix调用toBlockMatrix()方法来进行转换，该方法将矩阵划分成尺寸默认为1024x1024的分块，可以在调用toBlockMatrix(rowsPerBlock, colsPerBlock)方法时传入参数来调整分块的尺寸。<br>下面以矩阵A（如图）为例，先利用矩阵项MatrixEntry将其构造成坐标矩阵，再转化成如图所示的4个分块矩阵，最后对矩阵A与其转置进行乘法运算：</p>
+<p><center><br><img src="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2016/12/2.png" alt=""><br></center><br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.&#123;<span class="type">CoordinateMatrix</span>, <span class="type">MatrixEntry</span>&#125;</div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.&#123;<span class="type">CoordinateMatrix</span>, <span class="type">MatrixEntry</span>&#125;</div><div class="line">scala&gt; <span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.<span class="type">BlockMatrix</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.mllib.linalg.distributed.<span class="type">BlockMatrix</span></div><div class="line"> </div><div class="line"><span class="comment">// 创建8个矩阵项，每一个矩阵项都是由索引和值构成的三元组</span></div><div class="line">scala&gt; <span class="keyword">val</span> ent1 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>)</div><div class="line">...</div><div class="line">scala&gt; <span class="keyword">val</span> ent2 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>)</div><div class="line">...</div><div class="line">scala&gt; <span class="keyword">val</span> ent3 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">2</span>,<span class="number">0</span>,<span class="number">-1</span>)</div><div class="line">...</div><div class="line">scala&gt; <span class="keyword">val</span> ent4 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>)</div><div class="line">...</div><div class="line">scala&gt; <span class="keyword">val</span> ent5 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1</span>)</div><div class="line">...</div><div class="line">scala&gt; <span class="keyword">val</span> ent6 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">3</span>,<span class="number">0</span>,<span class="number">1</span>)</div><div class="line">...</div><div class="line">scala&gt; <span class="keyword">val</span> ent7 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">3</span>,<span class="number">1</span>,<span class="number">1</span>)</div><div class="line">...</div><div class="line">scala&gt; <span class="keyword">val</span> ent8 = <span class="keyword">new</span> <span class="type">MatrixEntry</span>(<span class="number">3</span>,<span class="number">3</span>,<span class="number">1</span>)</div><div class="line">...</div><div class="line"><span class="comment">// 创建RDD[MatrixEntry]</span></div><div class="line">scala&gt; <span class="keyword">val</span> entries : <span class="type">RDD</span>[<span class="type">MatrixEntry</span>] = sc.parallelize(<span class="type">Array</span>(ent1,ent2,ent3,ent4,ent5,ent6,ent7,ent8))</div><div class="line">entries: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.linalg.distributed.<span class="type">MatrixEntry</span>] = <span class="type">ParallelCollectionRDD</span>[<span class="number">21</span>] at parallelize at &lt;console&gt;:<span class="number">57</span></div><div class="line"> </div><div class="line"><span class="comment">// 通过RDD[MatrixEntry]创建一个坐标矩阵</span></div><div class="line">scala&gt; <span class="keyword">val</span> coordMat: <span class="type">CoordinateMatrix</span> = <span class="keyword">new</span> <span class="type">CoordinateMatrix</span>(entries)</div><div class="line">coordMat: org.apache.spark.mllib.linalg.distributed.<span class="type">CoordinateMatrix</span> = org.apache.spark.mllib.linalg.distributed.<span class="type">CoordinateMatrix</span>@<span class="number">31</span>c5fb43</div><div class="line"> </div><div class="line">  <span class="comment">// 将坐标矩阵转换成2x2的分块矩阵并存储，尺寸通过参数传入</span></div><div class="line"><span class="keyword">val</span> matA: <span class="type">BlockMatrix</span> = coordMat.toBlockMatrix(<span class="number">2</span>,<span class="number">2</span>).cache()</div><div class="line">  matA: org.apache.spark.mllib.linalg.distributed.<span class="type">BlockMatrix</span> = org.apache.spark.mllib.linalg.distributed.<span class="type">BlockMatrix</span>@<span class="number">26</span>b1df2c</div><div class="line"><span class="comment">// 可以用validate()方法判断是否分块成功</span></div><div class="line">matA.validate()</div></pre></td></tr></table></figure></p>
+<p>构建成功后，可通过toLocalMatrix转换成本地矩阵，并查看其分块情况：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">scala&gt; matA.toLocalMatrix</div><div class="line">res31: org.apache.spark.mllib.linalg.<span class="type">Matrix</span> =</div><div class="line"><span class="number">1.0</span>   <span class="number">0.0</span>  <span class="number">0.0</span>  <span class="number">0.0</span></div><div class="line"><span class="number">0.0</span>   <span class="number">1.0</span>  <span class="number">0.0</span>  <span class="number">0.0</span></div><div class="line"><span class="number">-1.0</span>  <span class="number">2.0</span>  <span class="number">1.0</span>  <span class="number">0.0</span></div><div class="line"><span class="number">1.0</span>   <span class="number">1.0</span>  <span class="number">0.0</span>  <span class="number">1.0</span></div><div class="line"> </div><div class="line"><span class="comment">// 查看其分块情况</span></div><div class="line">scala&gt; matA.numColBlocks</div><div class="line">res12: <span class="type">Int</span> = <span class="number">2</span></div><div class="line">scala&gt; matA.numRowBlocks</div><div class="line">res13: <span class="type">Int</span> = <span class="number">2</span></div><div class="line"> </div><div class="line"><span class="comment">// 计算矩阵A和其转置矩阵的积矩阵</span></div><div class="line">scala&gt; <span class="keyword">val</span> ata = matA.transpose.multiply(matA)</div><div class="line">  ata: org.apache.spark.mllib.linalg.distributed.<span class="type">BlockMatrix</span> = org.apache.spark.mllib.linalg.distributed.<span class="type">BlockMatrix</span>@<span class="number">3644e451</span></div><div class="line">scala&gt; ata.toLocalMatrix</div><div class="line">res1: org.apache.spark.mllib.linalg.<span class="type">Matrix</span> =</div><div class="line"><span class="number">3.0</span>   <span class="number">-1.0</span>  <span class="number">-1.0</span>  <span class="number">1.0</span></div><div class="line"><span class="number">-1.0</span>  <span class="number">6.0</span>   <span class="number">2.0</span>   <span class="number">1.0</span></div><div class="line"><span class="number">-1.0</span>  <span class="number">2.0</span>   <span class="number">1.0</span>   <span class="number">0.0</span></div><div class="line"><span class="number">1.0</span>   <span class="number">1.0</span>   <span class="number">0.0</span>   <span class="number">1.0</span></div></pre></td></tr></table></figure></p>
+<p>分块矩阵BlockMatrix将矩阵分成一系列矩阵块，底层由矩阵块构成的RDD来进行数据存储。值得指出的是，用于生成分布式矩阵的底层RDD必须是已经确定（Deterministic）的，因为矩阵的尺寸将被存储下来，所以使用未确定的RDD将会导致错误。而且，不同类型的分布式矩阵之间的转换需要进行一个全局的shuffle操作，非常耗费资源。所以，根据数据本身的性质和应用需求来选取恰当的分布式矩阵存储类型是非常重要的。</p>
+<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/img/wechat.png" alt="Melodylican WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/img/zhifubao.png" alt="Melodylican Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/18/Spark-MLlib基本数据类型/" rel="next" title="Spark入门 第六章 第二节 Spark - MLlib基本数据类型1">
+                <i class="fa fa-chevron-left"></i> Spark入门 第六章 第二节 Spark - MLlib基本数据类型1
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/24/BlockingQueue/" rel="prev" title="从一个故障说说Java的三个BlockingQueue">
+                从一个故障说说Java的三个BlockingQueue <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Melodylican" />
+          <p class="site-author-name" itemprop="name">Melodylican</p>
+           
+              <p class="site-description motion-element" itemprop="description">life is struggle</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">84</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">57</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/your-user-name" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/your-user-name" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3235750572" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.baidu.com/" title="MacTalk" target="_blank">MacTalk</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://example.com/" title="Title" target="_blank">Title</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式矩阵（Distributed-Matrix）"><span class="nav-number">1.</span> <span class="nav-text">分布式矩阵（Distributed Matrix）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#（一）行矩阵（RowMatrix）"><span class="nav-number">1.1.</span> <span class="nav-text">（一）行矩阵（RowMatrix）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（二）索引行矩阵（IndexedRowMatrix）"><span class="nav-number">1.2.</span> <span class="nav-text">（二）索引行矩阵（IndexedRowMatrix）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（三）坐标矩阵（Coordinate-Matrix）"><span class="nav-number">1.3.</span> <span class="nav-text">（三）坐标矩阵（Coordinate Matrix）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（四）分块矩阵（Block-Matrix）"><span class="nav-number">1.4.</span> <span class="nav-text">（四）分块矩阵（Block Matrix）</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Powered By <a href="#">Melodylican</a></span>
+</div>
+
+
+<div class="powered-by">
+    个人专属
+</div>
+
+<div class="theme-info">
+  博客 
+  
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2128487"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="local-search-pop-overlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("nCYvmPGeqGhuuM0qkwvIf2k1-gzGzoHsz", "dnC7e97rmSEwVQKrjxAE7oRR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+  
+  
+	<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+<!-- 小红心 -->
+<script type="text/javascript" src="/js/src/love.js"></script>
+</body>
+</html>
