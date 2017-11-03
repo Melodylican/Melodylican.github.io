@@ -95,7 +95,7 @@
 <meta property="og:url" content="http://Melodylican.github.io/2017/11/03/MySQL分库分表环境下全局ID生成方案/index.html">
 <meta property="og:site_name" content="不卑不亢不慌不忙">
 <meta property="og:description" content="MySQL分库分表环境下全局ID生成方案在大型互联网应用中，随着用户数的增加，为了提高应用的性能，我们经常需要对数据库进行分库分表操作。在单表时代，我们可以完全依赖于数据库的自增 ID来唯一标识一个用户或数据对象。但是当我们对数据库进行了分库分表后，就不能依赖于每个表的自增ID来全局唯一标识这些数据了。因此，我们需要提供一 个全局唯一的ID号生成策略来支持分库分表的环境。下面来介绍两种非常优秀的解">
-<meta property="og:updated_time" content="2017-11-03T03:47:35.532Z">
+<meta property="og:updated_time" content="2017-11-03T05:34:40.302Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL分库分表环境下全局ID生成方案">
 <meta name="twitter:description" content="MySQL分库分表环境下全局ID生成方案在大型互联网应用中，随着用户数的增加，为了提高应用的性能，我们经常需要对数据库进行分库分表操作。在单表时代，我们可以完全依赖于数据库的自增 ID来唯一标识一个用户或数据对象。但是当我们对数据库进行了分库分表后，就不能依赖于每个表的自增ID来全局唯一标识这些数据了。因此，我们需要提供一 个全局唯一的ID号生成策略来支持分库分表的环境。下面来介绍两种非常优秀的解">
@@ -440,7 +440,7 @@
       
         <h1 id="MySQL分库分表环境下全局ID生成方案"><a href="#MySQL分库分表环境下全局ID生成方案" class="headerlink" title="MySQL分库分表环境下全局ID生成方案"></a>MySQL分库分表环境下全局ID生成方案</h1><p>在大型互联网应用中，随着用户数的增加，为了提高应用的性能，我们经常需要对数据库进行分库分表操作。在单表时代，我们可以完全依赖于数据库的自增 ID来唯一标识一个用户或数据对象。但是当我们对数据库进行了分库分表后，就不能依赖于每个表的自增ID来全局唯一标识这些数据了。因此，我们需要提供一 个全局唯一的ID号生成策略来支持分库分表的环境。下面来介绍两种非常优秀的解决方案：<br><a id="more"></a></p>
 <h2 id="数据库自增ID——来自Flicker的解决方案"><a href="#数据库自增ID——来自Flicker的解决方案" class="headerlink" title="数据库自增ID——来自Flicker的解决方案"></a>数据库自增ID——来自Flicker的解决方案</h2><p>因为MySQL本身支持auto_increment操作，很自然地，我们会想到借助这个特性来实现这个功能。Flicker在解决全局ID生成方 案里就采用了MySQL自增长ID的机制（auto_increment + replace into + MyISAM）。一个生成64位ID方案具体就是这样的：<br>先创建单独的数据库(eg:ticket)，然后创建一个表：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE Tickets64 (</div><div class="line">            id bigint(20) unsigned NOT NULL auto_increment,</div><div class="line">            stub char(1) NOT NULL default &apos;&apos;,</div><div class="line">            PRIMARY KEY  (id),</div><div class="line">            UNIQUE KEY stub (stub)</div><div class="line">    ) ENGINE=MyISAM</div></pre></td></tr></table></figure></p>
-<p>当我们插入记录后，执行SELECT * from Tickets64，查询结果就是这样的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">+-------------------+------+</div><div class="line">| id                | stub |</div><div class="line">+-------------------+------+</div><div class="line">| 72157623227190423 |    a |</div><div class="line">+-------------------+------+</div></pre></td></tr></table></figure></p>
+<p>当我们插入记录后，执行SELECT * from Tickets64，查询结果就是这样的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">+-------------------+------+</div><div class="line">| id                | stub |</div><div class="line">+-------------------+------+</div><div class="line">| 72157623227190421 |    a |</div><div class="line">+-------------------+------+</div></pre></td></tr></table></figure></p>
 <p>在我们的应用端需要做下面这两个操作，在一个事务会话里提交：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">REPLACE INTO Tickets64 (stub) VALUES (&apos;a&apos;);</div><div class="line">SELECT LAST_INSERT_ID();</div></pre></td></tr></table></figure></p>
 <p>这样我们就能拿到不断增长且不重复的ID了。<br>到上面为止，我们只是在单台数据库上生成ID，从高可用角度考虑，接下来就要解决单点故障问题：<strong>Flicker</strong>启用了两台数据库服务器来生成ID，通过区分auto_increment的起始值和步长来生成<strong>奇偶数</strong>的ID。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">TicketServer1:</div><div class="line">auto-increment-increment = 2</div><div class="line">auto-increment-offset = 1</div><div class="line"></div><div class="line">TicketServer2:</div><div class="line">auto-increment-increment = 2</div><div class="line">auto-increment-offset = 2</div></pre></td></tr></table></figure></p>
 <p>最后，在客户端只需要通过<strong>轮询方式</strong>取ID就可以了。</p>
@@ -622,7 +622,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">61</span>
+                <span class="site-state-item-count">62</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
