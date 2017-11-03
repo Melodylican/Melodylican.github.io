@@ -8,14 +8,45 @@
     <atom:link href="/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description>life is struggle</description>
-    <pubDate>Fri, 03 Nov 2017 01:56:50 GMT</pubDate>
+    <pubDate>Fri, 03 Nov 2017 03:42:18 GMT</pubDate>
     <generator>http://hexo.io/</generator>
     
     <item>
-      <title>Java 线程间的状态转换</title>
-      <link>http://Melodylican.github.io/2017/11/03/%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2/</link>
-      <guid>http://Melodylican.github.io/2017/11/03/%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2/</guid>
+      <title>MySQL分库分表环境下全局ID生成方案</title>
+      <link>http://Melodylican.github.io/2017/11/03/MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88/</link>
+      <guid>http://Melodylican.github.io/2017/11/03/MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88/</guid>
       <pubDate>Thu, 02 Nov 2017 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;h1 id=&quot;MySQL分库分表环境下全局ID生成方案&quot;&gt;&lt;a href=&quot;#MySQL分库分表环境下全局ID生成方案&quot; class=&quot;headerlink&quot; title=&quot;MySQL分库分表环境下全局ID生成方案&quot;&gt;&lt;/a&gt;MySQL分库分表环境下全局ID生成方案&lt;/h1&gt;&lt;p&gt;在大型互联网应用中，随着用户数的增加，为了提高应用的性能，我们经常需要对数据库进行分库分表操作。在单表时代，我们可以完全依赖于数据库的自增 ID来唯一标识一个用户或数据对象。但是当我们对数据库进行了分库分表后，就不能依赖于每个表的自增ID来全局唯一标识这些数据了。因此，我们需要提供一 个全局唯一的ID号生成策略来支持分库分表的环境。下面来介绍两种非常优秀的解决方案：&lt;br&gt;&lt;/p&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<h1 id="MySQL分库分表环境下全局ID生成方案"><a href="#MySQL分库分表环境下全局ID生成方案" class="headerlink" title="MySQL分库分表环境下全局ID生成方案"></a>MySQL分库分表环境下全局ID生成方案</h1><p>在大型互联网应用中，随着用户数的增加，为了提高应用的性能，我们经常需要对数据库进行分库分表操作。在单表时代，我们可以完全依赖于数据库的自增 ID来唯一标识一个用户或数据对象。但是当我们对数据库进行了分库分表后，就不能依赖于每个表的自增ID来全局唯一标识这些数据了。因此，我们需要提供一 个全局唯一的ID号生成策略来支持分库分表的环境。下面来介绍两种非常优秀的解决方案：<br><a id="more"></a></p>
+<h2 id="数据库自增ID——来自Flicker的解决方案"><a href="#数据库自增ID——来自Flicker的解决方案" class="headerlink" title="数据库自增ID——来自Flicker的解决方案"></a>数据库自增ID——来自Flicker的解决方案</h2><p>因为MySQL本身支持auto_increment操作，很自然地，我们会想到借助这个特性来实现这个功能。Flicker在解决全局ID生成方 案里就采用了MySQL自增长ID的机制（auto_increment + replace into + MyISAM）。一个生成64位ID方案具体就是这样的：<br>先创建单独的数据库(eg:ticket)，然后创建一个表：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE Tickets64 (</div><div class="line">            id bigint(20) unsigned NOT NULL auto_increment,</div><div class="line">            stub char(1) NOT NULL default &apos;&apos;,</div><div class="line">            PRIMARY KEY  (id),</div><div class="line">            UNIQUE KEY stub (stub)</div><div class="line">    ) ENGINE=MyISAM</div></pre></td></tr></table></figure></p>
+<p>当我们插入记录后，执行SELECT * from Tickets64，查询结果就是这样的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">+-------------------+------+</div><div class="line">| id                | stub |</div><div class="line">+-------------------+------+</div><div class="line">| 72157623227190423 |    a |</div><div class="line">+-------------------+------+</div></pre></td></tr></table></figure></p>
+<p>在我们的应用端需要做下面这两个操作，在一个事务会话里提交：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">REPLACE INTO Tickets64 (stub) VALUES (&apos;a&apos;);</div><div class="line">SELECT LAST_INSERT_ID();</div></pre></td></tr></table></figure></p>
+<p>这样我们就能拿到不断增长且不重复的ID了。<br>到上面为止，我们只是在单台数据库上生成ID，从高可用角度考虑，接下来就要解决单点故障问题：<strong>Flicker</strong>启用了两台数据库服务器来生成ID，通过区分auto_increment的起始值和步长来生成<strong>奇偶数</strong>的ID。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">TicketServer1:</div><div class="line">auto-increment-increment = 2</div><div class="line">auto-increment-offset = 1</div><div class="line"></div><div class="line">TicketServer2:</div><div class="line">auto-increment-increment = 2</div><div class="line">auto-increment-offset = 2</div></pre></td></tr></table></figure></p>
+<p>最后，在客户端只需要通过<strong>轮询方式</strong>取ID就可以了。</p>
+<p><strong>优点</strong>：充分借助数据库的自增ID机制，提供高可靠性，生成的ID有序。<br><strong>缺点</strong>：占用两个独立的MySQL实例，有些浪费资源，成本较高。<br>参考：<a href="http://code.flickr.net/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/" target="_blank" rel="external">http://code.flickr.net/2010/02/08/ticket-servers-distributed-unique-primary-keys-on-the-cheap/</a></p>
+<h2 id="独立的应用程序——来自Twitter的解决方案"><a href="#独立的应用程序——来自Twitter的解决方案" class="headerlink" title="独立的应用程序——来自Twitter的解决方案"></a>独立的应用程序——来自Twitter的解决方案</h2><p>Twitter在把存储系统从MySQL迁移到Cassandra的过程中由于Cassandra没有顺序ID生成机制，于是自己开发了一套全局唯一ID生成服务：Snowflake。GitHub地址：<a href="https://github.com/twitter/snowflake" target="_blank" rel="external">https://github.com/twitter/snowflake</a>。根据twitter的业务需求，snowflake系统生成64位的ID。由3部分组成：</p>
+<p>41位的时间序列（精确到毫秒，41位的长度可以使用69年）<br>10位的机器标识（10位的长度最多支持部署1024个节点）<br>12位的计数顺序号（12位的计数顺序号支持每个节点每毫秒产生4096个ID序号）<br>最高位是符号位，始终为0。</p>
+<p><strong>优点</strong>：高性能，低延迟；独立的应用；按时间有序。<br><strong>缺点</strong>：需要独立的开发和部署。</p>
+<font color="red"><strong>注</strong>：last_insert_id()的值是由MySQL server来维护的，而且是为每条连接维护独立的值，也即，某条连接调用last_insert_id()获取到的值是这条连接最近一次insert操作执行后的自增值，该值不会被其它连接的sql语句所影响。这个行为保证了不同的连接能正确地获取到它最近一次insert sql执行所插入的行的自增值，也就是说，last_insert_id()的值不需要通过加锁或事务机制来保证其在多连接场景下的正确性.</font>
+
+<h2 id="在Twitter基础上的改进"><a href="#在Twitter基础上的改进" class="headerlink" title="在Twitter基础上的改进"></a>在Twitter基础上的改进</h2><p>可参考 <a href="http://geek.csdn.net/news/detail/72973" target="_blank" rel="external">http://geek.csdn.net/news/detail/72973</a> </p>
+<h2 id="使用缓存队列"><a href="#使用缓存队列" class="headerlink" title="使用缓存队列"></a>使用缓存队列</h2><p>使用队列服务，如redis、memcacheq等等，将一定量的ID预分配在一个队列里，每次插入操作，先从队列中获取一个ID，若插入失败的话，将该ID再次添加到队列中，同时监控队列数量，当小于阀值时，自动向队列中添加元素。<br>这种方式可以有规划的对ID进行分配，还会带来经济效应，比如ＱＱ号码，各种靓号，明码标价。如网站的userid, 允许uid登陆，推出各种靓号，明码标价，对于普通的ID打乱后再随机分配。</p>
+<h2 id="在Redis中使用lua脚本"><a href="#在Redis中使用lua脚本" class="headerlink" title="在Redis中使用lua脚本"></a>在Redis中使用lua脚本</h2><p>详细参见——<a href="http://blog.csdn.net/hengyunabc/article/details/19025973" target="_blank" rel="external">http://blog.csdn.net/hengyunabc/article/details/19025973</a></p>
+]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/11/03/MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Java 线程间的状态转换</title>
+      <link>http://Melodylican.github.io/2017/11/02/%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2/</link>
+      <guid>http://Melodylican.github.io/2017/11/02/%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2/</guid>
+      <pubDate>Wed, 01 Nov 2017 16:00:00 GMT</pubDate>
       <description>
       
         &lt;p&gt;线程间的状态转换： &lt;/p&gt;
@@ -26,22 +57,22 @@
       <content:encoded><![CDATA[<p>线程间的状态转换： </p>
 <p><center><br><img src="http://ojwkevhas.bkt.clouddn.com/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81.jpg" alt=""><br></center><br><a id="more"></a></p>
 <ol>
-<li><p>新建(new)：新创建了一个线程对象。</p>
+<li><p><strong>新建(new)</strong>：新创建了一个线程对象。</p>
 </li>
-<li><p>可运行(runnable)：线程对象创建后，其他线程(比如main线程）调用了该对象的start()方法。该状态的线程位于可运行线程池中，等待被线程调度选中，获取cpu 的使用权 。</p>
+<li><p><strong>可运行(runnable)</strong>：线程对象创建后，其他线程(比如main线程）调用了该对象的start()方法。该状态的线程位于可运行线程池中，等待被线程调度选中，获取cpu 的使用权 。</p>
 </li>
-<li><p>运行(running)：可运行状态(runnable)的线程获得了cpu 时间片（timeslice） ，执行程序代码。</p>
+<li><p><strong>运行(running)</strong>：可运行状态(runnable)的线程获得了cpu 时间片（timeslice） ，执行程序代码。</p>
 </li>
-<li><p>阻塞(block)：阻塞状态是指线程因为某种原因放弃了cpu 使用权，也即让出了cpu timeslice，暂时停止运行。直到线程进入可运行(runnable)状态，才有机会再次获得cpu timeslice 转到运行(running)状态。阻塞的情况分三种：<br> (一). 等待阻塞：运行(running)的线程执行o.wait()方法，JVM会把该线程放入等待队列(waitting queue)中。</p>
+<li><p><strong>阻塞(block)</strong>：阻塞状态是指线程因为某种原因放弃了cpu 使用权，也即让出了cpu timeslice，暂时停止运行。直到线程进入可运行(runnable)状态，才有机会再次获得cpu timeslice 转到运行(running)状态。阻塞的情况分三种：<br> (一). 等待阻塞：运行(running)的线程执行o.wait()方法，JVM会把该线程放入等待队列(waitting queue)中。</p>
 <p> (二). 同步阻塞：运行(running)的线程在获取对象的同步锁时，若该同步锁被别的线程占用，则JVM会把该线程放入锁池(lock pool)中。</p>
 <p> (三). 其他阻塞：运行(running)的线程执行Thread.sleep(long ms)或t.join()方法，或者发出了I/O请求时，JVM会把该线程置为阻塞状态。当sleep()状态超时、join()等待线程终止或者超时、或者I/O处理完毕时，线程重新转入可运行(runnable)状态。</p>
 </li>
-<li><p>死亡(dead)：线程run()、main() 方法执行结束，或者因异常退出了run()方法，则该线程结束生命周期。死亡的线程不可再次复生。</p>
+<li><p><strong>死亡(dead)</strong>：线程run()、main() 方法执行结束，或者因异常退出了run()方法，则该线程结束生命周期。死亡的线程不可再次复生。</p>
 </li>
 </ol>
 ]]></content:encoded>
       
-      <comments>http://Melodylican.github.io/2017/11/03/%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2/#disqus_thread</comments>
+      <comments>http://Melodylican.github.io/2017/11/02/%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2/#disqus_thread</comments>
     </item>
     
     <item>
@@ -277,23 +308,6 @@
     </item>
     
     <item>
-      <title>Spark应用案例-Spark完成PV和UV的计算</title>
-      <link>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</link>
-      <guid>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</guid>
-      <pubDate>Sun, 20 Aug 2017 08:42:23 GMT</pubDate>
-      <description>
-      
-        &lt;figure class=&quot;highlight scala&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/di
-      
-      </description>
-      
-      <content:encoded><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/#disqus_thread</comments>
-    </item>
-    
-    <item>
       <title>Spark优化</title>
       <link>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</link>
       <guid>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</guid>
@@ -311,6 +325,23 @@
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Spark应用案例-Spark完成PV和UV的计算</title>
+      <link>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</link>
+      <guid>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</guid>
+      <pubDate>Sun, 20 Aug 2017 08:42:23 GMT</pubDate>
+      <description>
+      
+        &lt;figure class=&quot;highlight scala&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/di
+      
+      </description>
+      
+      <content:encoded><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/#disqus_thread</comments>
     </item>
     
     <item>
@@ -921,31 +952,6 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$ ./a  </div><div class="line">RX ----- TX  </div><div class="line"><span class="number">5</span>MB/s <span class="number">7</span>MB/s  </div><div class="line">RX ----- TX  </div><div class="line"><span class="number">5</span>MB/s <span class="number">7</span>MB/s  </div><div class="line">RX ----- TX  </div><div class="line"><span class="number">4</span>MB/s <span class="number">6</span>MB/s  </div><div class="line">RX ----- TX  </div><div class="line"><span class="number">4</span>MB/s <span class="number">6</span>MB/s  </div><div class="line">RX ----- TX</div></pre></td></tr></table></figure>]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/06/06/%E7%BD%91%E5%8D%A1%E6%B5%81%E9%87%8F%E7%BB%9F%E8%AE%A1/#disqus_thread</comments>
-    </item>
-    
-    <item>
-      <title>Java线上应用故障排查之一：高CPU占用</title>
-      <link>http://Melodylican.github.io/2017/05/26/%E9%AB%98CPU%E5%8D%A0%E7%94%A8/</link>
-      <guid>http://Melodylican.github.io/2017/05/26/%E9%AB%98CPU%E5%8D%A0%E7%94%A8/</guid>
-      <pubDate>Thu, 25 May 2017 16:00:00 GMT</pubDate>
-      <description>
-      
-        &lt;p&gt;问题分析：&lt;br&gt;1，程序属于CPU密集型，和开发沟通过，排除此类情况。&lt;br&gt;2，程序代码有问题，出现死循环，可能性极大。&lt;/p&gt;
-&lt;p&gt;问题解决：&lt;br&gt;1，开发那边无法排查代码某个模块有问题，从日志上也无法分析得出。&lt;br&gt;2，记得原来通过strace跟踪的方法解决了一台PHP服务器CPU占用高的问题，但是通过这种方法无效，经过google搜索，发现可以通过下面的方法进行解决，那就尝试下吧。&lt;br&gt;&lt;/p&gt;
-      
-      </description>
-      
-      <content:encoded><![CDATA[<p>问题分析：<br>1，程序属于CPU密集型，和开发沟通过，排除此类情况。<br>2，程序代码有问题，出现死循环，可能性极大。</p>
-<p>问题解决：<br>1，开发那边无法排查代码某个模块有问题，从日志上也无法分析得出。<br>2，记得原来通过strace跟踪的方法解决了一台PHP服务器CPU占用高的问题，但是通过这种方法无效，经过google搜索，发现可以通过下面的方法进行解决，那就尝试下吧。<br><a id="more"></a><br>解决过程：<br>1，根据top命令，发现PID为2633的Java进程占用CPU高达300%，出现故障。</p>
-<p>2，找到该进程后，如何定位具体线程或代码呢，首先显示线程列表,并按照CPU占用高的线程排序：<br>[root@localhost logs]# ps -mp 2633 -o THREAD,tid,time | sort -rn</p>
-<p>显示结果如下：<br>USER     %CPU PRI SCNT WCHAN  USER SYSTEM   TID     TIME<br>root     10.5  19    - -         -      -  3626 00:12:48<br>root     10.1  19    - -         -      -  3593 00:12:16</p>
-<p>找到了耗时最高的线程3626，占用CPU时间有12分钟了！</p>
-<p>将需要的线程ID转换为16进制格式：<br>[root@localhost logs]# printf “%x\n” 3626<br>e18</p>
-<p>最后打印线程的堆栈信息：<br>[root@localhost logs]# jstack 2633 |grep e18 -A 30</p>
-<p>将输出的信息发给开发部进行确认，这样就能找出有问题的代码。<br>通过最近几天的监控，CPU已经安静下来了</p>
-]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/05/26/%E9%AB%98CPU%E5%8D%A0%E7%94%A8/#disqus_thread</comments>
     </item>
     
   </channel>
