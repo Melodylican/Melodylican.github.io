@@ -96,7 +96,7 @@
 <meta property="og:site_name" content="不卑不亢不慌不忙">
 <meta property="og:description" content="线程间的状态转换：">
 <meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81.jpg">
-<meta property="og:updated_time" content="2017-11-03T01:53:06.335Z">
+<meta property="og:updated_time" content="2017-11-03T01:56:50.928Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 线程间的状态转换">
 <meta name="twitter:description" content="线程间的状态转换：">
@@ -453,9 +453,8 @@
 <p> (二). 同步阻塞：运行(running)的线程在获取对象的同步锁时，若该同步锁被别的线程占用，则JVM会把该线程放入锁池(lock pool)中。</p>
 <p> (三). 其他阻塞：运行(running)的线程执行Thread.sleep(long ms)或t.join()方法，或者发出了I/O请求时，JVM会把该线程置为阻塞状态。当sleep()状态超时、join()等待线程终止或者超时、或者I/O处理完毕时，线程重新转入可运行(runnable)状态。</p>
 </li>
-</ol>
-<ol>
-<li>死亡(dead)：线程run()、main() 方法执行结束，或者因异常退出了run()方法，则该线程结束生命周期。死亡的线程不可再次复生。</li>
+<li><p>死亡(dead)：线程run()、main() 方法执行结束，或者因异常退出了run()方法，则该线程结束生命周期。死亡的线程不可再次复生。</p>
+</li>
 </ol>
 
       
