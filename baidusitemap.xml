@@ -4,6 +4,30 @@
 
     
   <url>
+    <loc>http://Melodylican.github.io/2017/11/06/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95/</loc>
+    <lastmod>2017-11-06T03:35:51.114Z</lastmod>
+    <data>
+        <display>
+        <title>JVM内存回收算法</title>
+        <pubTime>2017-11-05T16:00:00.000Z</pubTime>
+        
+        <tag>Java</tag>
+         
+        <tag>JVM</tag>
+         
+        <tag>GC</tag>
+         
+         
+           
+             
+              <breadCrumb title="笔记" url="http://Melodylican.github.io/categories/%E7%AC%94%E8%AE%B0/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://Melodylican.github.io/2017/11/05/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/</loc>
     <lastmod>2017-11-06T02:37:44.813Z</lastmod>
     <data>
