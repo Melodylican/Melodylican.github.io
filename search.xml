@@ -7,7 +7,8 @@
       <title><![CDATA[Ansible when register使用]]></title>
       <url>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</url>
       <content type="html"><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件：</p>
-<p><img src="http://blog.mreald.com/ueditor/php/upload/image/20160226/1456467439538066.png" alt=""><br><a id="more"></a><br>执行演示：<br><img src="http://blog.mreald.com/ueditor/php/upload/image/20160226/1456467535179909.png" alt=""></p>
+<p><img src="http://ojwkevhas.bkt.clouddn.com/ansible2.png" alt=""><br><a id="more"></a></p>
+<p>执行演示：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible1.png" alt=""></p>
 ]]></content>
       
         <categories>
@@ -52,6 +53,28 @@
         <tags>
             
             <tag> 动态代理 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Netty 架构原理图]]></title>
+      <url>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</url>
+      <content type="html"><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Netty </tag>
+            
+            <tag> Reactor </tag>
             
         </tags>
         
@@ -150,28 +173,6 @@
         <tags>
             
             <tag> 分布式锁 </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Netty 架构原理图]]></title>
-      <url>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</url>
-      <content type="html"><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Netty </tag>
-            
-            <tag> Reactor </tag>
             
         </tags>
         
