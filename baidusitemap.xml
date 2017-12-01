@@ -5,7 +5,7 @@
     
   <url>
     <loc>http://Melodylican.github.io/2017/11/23/%E7%A7%92%E6%9D%80%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8CSQL%E8%AE%BE%E8%AE%A1/</loc>
-    <lastmod>2017-11-23T06:25:31.855Z</lastmod>
+    <lastmod>2017-12-01T06:05:21.983Z</lastmod>
     <data>
         <display>
         <title>“秒杀”问题的数据库和SQL设计</title>
@@ -16,6 +16,28 @@
         <tag>数据库</tag>
          
         <tag>SQL</tag>
+         
+         
+           
+             
+              <breadCrumb title="笔记" url="http://Melodylican.github.io/categories/%E7%AC%94%E8%AE%B0/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</loc>
+    <lastmod>2017-11-23T06:54:51.253Z</lastmod>
+    <data>
+        <display>
+        <title>高性能、最终一致性的数据同步方案</title>
+        <pubTime>2017-11-22T16:00:00.000Z</pubTime>
+        
+        <tag>最终一致</tag>
+         
+        <tag>数据同步</tag>
          
          
            

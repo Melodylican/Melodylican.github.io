@@ -111,7 +111,7 @@
 下文的所有解决方案是在 Mysql Inn">
 <meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%A7%92%E6%9D%80%E6%95%B0%E6%8D%AE%E5%BA%93sql%E8%AE%BE%E8%AE%A11.png">
 <meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%A7%92%E6%9D%80%E6%95%B0%E6%8D%AE%E5%BA%93sql%E8%AE%BE%E8%AE%A12.png">
-<meta property="og:updated_time" content="2017-11-23T06:25:31.855Z">
+<meta property="og:updated_time" content="2017-12-01T06:05:21.983Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="“秒杀”问题的数据库和SQL设计">
 <meta name="twitter:description" content="问题的来源最近发现很多人被类似秒杀这样的设计困扰，其实这类问题可以很方便地解决，先来说说这类问题的关键点是什么：
@@ -469,12 +469,12 @@
 <li>既然这里说了是秒杀，那往往还会针对每个用户有购买数量的限制。<br>总结一下，还是那几个词：高性能强一致性！</li>
 </ol>
 <blockquote>
-<p>下文的所有解决方案是在 Mysql InnoDB 下做的。因为用到了很多数据库特性。其他的数据库或其他的数据库引擎会有不同的表现，请注意。</p>
+<p>下文的所有解决方案是在 Mysql InnoDB 下做的。因为用到了很多数据库特性。其他的数据库或其他的数据库引擎会有不同的表现，请注意。<br><a id="more"></a></p>
 </blockquote>
 <h2 id="完全不考虑一致性的方案"><a href="#完全不考虑一致性的方案" class="headerlink" title="完全不考虑一致性的方案"></a>完全不考虑一致性的方案</h2><h3 id="表结构"><a href="#表结构" class="headerlink" title="表结构"></a>表结构</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">+-----------+------------------+------+-----+---------+----------------+</div><div class="line">| Field     | Type             | Null | Key | Default | Extra          |</div><div class="line">+-----------+------------------+------+-----+---------+----------------+</div><div class="line">| id        | int(11) unsigned | NO   | PRI | NULL    | auto_increment |</div><div class="line">| user_id   | int(11)          | NO   |     | NULL    |                |</div><div class="line">| deal_id   | int(11)          | NO   |     | NULL    |                |</div><div class="line">| buy_count | int(11)          | NO   |     | NULL    |                |</div><div class="line">+-----------+------------------+------+-----+---------+----------------+</div></pre></td></tr></table></figure>
 <h3 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h3><p>表结构很简单，其实就是一个user和deal的关联表。谁买了多少就插入数据呗。</p>
 <p>首先，还要检查一下传过来的buy_count是否超过单人购买限制。</p>
-<p>接下来，每次插入前执行以下以下操作检查一下是否超卖即可：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">select sum(buy_count) from UserDeal where deal_id = ?</div></pre></td></tr></table></figure></p>
+<p>接下来，每次插入前执行以下操作检查一下是否超卖即可：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">select sum(buy_count) from UserDeal where deal_id = ?</div></pre></td></tr></table></figure></p>
 <p>最后还要检查一下这个用户是否购买过：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">select count(*) from UserDeal where user_id = ? and deal_id = ?</div></pre></td></tr></table></figure></p>
 <p>全都没问题了就插入数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">insert into UserDeal (user_id, deal_id, buy_count) values (?, ?, ?)</div></pre></td></tr></table></figure></p>
 <h3 id="存在的问题"><a href="#存在的问题" class="headerlink" title="存在的问题"></a>存在的问题</h3><p>大家别笑，这样的设计你一定做过，刚毕业的时候谁没设计过这样的系统啊？而且大部分系统对性能和一致性的要求并没有那么高，所以以上的设计方案还真是普遍存在的。</p>
@@ -604,8 +604,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/21/浅谈Java动态代理/" rel="next" title="浅谈Java动态代理">
-                <i class="fa fa-chevron-left"></i> 浅谈Java动态代理
+              <a href="/2017/11/23/Ansible-when-register使用/" rel="next" title="Ansible when register使用">
+                <i class="fa fa-chevron-left"></i> Ansible when register使用
               </a>
             
           </div>
@@ -613,10 +613,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/11/23/Ansible-when-register使用/" rel="prev" title="Ansible when register使用">
-                Ansible when register使用 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -696,7 +692,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">93</span>
+                <span class="site-state-item-count">94</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -714,7 +710,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">72</span>
+                <span class="site-state-item-count">74</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
