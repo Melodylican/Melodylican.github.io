@@ -489,7 +489,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/Ansible-when-register使用/">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/秒杀问题的数据库和SQL设计/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Melodylican">
@@ -511,8 +511,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/11/23/Ansible-when-register使用/" itemprop="url">
-                  Ansible when register使用
+                <a class="post-title-link" href="/2017/11/23/秒杀问题的数据库和SQL设计/" itemprop="url">
+                  “秒杀”问题的数据库和SQL设计
                 </a>
               
             
@@ -568,7 +568,7 @@
 
           
           
-             <span id="/2017/11/23/Ansible-when-register使用/" class="leancloud_visitors" data-flag-title="Ansible when register使用">
+             <span id="/2017/11/23/秒杀问题的数据库和SQL设计/" class="leancloud_visitors" data-flag-title="“秒杀”问题的数据库和SQL设计">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -598,10 +598,17 @@
 
       
         
-          <p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible1.png" alt=""></p>
+          <h2 id="问题的来源"><a href="#问题的来源" class="headerlink" title="问题的来源"></a>问题的来源</h2><p>最近发现很多人被类似秒杀这样的设计困扰，其实这类问题可以很方便地解决，先来说说这类问题的关键点是什么：</p>
+<ol>
+<li>一定要高性能，不然还能叫秒杀吗？</li>
+<li>要强一致性，库存只有100个，不能卖出去101个吧？但是库存10000实际只卖了9999是否允许呢？</li>
+<li>既然这里说了是秒杀，那往往还会针对每个用户有购买数量的限制。<br>总结一下，还是那几个词：高性能强一致性！</li>
+</ol>
+<blockquote>
+<p>下文的所有解决方案是在 Mysql InnoDB 下做的。因为用到了很多数据库特性。其他的数据库或其他的数据库引擎会有不同的表现，请注意。<br></p></blockquote>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/23/Ansible-when-register使用/#more" rel="contents">
+            <a class="btn" href="/2017/11/23/秒杀问题的数据库和SQL设计/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -753,54 +760,15 @@
 
       
         
-          
-            <p>问题的来源<br>先描述一下问题：</p>
-<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。</p>
-<p>利用 Job 来定时同步数据<br>首先，如果是中小型系统，可以接受秒级别的延时，数据变更频率不是非常高的话，可以用这个方案。</p>
-<p>常见的场景有：后台系统用户数据，后台系统角色、组织架构数据。</p>
-<p>Job 处理过程</p>
-<p>那 Job 的数据逻辑是怎么样的呢？</p>
-<p>查询数据 -&gt; 可能需要做一些转换 -&gt; 然后插入数据</p>
-<p>看上去好简单的样子，但是如何查询数据会是一个挑战。因为假如你的表很大，而实际每分钟只会变更几条，难道你每次都要全量同步一边？</p>
-<p>如何识别出那些变过的数据呢？</p>
-<p>为你的数据加上 UpdateTime 字段</p>
-<p>为了解决这个问题，需要对你的数据库表进行一定的改造。其实，所有的数据库表都应该这么设计。</p>
-<p>第一个要改造的点是加上一个UpdateTime字段，每次更新数据的时候都需要去更新这个字段。</p>
-<p>如果用的是 MySQL 的话，可以直接把这个字段定义成这样子：</p>
-<p>UpdateTime timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP</p>
-<p>这样设置以后，每次数据变更 MySQL 会自动更新这个字段。另外，如果你进行了Update操作而数据其实没变，那么这个字段不会更新，非常贴心。</p>
-<p>这个是为了解决什么问题？</p>
-<p>我必须要知道所有数据的变更时间，我才能找到那些新插入或者新更新的数据。所以加上这个字段后，Insert和Update的问题就解决了，但是还有Delete！</p>
-<p>为你的数据加上 IsDeleted 字段</p>
-<p>你还在直接删除数据？如果是的话，赶紧改改吧，因为这么做在 ETL 系统中非常不友好。源表中的数据都删了，那 Job 还怎么找到它？难道要做两遍的数据比对？这个又要全表扫描目标表了。性能会非常差。</p>
-<p>所以最简单的方案就是加上IsDeleted字段进行软删除，这样删除的数据其实就是Update了一下，处理起来就非常简单了。</p>
-<p>如果你的系统在设计之初就用了软删除，那么你会轻松很多，如果不是，那么就需要修改你的程序了。</p>
-<p>相信我，越早改越好！除非你的系统永远那么小…</p>
-<p>选择合适的时间</p>
-<p>下面一个问题才是真正头疼的地方。我们也用过很多现成的 ETL 系统来同步数据了，源表也加上了上面提到的两个字段来识别有变更的数据。</p>
-<p>假设作业5分钟跑一次，那怎么写 SQL 语句呢？</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(Now(),INTERVAL 5 MINUTE)</p>
-<p>这么写有什么缺点呢？第一个缺点就是，你没办法保证你的 Job 真的是5分钟运行一次的，如果是5分01秒呢？那多出来的1秒的数据就丢了。</p>
-<p>另外，如果你 Job 所在机器的时间和数据库的时间不一致呢？极端情况假设你的 Job 机器快了10分钟，那么 Job 就永远取不到数据了。别以为这种情况不会发生…</p>
-<p>这个方案直接被拍死，那么下一个方案：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRunTime#</p>
-<p>这里需要加入一个LastRunTime变量，直接变量由 Job 程序自己记录。加上这个变量后，就解决了 Job 没办法准确地5分钟跑一次的问题。</p>
-<p>但是机器时间不一致的问题解决了吗？好像还没有…</p>
-<p>那来一个终极完美的方案吧：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRowTime#</p>
-<p>这里的LastRowTime是什么含义呢？它是你上次取到数据的最新一条。恩，这样就完全不依赖 Job 所在机器的时间了。哪怕它们相隔几年，数据也不会丢。因为你用的是相对时间。</p>
-<p>那为什么是&gt;=而不是&gt;呢？</p>
-<p>极端情况下，假设在同一个时间插入两条数据，它们的LastUpdateTime是一样的。而你取数据的时候，只插入了第一条，取完了才插入第二条。如果你后面查询的时候用&gt;，这个这里第二条数据就丢掉了。</p>
-<p>最后，还有一个折中方案，因为很多现成的 ETL 系统没办法记录LastRowTime，只能记录LastRunTime，那么可以这么写：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(#LastRunTime#,INTERVAL 10 MINUTE)</p>
-<p>这里我们可以接受两台机器有时间差，但是最多十分钟，这样做也会有缺点，每次都会有一些数据重复同步。</p>
-<p>或者，你的 ETL 系统连LastRunTime都没有（那还算是一个合格的 ETL 系统吗？），那么只能这样了，每五分钟同步一次：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(NOW(),INTERVAL 10 MINUTE)</p>
-<p>利用阿里巴巴开源组件 canal<br>上面的方案虽说只支持中小型系统，但是你们的数据库表真的会有频繁变更吗？如果没有，那么上面的方案一直是适用的。</p>
-<p>但是如果你们系统的更新真的非常频繁，而且你们要接近实时的同步效率那怎么办？</p>
-<p>如果有这样需求的话，建议尝试看看阿里巴巴的canal，项目地址在这里：<a href="https://github.com/alibaba/canal" target="_blank" rel="external">https://github.com/alibaba/canal</a></p>
-
-          
+          <p>问题的来源<br>先描述一下问题：</p>
+<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/23/高性能最终一致性的数据同步方案/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -839,7 +807,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/秒杀问题的数据库和SQL设计/">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/Ansible-when-register使用/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Melodylican">
@@ -861,8 +829,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/11/23/秒杀问题的数据库和SQL设计/" itemprop="url">
-                  “秒杀”问题的数据库和SQL设计
+                <a class="post-title-link" href="/2017/11/23/Ansible-when-register使用/" itemprop="url">
+                  Ansible when register使用
                 </a>
               
             
@@ -918,7 +886,7 @@
 
           
           
-             <span id="/2017/11/23/秒杀问题的数据库和SQL设计/" class="leancloud_visitors" data-flag-title="“秒杀”问题的数据库和SQL设计">
+             <span id="/2017/11/23/Ansible-when-register使用/" class="leancloud_visitors" data-flag-title="Ansible when register使用">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -948,17 +916,10 @@
 
       
         
-          <h2 id="问题的来源"><a href="#问题的来源" class="headerlink" title="问题的来源"></a>问题的来源</h2><p>最近发现很多人被类似秒杀这样的设计困扰，其实这类问题可以很方便地解决，先来说说这类问题的关键点是什么：</p>
-<ol>
-<li>一定要高性能，不然还能叫秒杀吗？</li>
-<li>要强一致性，库存只有100个，不能卖出去101个吧？但是库存10000实际只卖了9999是否允许呢？</li>
-<li>既然这里说了是秒杀，那往往还会针对每个用户有购买数量的限制。<br>总结一下，还是那几个词：高性能强一致性！</li>
-</ol>
-<blockquote>
-<p>下文的所有解决方案是在 Mysql InnoDB 下做的。因为用到了很多数据库特性。其他的数据库或其他的数据库引擎会有不同的表现，请注意。<br></p></blockquote>
+          <p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible1.png" alt=""></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/23/秒杀问题的数据库和SQL设计/#more" rel="contents">
+            <a class="btn" href="/2017/11/23/Ansible-when-register使用/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
