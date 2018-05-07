@@ -7,6 +7,7 @@
       <title><![CDATA[Kafka常用命令]]></title>
       <url>http://Melodylican.github.io/2018/04/20/Kafka%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</url>
       <content type="html"><![CDATA[<h1 id="kafka-资料整理"><a href="#kafka-资料整理" class="headerlink" title="kafka 资料整理"></a>kafka 资料整理</h1><h2 id="安装-zookeeper-配置-zookeeper-集群"><a href="#安装-zookeeper-配置-zookeeper-集群" class="headerlink" title="安装 zookeeper 配置 zookeeper 集群"></a>安装 zookeeper 配置 zookeeper 集群</h2><p>启动 <code>zookeeper: sudo bin/zkServer.sh {start|start-foreground|stop|restart|status|upgrade|print-cmd}</code></p>
+<a id="more"></a>
 <h1 id="检测-zookeeper-节点状态"><a href="#检测-zookeeper-节点状态" class="headerlink" title="检测 zookeeper 节点状态"></a>检测 zookeeper 节点状态</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">bin/zkServer.sh status</div><div class="line">echo srvr | nc 192.168.0.94 2181</div><div class="line">echo srvr | nc 10.50.75.133 2181</div><div class="line"></div><div class="line"># 连上 zookeeper，并访问目录</div><div class="line">bin/zkCli.sh -server 192.168.0.94:2181</div></pre></td></tr></table></figure>
 <h2 id="安装配置-kafka"><a href="#安装配置-kafka" class="headerlink" title="安装配置 kafka"></a>安装配置 kafka</h2><p>编辑 ${KAFKA_HOME}/config/server.properties, 主要参数</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">host.name=10.50.75.133</div><div class="line">advertised.host.name=10.50.75.133</div><div class="line"></div><div class="line">port=9093</div><div class="line">advertised.port=9093</div><div class="line"></div><div class="line">broker.id=3</div><div class="line"></div><div class="line">listeners=PLAINTEXT://10.50.75.133:9093</div><div class="line"></div><div class="line">advertised.listeners=PLAINTEXT://10.50.75.133:9093</div><div class="line"></div><div class="line">unclean.leader.election.enable=false</div><div class="line">queued.max.requests=16</div><div class="line">num.replica.fetchers=4</div><div class="line">num.network.threads=8</div><div class="line">num.io.threads=12</div><div class="line"></div><div class="line">socket.send.buffer.bytes=1048576</div><div class="line">socket.receive.buffer.bytes=1048576</div><div class="line">socket.request.max.bytes=104857600</div><div class="line"></div><div class="line">log.dirs=/data/kafka-logs2</div><div class="line">num.partitions=8</div><div class="line">log.flush.interval.messages=20000</div><div class="line">log.flush.interval.ms=10000</div><div class="line">log.flush.scheduler.interval.ms=2000</div><div class="line">log.retention.hours=48</div><div class="line">log.retention.bytes=966367641600</div><div class="line">log.segment.bytes=1073741824</div><div class="line">log.retention.check.interval.ms=300000</div><div class="line"></div><div class="line">zookeeper.connect=zs-dw-kafka-dn-1:2181,zs-dw-kafka-dn-2:2181,zs-dw-kafka-dn-3:2181/kafka_1.0</div><div class="line">zookeeper.connection.timeout.ms=10000</div><div class="line"></div><div class="line">group.initial.rebalance.delay.ms=3</div><div class="line"></div><div class="line">default.replication.factor=2</div><div class="line">auto.create.topics.enable=true</div></pre></td></tr></table></figure>
@@ -369,28 +370,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Netty 架构原理图]]></title>
-      <url>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</url>
-      <content type="html"><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Netty </tag>
-            
-            <tag> Reactor </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[浅谈分布式锁]]></title>
       <url>http://Melodylican.github.io/2017/11/17/%E6%B5%85%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</url>
       <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着互联网技术的不断发展，数据量的不断增加，业务逻辑日趋复杂，在这种背景下，传统的集中式系统已经无法满足我们的业务需求，分布式系统被应用在更多的场景，而在分布式系统中访问共享资源就需要一种互斥机制，来防止彼此之间的互相干扰，以保证一致性，在这种情况下，我们就需要用到分布式锁。<br><a id="more"></a></p>
@@ -483,6 +462,28 @@ Note: This will have no impact if delete.topic.enable is not set to true.
         <tags>
             
             <tag> 分布式锁 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Netty 架构原理图]]></title>
+      <url>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</url>
+      <content type="html"><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Netty </tag>
+            
+            <tag> Reactor </tag>
             
         </tags>
         
@@ -2078,28 +2079,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Spark入门 第四章 第七节 Spark - 读写Hive数据(DataFrame)]]></title>
-      <url>http://Melodylican.github.io/2017/03/12/Spark%E8%AF%BB%E5%86%99Hive%E6%95%B0%E6%8D%AE/</url>
-      <content type="html"><![CDATA[<div class="note success"><p>该节内容待补充完整</p>
-</div>
-<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Spark </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Spark入门 第四章 第六节 Spark - 通过JDBC连接数据库(DataFrame)]]></title>
       <url>http://Melodylican.github.io/2017/03/12/Spark%E9%80%9A%E8%BF%87JDBC%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93/</url>
       <content type="html"><![CDATA[<p>这里以关系数据库MySQL为例。首先，请参考厦门大学数据库实验室博客教程（Ubuntu安装MySQL），在Linux系统中安装好MySQL数据库。这里假设你已经成功安装了MySQL数据库。下面我们要新建一个测试Spark程序的数据库，数据库名称是“spark”，表的名称是“student”。<br><a id="more"></a><br>请执行下面命令在Linux中启动MySQL数据库，并完成数据库和表的创建，以及样例数据的录入：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">service mysql start</div><div class="line">mysql -u root -p</div><div class="line">//屏幕会提示你输入密码</div></pre></td></tr></table></figure></p>
@@ -2118,6 +2097,28 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 <p>上面的命令行中，在一行的末尾加入斜杠\，是为了告诉spark-shell，命令还没有结束。</p>
 <p>启动进入spark-shell以后，可以执行以下命令连接数据库，写入数据，程序如下（你可以把下面程序一条条拷贝到spark-shell中执行）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.<span class="type">Properties</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.sql.types._</div><div class="line"><span class="keyword">import</span> org.apache.spark.sql.<span class="type">Row</span></div><div class="line"> </div><div class="line"><span class="comment">//下面我们设置两条数据表示两个学生信息</span></div><div class="line"><span class="keyword">val</span> studentRDD = spark.sparkContext.parallelize(<span class="type">Array</span>(<span class="string">"3 Rongcheng M 26"</span>,<span class="string">"4 Guanhua M 27"</span>)).map(_.split(<span class="string">" "</span>))</div><div class="line"> </div><div class="line"><span class="comment">//下面要设置模式信息</span></div><div class="line"><span class="keyword">val</span> schema = <span class="type">StructType</span>(<span class="type">List</span>(<span class="type">StructField</span>(<span class="string">"id"</span>, <span class="type">IntegerType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"name"</span>, <span class="type">StringType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"gender"</span>, <span class="type">StringType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"age"</span>, <span class="type">IntegerType</span>, <span class="literal">true</span>)))</div><div class="line"> </div><div class="line"><span class="comment">//下面创建Row对象，每个Row对象都是rowRDD中的一行</span></div><div class="line"><span class="keyword">val</span> rowRDD = studentRDD.map(p =&gt; <span class="type">Row</span>(p(<span class="number">0</span>).toInt, p(<span class="number">1</span>).trim, p(<span class="number">2</span>).trim, p(<span class="number">3</span>).toInt))</div><div class="line"> </div><div class="line"><span class="comment">//建立起Row对象和模式之间的对应关系，也就是把数据和模式对应起来</span></div><div class="line"><span class="keyword">val</span> studentDF = spark.createDataFrame(rowRDD, schema)</div><div class="line"> </div><div class="line"><span class="comment">//下面创建一个prop变量用来保存JDBC连接参数</span></div><div class="line"><span class="keyword">val</span> prop = <span class="keyword">new</span> <span class="type">Properties</span>()</div><div class="line">prop.put(<span class="string">"user"</span>, <span class="string">"root"</span>) <span class="comment">//表示用户名是root</span></div><div class="line">prop.put(<span class="string">"password"</span>, <span class="string">"hadoop"</span>) <span class="comment">//表示密码是hadoop</span></div><div class="line">prop.put(<span class="string">"driver"</span>,<span class="string">"com.mysql.jdbc.Driver"</span>) <span class="comment">//表示驱动程序是com.mysql.jdbc.Driver</span></div><div class="line"> </div><div class="line"><span class="comment">//下面就可以连接数据库，采用append模式，表示追加记录到数据库spark的student表中</span></div><div class="line">studentDF.write.mode(<span class="string">"append"</span>).jdbc(<span class="string">"jdbc:mysql://localhost:3306/spark"</span>, <span class="string">"spark.student"</span>, prop)</div></pre></td></tr></table></figure></p>
 <p>在spark-shell中执行完上述程序后，我们可以看一下效果，看看MySQL数据库中的spark.student表发生了什么变化。请在刚才的另外一个窗口的MySQL命令提示符下面继续输入下面命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">mysql&gt; select * from student;</div><div class="line">+------+-----------+--------+------+</div><div class="line">| id   | name      | gender | age  |</div><div class="line">+------+-----------+--------+------+</div><div class="line">|    1 | Xueqian   | F      |   23 |</div><div class="line">|    2 | Weiliang  | M      |   24 |</div><div class="line">|    3 | Rongcheng | M      |   26 |</div><div class="line">|    4 | Guanhua   | M      |   27 |</div><div class="line">+------+-----------+--------+------+</div><div class="line">4 rows in set (0.00 sec)</div></pre></td></tr></table></figure></p>
+<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Spark </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Spark入门 第四章 第七节 Spark - 读写Hive数据(DataFrame)]]></title>
+      <url>http://Melodylican.github.io/2017/03/12/Spark%E8%AF%BB%E5%86%99Hive%E6%95%B0%E6%8D%AE/</url>
+      <content type="html"><![CDATA[<div class="note success"><p>该节内容待补充完整</p>
+</div>
 <font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
       
         <categories>

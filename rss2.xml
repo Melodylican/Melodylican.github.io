@@ -8,7 +8,7 @@
     <atom:link href="/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description>life is struggle</description>
-    <pubDate>Mon, 07 May 2018 12:14:53 GMT</pubDate>
+    <pubDate>Mon, 07 May 2018 12:25:28 GMT</pubDate>
     <generator>http://hexo.io/</generator>
     
     <item>
@@ -18,11 +18,12 @@
       <pubDate>Thu, 19 Apr 2018 16:00:00 GMT</pubDate>
       <description>
       
-        &lt;h1 id=&quot;kafka-资料整理&quot;&gt;&lt;a href=&quot;#kafka-资料整理&quot; class=&quot;headerlink&quot; title=&quot;kafka 资料整理&quot;&gt;&lt;/a&gt;kafka 资料整理&lt;/h1&gt;&lt;h2 id=&quot;安装-zookeeper-配置-zookeeper-集群&quot;&gt;&lt;a 
+        &lt;h1 id=&quot;kafka-资料整理&quot;&gt;&lt;a href=&quot;#kafka-资料整理&quot; class=&quot;headerlink&quot; title=&quot;kafka 资料整理&quot;&gt;&lt;/a&gt;kafka 资料整理&lt;/h1&gt;&lt;h2 id=&quot;安装-zookeeper-配置-zookeeper-集群&quot;&gt;&lt;a href=&quot;#安装-zookeeper-配置-zookeeper-集群&quot; class=&quot;headerlink&quot; title=&quot;安装 zookeeper 配置 zookeeper 集群&quot;&gt;&lt;/a&gt;安装 zookeeper 配置 zookeeper 集群&lt;/h2&gt;&lt;p&gt;启动 &lt;code&gt;zookeeper: sudo bin/zkServer.sh {start|start-foreground|stop|restart|status|upgrade|print-cmd}&lt;/code&gt;&lt;/p&gt;
       
       </description>
       
       <content:encoded><![CDATA[<h1 id="kafka-资料整理"><a href="#kafka-资料整理" class="headerlink" title="kafka 资料整理"></a>kafka 资料整理</h1><h2 id="安装-zookeeper-配置-zookeeper-集群"><a href="#安装-zookeeper-配置-zookeeper-集群" class="headerlink" title="安装 zookeeper 配置 zookeeper 集群"></a>安装 zookeeper 配置 zookeeper 集群</h2><p>启动 <code>zookeeper: sudo bin/zkServer.sh {start|start-foreground|stop|restart|status|upgrade|print-cmd}</code></p>
+<a id="more"></a>
 <h1 id="检测-zookeeper-节点状态"><a href="#检测-zookeeper-节点状态" class="headerlink" title="检测 zookeeper 节点状态"></a>检测 zookeeper 节点状态</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">bin/zkServer.sh status</div><div class="line">echo srvr | nc 192.168.0.94 2181</div><div class="line">echo srvr | nc 10.50.75.133 2181</div><div class="line"></div><div class="line"># 连上 zookeeper，并访问目录</div><div class="line">bin/zkCli.sh -server 192.168.0.94:2181</div></pre></td></tr></table></figure>
 <h2 id="安装配置-kafka"><a href="#安装配置-kafka" class="headerlink" title="安装配置 kafka"></a>安装配置 kafka</h2><p>编辑 ${KAFKA_HOME}/config/server.properties, 主要参数</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">host.name=10.50.75.133</div><div class="line">advertised.host.name=10.50.75.133</div><div class="line"></div><div class="line">port=9093</div><div class="line">advertised.port=9093</div><div class="line"></div><div class="line">broker.id=3</div><div class="line"></div><div class="line">listeners=PLAINTEXT://10.50.75.133:9093</div><div class="line"></div><div class="line">advertised.listeners=PLAINTEXT://10.50.75.133:9093</div><div class="line"></div><div class="line">unclean.leader.election.enable=false</div><div class="line">queued.max.requests=16</div><div class="line">num.replica.fetchers=4</div><div class="line">num.network.threads=8</div><div class="line">num.io.threads=12</div><div class="line"></div><div class="line">socket.send.buffer.bytes=1048576</div><div class="line">socket.receive.buffer.bytes=1048576</div><div class="line">socket.request.max.bytes=104857600</div><div class="line"></div><div class="line">log.dirs=/data/kafka-logs2</div><div class="line">num.partitions=8</div><div class="line">log.flush.interval.messages=20000</div><div class="line">log.flush.interval.ms=10000</div><div class="line">log.flush.scheduler.interval.ms=2000</div><div class="line">log.retention.hours=48</div><div class="line">log.retention.bytes=966367641600</div><div class="line">log.segment.bytes=1073741824</div><div class="line">log.retention.check.interval.ms=300000</div><div class="line"></div><div class="line">zookeeper.connect=zs-dw-kafka-dn-1:2181,zs-dw-kafka-dn-2:2181,zs-dw-kafka-dn-3:2181/kafka_1.0</div><div class="line">zookeeper.connection.timeout.ms=10000</div><div class="line"></div><div class="line">group.initial.rebalance.delay.ms=3</div><div class="line"></div><div class="line">default.replication.factor=2</div><div class="line">auto.create.topics.enable=true</div></pre></td></tr></table></figure>
@@ -353,22 +354,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </item>
     
     <item>
-      <title>Netty 架构原理图</title>
-      <link>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</link>
-      <guid>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</guid>
-      <pubDate>Thu, 16 Nov 2017 16:00:00 GMT</pubDate>
-      <description>
-      
-        &lt;center&gt;&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg&quot; alt=&quot;&quot;&gt;&lt;br&gt;&lt;/center&gt;
-      
-      </description>
-      
-      <content:encoded><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/#disqus_thread</comments>
-    </item>
-    
-    <item>
       <title>浅谈分布式锁</title>
       <link>http://Melodylican.github.io/2017/11/17/%E6%B5%85%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</link>
       <guid>http://Melodylican.github.io/2017/11/17/%E6%B5%85%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</guid>
@@ -460,6 +445,22 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 ]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/11/17/%E6%B5%85%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Netty 架构原理图</title>
+      <link>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</link>
+      <guid>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</guid>
+      <pubDate>Thu, 16 Nov 2017 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;center&gt;&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg&quot; alt=&quot;&quot;&gt;&lt;br&gt;&lt;/center&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/#disqus_thread</comments>
     </item>
     
     <item>
