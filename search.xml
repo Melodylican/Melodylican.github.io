@@ -4,6 +4,88 @@
   
     
     <entry>
+      <title><![CDATA[Kafka常用命令]]></title>
+      <url>http://Melodylican.github.io/2018/04/20/Kafka%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</url>
+      <content type="html"><![CDATA[<h1 id="kafka-资料整理"><a href="#kafka-资料整理" class="headerlink" title="kafka 资料整理"></a>kafka 资料整理</h1><h2 id="安装-zookeeper-配置-zookeeper-集群"><a href="#安装-zookeeper-配置-zookeeper-集群" class="headerlink" title="安装 zookeeper 配置 zookeeper 集群"></a>安装 zookeeper 配置 zookeeper 集群</h2><p>启动 <code>zookeeper: sudo bin/zkServer.sh {start|start-foreground|stop|restart|status|upgrade|print-cmd}</code></p>
+<h1 id="检测-zookeeper-节点状态"><a href="#检测-zookeeper-节点状态" class="headerlink" title="检测 zookeeper 节点状态"></a>检测 zookeeper 节点状态</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">bin/zkServer.sh status</div><div class="line">echo srvr | nc 192.168.0.94 2181</div><div class="line">echo srvr | nc 10.50.75.133 2181</div><div class="line"></div><div class="line"># 连上 zookeeper，并访问目录</div><div class="line">bin/zkCli.sh -server 192.168.0.94:2181</div></pre></td></tr></table></figure>
+<h2 id="安装配置-kafka"><a href="#安装配置-kafka" class="headerlink" title="安装配置 kafka"></a>安装配置 kafka</h2><p>编辑 ${KAFKA_HOME}/config/server.properties, 主要参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">host.name=10.50.75.133</div><div class="line">advertised.host.name=10.50.75.133</div><div class="line"></div><div class="line">port=9093</div><div class="line">advertised.port=9093</div><div class="line"></div><div class="line">broker.id=3</div><div class="line"></div><div class="line">listeners=PLAINTEXT://10.50.75.133:9093</div><div class="line"></div><div class="line">advertised.listeners=PLAINTEXT://10.50.75.133:9093</div><div class="line"></div><div class="line">unclean.leader.election.enable=false</div><div class="line">queued.max.requests=16</div><div class="line">num.replica.fetchers=4</div><div class="line">num.network.threads=8</div><div class="line">num.io.threads=12</div><div class="line"></div><div class="line">socket.send.buffer.bytes=1048576</div><div class="line">socket.receive.buffer.bytes=1048576</div><div class="line">socket.request.max.bytes=104857600</div><div class="line"></div><div class="line">log.dirs=/data/kafka-logs2</div><div class="line">num.partitions=8</div><div class="line">log.flush.interval.messages=20000</div><div class="line">log.flush.interval.ms=10000</div><div class="line">log.flush.scheduler.interval.ms=2000</div><div class="line">log.retention.hours=48</div><div class="line">log.retention.bytes=966367641600</div><div class="line">log.segment.bytes=1073741824</div><div class="line">log.retention.check.interval.ms=300000</div><div class="line"></div><div class="line">zookeeper.connect=zs-dw-kafka-dn-1:2181,zs-dw-kafka-dn-2:2181,zs-dw-kafka-dn-3:2181/kafka_1.0</div><div class="line">zookeeper.connection.timeout.ms=10000</div><div class="line"></div><div class="line">group.initial.rebalance.delay.ms=3</div><div class="line"></div><div class="line">default.replication.factor=2</div><div class="line">auto.create.topics.enable=true</div></pre></td></tr></table></figure>
+<p>编辑 bin/kafka-server-start.sh</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">export KAFKA_HEAP_OPTS=&quot;-Xmx6g -Xms6g -XX:MetaspaceSize=96m -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:G1HeapRegionSize=16M -XX:MinMetaspaceFreeRatio=50 -XX:MaxMetaspaceFreeRatio=80&quot;</div><div class="line"></div><div class="line">export LOG_DIR=&quot;/data/log/kafka_1.0&quot;</div></pre></td></tr></table></figure>
+<p>启动 kafka</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo -E bin/kafka-server-start.sh -daemon config/server.properties</div><div class="line"># -E 命令表示将当前shell环境变量带入执行。 类似 su username 切换新用户保存了当前shell环境变量</div></pre></td></tr></table></figure>
+<p>启动完执行 bin/kafka-preferred-replica-election.sh –zookeeper 127.0.0.1:2181 来重新平衡 kafka 各分区的leader</p>
+<p>关闭kafka<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ps -ef|grep kafka</div><div class="line">kill -s TERM $PIDS</div></pre></td></tr></table></figure></p>
+<h2 id="kafka-命令"><a href="#kafka-命令" class="headerlink" title="kafka 命令"></a>kafka 命令</h2><p>创建topic ‘dlog-test’ ，其中副本数位 2，分区数为 1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 --create --topic dlog-test --partitions 1 --replication-factor 2</div></pre></td></tr></table></figure></p>
+<p>提示：</p>
+<pre><code>Topic dlog-test2 is marked for deletion.
+Note: This will have no impact if delete.topic.enable is not set to true.
+</code></pre><p>删除topic<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 --delete --topic dlog-test2</div></pre></td></tr></table></figure></p>
+<p>修改 topic 配置，参考 <a href="https://kafka.apache.org/documentation/#topicconfigs" target="_blank" rel="external">3.2 Topic-Level Configs</a></p>
+<ol>
+<li><p>查看 brokers 配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-configs.sh --describe --zookeeper localhost:2181 --entity-type brokers</div></pre></td></tr></table></figure>
+</li>
+<li><p>查看 topic 的配置</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics  --describe</div><div class="line"> </div><div class="line">bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics --entity-name my-topic --describe</div><div class="line"></div><div class="line">bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics --entity-name PlayerLogin --describe</div></pre></td></tr></table></figure>
+<ol>
+<li>增加 topic 配置</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics --entity-name my-topic --alter --add-config retention.ms=168</div><div class="line"></div><div class="line">bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics --entity-name PlayerLogin --alter --add-config retention.ms=604800000</div><div class="line"></div><div class="line"># 保留12小时</div><div class="line">bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics --entity-name CustomEvent --alter --add-config retention.ms=43200000</div></pre></td></tr></table></figure>
+<ol>
+<li>删除 topic 配置</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">bin/kafka-configs.sh --zookeeper localhost:2181  --entity-type topics --entity-name my-topic --alter --delete-config max.message.bytes</div><div class="line"></div><div class="line">bin/kafka-configs.sh --zookeeper localhost:2181  --entity-type topics --entity-name PlayerLogin --alter --delete-config retention.ms</div></pre></td></tr></table></figure>
+<ol>
+<li>增加 topic 的 partition 分区数</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; bin/kafka-topics.sh --zookeeper zk_host:port/chroot --alter --topic my_topic_name --partitions 40</div><div class="line">bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 --alter --topic CustomEvent --partitions 4</div></pre></td></tr></table></figure>
+<p>查看topic</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 --list</div><div class="line">bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 --describe</div><div class="line">bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 --describe --topic PlayerLogin</div><div class="line">bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 --describe --topic CustomEvent</div></pre></td></tr></table></figure>
+<p>手动触发分区重新选举，类似  auto.leader.rebalance.enable=true 参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-preferred-replica-election.sh --zookeeper 127.0.0.1:2181</div></pre></td></tr></table></figure></p>
+<p>执行结果<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Created preferred replica election path with &#123;&quot;version&quot;:1,&quot;partitions&quot;:[&#123;&quot;topic&quot;:&quot;MutableFlow&quot;,&quot;partition&quot;:2&#125;,&#123;&quot;topic&quot;:&quot;TC_MailFlow&quot;,&quot;partition&quot;:0&#125;,&#123;&quot;topic&quot;:&quot;RoundFlow&quot;,&quot;partition&quot;:2&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerExpFlow&quot;,&quot;partition&quot;:0&#125;,&#123;&quot;topic&quot;:&quot;SnsFlow&quot;,&quot;partition&quot;:1&#125;,&#123;&quot;topic&quot;:&quot;TC_404Item&quot;,&quot;partition&quot;:0&#125;,...]&#125;</div><div class="line">Successfully started preferred replica election for partitions Set([TC_MailFlow,1], [__consumer_offsets,32], [LBS_DATA,2], [__consumer_offsets,16], [__consumer_offsets,49], [__consumer_offsets,44],...)</div></pre></td></tr></table></figure></p>
+<p>查看当前 topic 最大 offsets<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list localhost:9092 --time -1 --topic topiname</div></pre></td></tr></table></figure></p>
+<p>最小offset<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list localhost:9092 --time -2 --topic topiname</div></pre></td></tr></table></figure></p>
+<p>简单消费<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">bin/kafka-simple-consumer-shell.sh --broker-list &quot;172.16.150.132:9093&quot; --topic PlayerLogin</div><div class="line"></div><div class="line">bin/kafka-simple-consumer-shell.sh -broker-list &quot;192.168.0.94:9092,192.168.0.93:9092&quot; --offset -1  --topic CustomEvent</div><div class="line"></div><div class="line">bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic PlayerLogin --from-beginning</div></pre></td></tr></table></figure></p>
+<p>查看消费详情<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"># 旧版kafka 消费组的 offset 保存在 zookeeper</div><div class="line">bin/kafka-consumer-groups.sh --zookeeper localhost:2181 --list</div><div class="line"># 新版kafka 消费组的 offset 保存在 kafka</div><div class="line">bin/kafka-consumer-groups.sh --new-consumer --bootstrap-server localhost:9092 --list</div><div class="line"></div><div class="line">bin/kafka-consumer-groups.sh --new-consumer --bootstrap-server localhost:9092 --describe --group dlog_rtc_group_PlayerLogin</div><div class="line"></div><div class="line"> bin/kafka-consumer-groups.sh --bootstrap-server 172.16.150.130:9093 --describe --group dlog_rtc_group_CustomEvent</div></pre></td></tr></table></figure></p>
+<p>kafka 平衡leader<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">bin/kafka-preferred-replica-election.sh --zookeeper 127.0.0.1:2181</div><div class="line">或</div><div class="line">auto.leader.rebalance.enable=true</div></pre></td></tr></table></figure></p>
+<p>迁移数据，达到集群数据平衡<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --topics-to-move-json-file topics-to-move.json --broker-list &quot;3,4&quot; --generate</div><div class="line"></div><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --reassignment-json-file expand-cluster-reassignment.json --execute</div><div class="line"></div><div class="line"># topic 分区重新分配，同时限速 50000000 B/s</div><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2185 --reassignment-json-file expand-cluster-reassignment.json --execute --throttle 50000000</div><div class="line"></div><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --reassignment-json-file expand-cluster-reassignment.json --verify</div><div class="line"></div><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --reassignment-json-file expand-cluster-reassignment.json --verify |grep &quot;still in progress&quot;</div><div class="line"></div><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --reassignment-json-file custom-reassignment.json --execute</div><div class="line"></div><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --reassignment-json-file expand-cluster-reassignment.json --execute</div></pre></td></tr></table></figure></p>
+<p>对于数据量非常大的topic，可以临时将topic数据保存时间设置成很小，然后执行迁移任务，等迁移完再调回原来时间</p>
+<p>中断迁移任务</p>
+<p>一旦启动reassign 脚本，则无法停止迁移任务。如果需要强制停止，可以通过zookeeper 进行修改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ zookeeper-client -server 10.1.1.50:2181/kafka</div><div class="line">[zk] delete /admin/reassign_partitions</div></pre></td></tr></table></figure>
+<p>链接：<a href="https://www.jianshu.com/p/626b147821cd" target="_blank" rel="external">https://www.jianshu.com/p/626b147821cd</a></p>
+<p>添加副本数也是一样道理</p>
+<p>cat topics-to-move.json<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;topics&quot;: [</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_404Item&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_CityWarFlow&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_DepositFlow&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_EquipFlow&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_GuildFlow&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_ItemFlow&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_MailFlow&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_MoneyFlow&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_PlayerExpFlow&quot;&#125;,</div><div class="line">  &#123;&quot;topic&quot;: &quot;TC_PlayerRegister&quot;&#125;</div><div class="line">  ],</div><div class="line">&quot;version&quot;:1</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>bin/kafka-reassign-partitions.sh –zookeeper localhost:2181 –topics-to-move-json-file topics-to-move.json –broker-list “1,2,3” –generate</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;version&quot;:1,&quot;partitions&quot;:[&#123;&quot;topic&quot;:&quot;TC_GuildFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerExpFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_EquipFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerRegister&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_MailFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_ItemFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[2]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerRegister&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[2]&#125;,&#123;&quot;topic&quot;:&quot;TC_GuildFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_MoneyFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_EquipFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerRegister&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerExpFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[2]&#125;,&#123;&quot;topic&quot;:&quot;TC_ItemFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_DepositFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_MoneyFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[2]&#125;,&#123;&quot;topic&quot;:&quot;TC_MailFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_GuildFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[2]&#125;,&#123;&quot;topic&quot;:&quot;TC_DepositFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[2]&#125;,&#123;&quot;topic&quot;:&quot;TC_MoneyFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerExpFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_EquipFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[2]&#125;,&#123;&quot;topic&quot;:&quot;TC_404Item&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_DepositFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[3]&#125;,&#123;&quot;topic&quot;:&quot;TC_MailFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[2]&#125;,&#123;&quot;topic&quot;:&quot;TC_ItemFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_404Item&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[1]&#125;,&#123;&quot;topic&quot;:&quot;TC_404Item&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[2]&#125;]&#125;</div></pre></td></tr></table></figure>
+<p>配置文件改成 expand-cluster-reassignment.json<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;version&quot;:1,&quot;partitions&quot;:[&#123;&quot;topic&quot;:&quot;TC_GuildFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerExpFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_EquipFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerRegister&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_MailFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_ItemFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[2,3]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerRegister&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[2,3]&#125;,&#123;&quot;topic&quot;:&quot;TC_GuildFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_MoneyFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_EquipFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerRegister&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerExpFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[2,3]&#125;,&#123;&quot;topic&quot;:&quot;TC_ItemFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_DepositFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_MoneyFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[2,3]&#125;,&#123;&quot;topic&quot;:&quot;TC_MailFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_GuildFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[2,3]&#125;,&#123;&quot;topic&quot;:&quot;TC_DepositFlow&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[2,3]&#125;,&#123;&quot;topic&quot;:&quot;TC_MoneyFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_PlayerExpFlow&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_EquipFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[2,3]&#125;,&#123;&quot;topic&quot;:&quot;TC_404Item&quot;,&quot;partition&quot;:2,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_DepositFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[3,1]&#125;,&#123;&quot;topic&quot;:&quot;TC_MailFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[2,3]&#125;,&#123;&quot;topic&quot;:&quot;TC_ItemFlow&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_404Item&quot;,&quot;partition&quot;:0,&quot;replicas&quot;:[1,2]&#125;,&#123;&quot;topic&quot;:&quot;TC_404Item&quot;,&quot;partition&quot;:1,&quot;replicas&quot;:[2,3]&#125;]&#125;</div></pre></td></tr></table></figure></p>
+<p>执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --reassignment-json-file expand-cluster-reassignment.json --execute</div></pre></td></tr></table></figure></p>
+<p>验证<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-reassign-partitions.sh --zookeeper localhost:2181 --reassignment-json-file expand-cluster-reassignment.json --verify</div></pre></td></tr></table></figure></p>
+<h1 id="kafka-生产消费速率控制，-限速"><a href="#kafka-生产消费速率控制，-限速" class="headerlink" title="kafka 生产消费速率控制， 限速"></a>kafka 生产消费速率控制， 限速</h1><p>添加修改配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-configs.sh  --zookeeper localhost:2181 --alter --add-config &apos;producer_byte_rate=102400,consumer_byte_rate=2097152&apos; --entity-type clients --entity-name client-test</div></pre></td></tr></table></figure></p>
+<p>查看配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-configs.sh  --zookeeper localhost:2181 --describe --entity-type clients</div></pre></td></tr></table></figure></p>
+<p>删除配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/kafka-configs.sh  --zookeeper localhost:2181 --alter --delete-config producer_byte_rate,consumer_byte_rate --entity-type clients --entity-name client-test</div></pre></td></tr></table></figure></p>
+<p>直接通过 zookeeper 删除配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">bin/zkCli.sh -server 127.0.0.1:2181</div><div class="line">ls /config/clients</div><div class="line">get /config/clients/client-test</div><div class="line">delete /config/clients/client-test</div></pre></td></tr></table></figure></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[缓存踩过的坑]]></title>
       <url>http://Melodylican.github.io/2017/12/07/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91/</url>
       <content type="html"><![CDATA[<p>今天讲的这个话题，我相信是众多工程师和团队的痛。从我刚开始工作，那时候构建本地缓存，到后续memcache, Redis的出现，到现在各种分布式集群的缓存，例如redis Cluster等产品的出现，缓存越来越发达和复杂了，缓存对我们的系统也越发重要，现在很难相信一个后端服务里没有缓存的存在。在这篇文章里，我会和大家分享一下过去踩到的缓存坑，然后试图给出一些解决方案，大家可以一起讨论，最终拿出更好的方法。由于篇幅有限，所以这里的缓存讨论，只局限于后端服务的缓存，并且不涉及具体的框架，对于H5,iOS和Android等前端缓存的讨论本文暂时不会涉及。<br><a id="more"></a><br><strong>案例1，缓存和DB的同步更新不在同一个事务里并且没有重试补偿机制</strong></p>
@@ -54,29 +136,6 @@
             <tag> 缓存 </tag>
             
             <tag> Redis </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Ansible when register使用]]></title>
-      <url>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</url>
-      <content type="html"><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible1.png" alt=""></p>
-<a id="more"></a>
-<p>执行演示：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible2.png" alt=""></p>
-]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Ansible </tag>
             
         </tags>
         
@@ -255,6 +314,29 @@
     </entry>
     
     <entry>
+      <title><![CDATA[Ansible when register使用]]></title>
+      <url>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</url>
+      <content type="html"><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible1.png" alt=""></p>
+<a id="more"></a>
+<p>执行演示：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible2.png" alt=""></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Ansible </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[浅谈Java动态代理]]></title>
       <url>http://Melodylican.github.io/2017/11/21/%E6%B5%85%E8%B0%88Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</url>
       <content type="html"><![CDATA[<p>AOP的拦截功能是由java中的动态代理来实现的。说白了，就是在目标类的基础上增加切面逻辑，生成增强的目标类（该切面逻辑或者在目标类函数执行之前，或者目标类函数执行之后，或者在目标类函数抛出异常时候执行。不同的切入时机对应不同的Interceptor的种类，如BeforeAdviseInterceptor，AfterAdviseInterceptor以及ThrowsAdviseInterceptor等）。<br><a id="more"></a><br>那么动态代理是如何实现将切面逻辑（advise）织入到目标类方法中去的呢？下面我们就来详细介绍并实现AOP中用到的两种动态代理。<br>AOP的源码中用到了两种动态代理来实现拦截切入功能：jdk动态代理和cglib动态代理。两种方法同时存在，各有优劣。jdk动态代理是由java内部的反射机制来实现的，cglib动态代理底层则是借助asm来实现的。总的来说，反射机制在生成类的过程中比较高效，而asm在生成类之后的相关执行过程中比较高效（可以通过将asm生成的类进行缓存，这样解决asm生成类过程低效问题）。还有一点必须注意：jdk动态代理的应用前提，必须是目标类基于统一的接口。如果没有上述前提，jdk动态代理不能应用。由此可以看出，jdk动态代理有一定的局限性，cglib这种第三方类库实现的动态代理应用更加广泛，且在效率上更有优势。。</p>
@@ -281,6 +363,28 @@
         <tags>
             
             <tag> 动态代理 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Netty 架构原理图]]></title>
+      <url>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</url>
+      <content type="html"><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Netty </tag>
+            
+            <tag> Reactor </tag>
             
         </tags>
         
@@ -379,28 +483,6 @@
         <tags>
             
             <tag> 分布式锁 </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Netty 架构原理图]]></title>
-      <url>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</url>
-      <content type="html"><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Netty </tag>
-            
-            <tag> Reactor </tag>
             
         </tags>
         
@@ -885,10 +967,9 @@
     </entry>
     
     <entry>
-      <title><![CDATA[Spark优化]]></title>
-      <url>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</url>
-      <content type="html"><![CDATA[<center><br><br><img src="http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png" alt=""><br><br></center>
-
+      <title><![CDATA[Spark应用案例-Spark完成PV和UV的计算]]></title>
+      <url>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</url>
+      <content type="html"><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content>
       
         <categories>
@@ -909,9 +990,10 @@
     </entry>
     
     <entry>
-      <title><![CDATA[Spark应用案例-Spark完成PV和UV的计算]]></title>
-      <url>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</url>
-      <content type="html"><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      <title><![CDATA[Spark优化]]></title>
+      <url>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</url>
+      <content type="html"><![CDATA[<center><br><br><img src="http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png" alt=""><br><br></center>
+
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content>
       
         <categories>
@@ -1996,28 +2078,6 @@
     </entry>
     
     <entry>
-      <title><![CDATA[Spark入门 第四章 第七节 Spark - 读写Hive数据(DataFrame)]]></title>
-      <url>http://Melodylican.github.io/2017/03/12/Spark%E8%AF%BB%E5%86%99Hive%E6%95%B0%E6%8D%AE/</url>
-      <content type="html"><![CDATA[<div class="note success"><p>该节内容待补充完整</p>
-</div>
-<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Spark </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Spark入门 第四章 第六节 Spark - 通过JDBC连接数据库(DataFrame)]]></title>
       <url>http://Melodylican.github.io/2017/03/12/Spark%E9%80%9A%E8%BF%87JDBC%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93/</url>
       <content type="html"><![CDATA[<p>这里以关系数据库MySQL为例。首先，请参考厦门大学数据库实验室博客教程（Ubuntu安装MySQL），在Linux系统中安装好MySQL数据库。这里假设你已经成功安装了MySQL数据库。下面我们要新建一个测试Spark程序的数据库，数据库名称是“spark”，表的名称是“student”。<br><a id="more"></a><br>请执行下面命令在Linux中启动MySQL数据库，并完成数据库和表的创建，以及样例数据的录入：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">service mysql start</div><div class="line">mysql -u root -p</div><div class="line">//屏幕会提示你输入密码</div></pre></td></tr></table></figure></p>
@@ -2036,6 +2096,28 @@
 <p>上面的命令行中，在一行的末尾加入斜杠\，是为了告诉spark-shell，命令还没有结束。</p>
 <p>启动进入spark-shell以后，可以执行以下命令连接数据库，写入数据，程序如下（你可以把下面程序一条条拷贝到spark-shell中执行）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.<span class="type">Properties</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.sql.types._</div><div class="line"><span class="keyword">import</span> org.apache.spark.sql.<span class="type">Row</span></div><div class="line"> </div><div class="line"><span class="comment">//下面我们设置两条数据表示两个学生信息</span></div><div class="line"><span class="keyword">val</span> studentRDD = spark.sparkContext.parallelize(<span class="type">Array</span>(<span class="string">"3 Rongcheng M 26"</span>,<span class="string">"4 Guanhua M 27"</span>)).map(_.split(<span class="string">" "</span>))</div><div class="line"> </div><div class="line"><span class="comment">//下面要设置模式信息</span></div><div class="line"><span class="keyword">val</span> schema = <span class="type">StructType</span>(<span class="type">List</span>(<span class="type">StructField</span>(<span class="string">"id"</span>, <span class="type">IntegerType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"name"</span>, <span class="type">StringType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"gender"</span>, <span class="type">StringType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"age"</span>, <span class="type">IntegerType</span>, <span class="literal">true</span>)))</div><div class="line"> </div><div class="line"><span class="comment">//下面创建Row对象，每个Row对象都是rowRDD中的一行</span></div><div class="line"><span class="keyword">val</span> rowRDD = studentRDD.map(p =&gt; <span class="type">Row</span>(p(<span class="number">0</span>).toInt, p(<span class="number">1</span>).trim, p(<span class="number">2</span>).trim, p(<span class="number">3</span>).toInt))</div><div class="line"> </div><div class="line"><span class="comment">//建立起Row对象和模式之间的对应关系，也就是把数据和模式对应起来</span></div><div class="line"><span class="keyword">val</span> studentDF = spark.createDataFrame(rowRDD, schema)</div><div class="line"> </div><div class="line"><span class="comment">//下面创建一个prop变量用来保存JDBC连接参数</span></div><div class="line"><span class="keyword">val</span> prop = <span class="keyword">new</span> <span class="type">Properties</span>()</div><div class="line">prop.put(<span class="string">"user"</span>, <span class="string">"root"</span>) <span class="comment">//表示用户名是root</span></div><div class="line">prop.put(<span class="string">"password"</span>, <span class="string">"hadoop"</span>) <span class="comment">//表示密码是hadoop</span></div><div class="line">prop.put(<span class="string">"driver"</span>,<span class="string">"com.mysql.jdbc.Driver"</span>) <span class="comment">//表示驱动程序是com.mysql.jdbc.Driver</span></div><div class="line"> </div><div class="line"><span class="comment">//下面就可以连接数据库，采用append模式，表示追加记录到数据库spark的student表中</span></div><div class="line">studentDF.write.mode(<span class="string">"append"</span>).jdbc(<span class="string">"jdbc:mysql://localhost:3306/spark"</span>, <span class="string">"spark.student"</span>, prop)</div></pre></td></tr></table></figure></p>
 <p>在spark-shell中执行完上述程序后，我们可以看一下效果，看看MySQL数据库中的spark.student表发生了什么变化。请在刚才的另外一个窗口的MySQL命令提示符下面继续输入下面命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">mysql&gt; select * from student;</div><div class="line">+------+-----------+--------+------+</div><div class="line">| id   | name      | gender | age  |</div><div class="line">+------+-----------+--------+------+</div><div class="line">|    1 | Xueqian   | F      |   23 |</div><div class="line">|    2 | Weiliang  | M      |   24 |</div><div class="line">|    3 | Rongcheng | M      |   26 |</div><div class="line">|    4 | Guanhua   | M      |   27 |</div><div class="line">+------+-----------+--------+------+</div><div class="line">4 rows in set (0.00 sec)</div></pre></td></tr></table></figure></p>
+<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Spark </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Spark入门 第四章 第七节 Spark - 读写Hive数据(DataFrame)]]></title>
+      <url>http://Melodylican.github.io/2017/03/12/Spark%E8%AF%BB%E5%86%99Hive%E6%95%B0%E6%8D%AE/</url>
+      <content type="html"><![CDATA[<div class="note success"><p>该节内容待补充完整</p>
+</div>
 <font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
       
         <categories>
@@ -2976,46 +3058,6 @@ scala&gt; df.select(df(<span class="string">"name"</span>).as(<span class="strin
     </entry>
     
     <entry>
-      <title><![CDATA[使用Java开发高性能网站需要注意的那些事]]></title>
-      <url>http://Melodylican.github.io/2017/01/10/Java%E5%BC%80%E5%8F%91%E9%AB%98%E6%80%A7%E8%83%BD%E7%BD%91%E7%AB%99%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/</url>
-      <content type="html"><![CDATA[<p><center><br><img src="http://www.javabloger.com/wp-content/uploads/2016/02/li8hzoM36n1XM.jpg" alt=""><br></center><br><a id="more"></a><br>近期各家IT媒体举办的业内技术大会让很多网站都在披露自己的技术内幕与同行们分享，大到facebook，百度，小到刚起步的网站。facebook，百度之类的大型网站采用的技术和超凡的处理能力的确给人耳目一新的感觉，但并不是每个网站都是像facebook，百度 有上亿的用户访问流量，有海量的数据需要存储，需要使用到mapreduce/并行计算，HBase/列存储这些技术不可。技术手段始终是运营的支撑，对于当前的运营环境适用就好，没有必要非要赶个时髦，一定要和某项流行的技术产生点关系才善罢甘休。</p>
-<p>在最近的技术大会中我们更多的目光都聚焦在这些大型网站，其实中小型门户网站的技术体系也是值得去探讨和关注。全天下的攻城师们并不是都在为这些大型门户网站服务，更多的攻城师们正在默默无闻的为一些刚刚起步的中小型网站服务，而且占据了攻城师队伍中的60%以上的人群。在关注大型门户网站的时候，中小型门户网站的技术发展和实战经验更值得去分享。</p>
-<p>无论大型门户网站还是中小型垂直类型网站都会对稳定性、性能和可伸缩性有所追求。大型网站的技术经验分享值得我们去学习和借用，但落实到更具体的实践上并不是对所有网站可以适用,其他语言开发的网站我还不敢多说，但Java开发的系统，我还是能您给插上几句话：</p>
-<h2 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h2><p>JEE容器中运行的JVM参数配置参数的正确使用直接关系到整个系统的性能和处理能力，JVM的调优主要是对内存管理方面的调优，优化的方向分为以下4点：<br>1.HeapSize             堆的大小，也可以说Java虚拟机使用内存的策略，这点是非常关键的。<br>2.GarbageCollector  通过配置相关的参数进行Java中的垃圾收集器的4个算法(策略)进行使用。<br>3.StackSize             栈是JVM的内存指令区,每个线程都有他自己的Stack，Stack的大小限制着线程的数量。<br>4.DeBug/Log           在JVM中还可以设置对JVM运行时的日志和JVM挂掉后的日志输出，这点非常的关键，根据各类JVM的日志输出才能配置合适的参数。<br>网上随处可见JVM的配置技巧，但是我还是推荐阅读Sun官方的2篇文章，可以对配置参数的其所依然有一个了解<br>1.Java HotSpot VM Options<br><a href="http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html" target="_blank" rel="external">http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html</a><br>2.Troubleshooting Guide for Java SE 6 with HotSpot VM <a href="http://www.oracle.com/technetwork/java/javase/index-137495.html" target="_blank" rel="external">http://www.oracle.com/technetwork/java/javase/index-137495.html</a><br>另外，我相信不是每个人攻城师都是天天对着这些JVM参数的，如果你忘记了那些关键的参数你可以输入Java -X(大写X)进行提示。</p>
-<h2 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h2><p>针对MySQL的JDBC的参数在之前的文章中也有介绍过，在单台机器或者集群的环境下合理的使用JDBC中的配置参数对操作数据库也有很大的影响。<br>一些所谓高性能的 Java ORM开源框架也就是打开了很多JDBC中的默认参数：<br>1.例如：autoReconnect、prepStmtCacheSize、cachePrepStmts、useNewIO、blobSendChunkSize 等，<br>2.例如集群环境下：roundRobinLoadBalance、failOverReadOnly、autoReconnectForPools、secondsBeforeRetryMaster。<br>具体内容可以参阅MySQL的JDBC官方使用手册：<br><a href="http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-jdbc-reference" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-jdbc-reference</a></p>
-<h2 id="数据库连接池-DataSource"><a href="#数据库连接池-DataSource" class="headerlink" title="数据库连接池(DataSource)"></a>数据库连接池(DataSource)</h2><p>应用程序与数据库连接频繁的交互会给系统带来瓶颈和大量的开销会影响到系统的性能，JDBC连接池负责分配、管理和释放数据库连接，它允许应用程序重复使用一个现有的数据库连接，而再不是重新建立一个连接，因此应用程序不需要频繁的与数据库开关连接，并且可以释放空闲时间超过最大空闲时间的数据库连接来避免因为没有释放数据库连接而引起的数据库连接遗漏。这项技术能明显提高对数据库操作的性能。<br>在此我认为有一点需要说明：<br>连接池的使用也是需要关闭，因为在数据库连接池启动的时候就预先和数据库获得了相应的连接，之后不再需要应用程序直接的和数据库打交道，因为应用程序使用数据库连接池是一个“借”的概念，应用程序从数据库连接池中获得资源是“借出”，还需要还回去，就好比有20个水桶放在这里，需要拿水的人都可以使用这些木桶从水池里面拿水，如果20个人都拿完水，不将水桶还回原地，那么后面来的人再需要拿水，只能在旁边等待有人将木桶还回去，之前的人用完后需要放回去，不然后面的人就会一直等待，造成资源堵塞，同理，应用程序获取数据库连接的时候Connection连接对象的时候是从“池”中分配一个数据库连接出去，在使用完毕后，归还这个数据库连接，这样才能保持数据库的连接“有借有还”准则。</p>
-<p><font color="red">参考资料</font>：<br><a href="http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-connection-pooling" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-connection-pooling</a></p>
-<h2 id="数据存取"><a href="#数据存取" class="headerlink" title="数据存取"></a>数据存取</h2><p>数据库服务器的优化和数据的存取，什么类型的数据放在什么地方更好是值得去思考的问题，将来的存储很可能是混用的，Cache，NOSQL，DFS，DataBase 在一个系统中都会有，生活的餐具和平日里穿衣服需要摆放在家里，但是不会用同一种类型的家具存放，貌似没有那个人家把餐具和衣服放在同一个柜子里面的。这就像是系统中不同类型的数据一样，对不同类型的数据需要使用合适的存储环境。文件和图片的存储，首先按照访问的热度分类，或者按照文件的大小。强关系类型并且需要事务支持的采用传统的数据库，弱关系型不需要事务支持的可以考虑NOSQL，海量文件存储可以考虑一下支持网络存储的DFS，至于缓存要看你单个数据存储的大小和读写的比例。<br>还有一点值得注意就是数据读写分离，无论在DataBase还是NOSQL的环境中大部分都是读大于写，因此在设计时还需考虑 不仅仅需要让数据的读分散在多台机器上，还需要考虑多台机器之间的数据一致性，MySQL的一主多从，在加上MySQL-Proxy或者借用JDBC中的一些参数(roundRobinLoadBalance、failOverReadOnly、autoReconnectForPools、secondsBeforeRetryMaster)对后续应用程序开发，可以将读和写分离，将大量读的压力分散在多台机器上，并且还保证了数据的一致性。</p>
-<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><p>在宏观上看缓存一般分为2种：本地缓存和分布式缓存</p>
-<ol>
-<li>本地缓存，对于Java的本地缓存而言就是讲数据放入静态(static)的数据结合中，然后需要用的时候就从静态数据结合中拿出来,对于高并发的环境建议使用 ConcurrentHashMap或者CopyOnWriteArrayList作为本地缓存。缓存的使用更具体点说就是对系统内存的使用，使用多少内存的资源需要有一个适当比例，如果超过适当的使用存储访问，将会适得其反，导致整个系统的运行效率低下。</li>
-<li>分布式缓存，一般用于分布式的环境，将每台机器上的缓存进行集中化的存储，并且不仅仅用于缓存的使用范畴，还可以作为分布式系统数据同步/传输的一种手段，一般被使用最多的就是Memcached和Redis。<br>数据存储在不同的介质上读/写得到的效率是不同的，在系统中如何善用缓存，让你的数据更靠近cpu，下面有一张图你需要永远牢记在心里，来自Google的技术大牛Jeff Dean(Ref)的杰作，如图所示：<br><img src="http://www.javabloger.com/wp-content/uploads/2016/02/cache-speed.png" alt=""></li>
-</ol>
-<h2 id="并发-多线程"><a href="#并发-多线程" class="headerlink" title="并发/多线程"></a>并发/多线程</h2><p>在高并发环境下建议开发者使用JDK中自带的并发包(java.util.concurrent)，在JDK1.5以后使用java.util.concurrent下的工具类可以简化多线程开发，在java.util.concurrent的工具中主要分为以下几个主要部分：<br>1.线程池，线程池的接口(Executor、ExecutorService)与实现类(ThreadPoolExecutor、 ScheduledThreadPoolExecutor），利用jdk自带的线程池框架可以管理任务的排队和安排，并允许受控制的关闭。因为运行一个线程需要消耗系统CPU资源，而创建、结束一个线程也对系统CPU资源有开销，使用线程池不仅仅可以有效的管理多线程的使用，还是可以提高线程的运行效率。<br>2.本地队列，提供了高效的、可伸缩的、线程安全的非阻塞 FIFO 队列。java.util.concurrent 中的五个实现都支持扩展的 BlockingQueue 接口，该接口定义了 put 和 take 的阻塞版本：LinkedBlockingQueue、ArrayBlockingQueue、SynchronousQueue、PriorityBlockingQueue 和 DelayQueue。这些不同的类覆盖了生产者-使用者、消息传递、并行任务执行和相关并发设计的大多数常见使用的上下文。<br>3.同步器，四个类可协助实现常见的专用同步语句。Semaphore 是一个经典的并发工具。CountDownLatch 是一个极其简单但又极其常用的实用工具，用于在保持给定数目的信号、事件或条件前阻塞执行。CyclicBarrier 是一个可重置的多路同步点，在某些并行编程风格中很有用。Exchanger 允许两个线程在 collection 点交换对象，它在多流水线设计中是有用的。<br>4.并发包 Collection，此包还提供了设计用于多线程上下文中的 Collection 实现：ConcurrentHashMap、ConcurrentSkipListMap、ConcurrentSkipListSet、CopyOnWriteArrayList 和 CopyOnWriteArraySet。当期望许多线程访问一个给定 collection 时，ConcurrentHashMap 通常优于同步的 HashMap，ConcurrentSkipListMap 通常优于同步的 TreeMap。当期望的读数和遍历远远大于列表的更新数时，CopyOnWriteArrayList 优于同步的 ArrayList。</p>
-<h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><p>关于队列可以分为：本地的队列 和 分布式队列 2类<br>本地队列：一般常见的用于非及时性的数据批量写入，可以将获取的数据缓存在一个数组中等达到一定数量的时候在进行批量的一次写入，可以使用BlockingQueue或者List/Map来实现。<br>相关资料：Sun Java API.<br>分布式队列：一般作为消息中间件，构建分布式环境下子系统与子系统之间通信的桥梁，JEE环境中使用最多的就是Apache的AvtiveMQ和Sun公司的OpenMQ。<br>轻量级的MQ中间件之前也向大家介绍过一些例如：Kestrel和Redis(Ref <a href="http://www.javabloger.com/article/mq-kestrel-redis-for-java.html)，最近又听说LinkedIn的搜索技术团队推出了一个MQ产品-kaukaf(Ref" target="_blank" rel="external">http://www.javabloger.com/article/mq-kestrel-redis-for-java.html)，最近又听说LinkedIn的搜索技术团队推出了一个MQ产品-kaukaf(Ref</a> <a href="http://sna-projects.com/kafka" target="_blank" rel="external">http://sna-projects.com/kafka</a> )，对此保持关注。<br>相关资料：<br>1.ActiveMQ <a href="http://activemq.apache.org/getting-started.html" target="_blank" rel="external">http://activemq.apache.org/getting-started.html</a><br>2.OpenMQ  <a href="http://mq.java.net/about.html" target="_blank" rel="external">http://mq.java.net/about.html</a><br>3.Kafka       <a href="http://sna-projects.com/kafka" target="_blank" rel="external">http://sna-projects.com/kafka</a><br>4.JMS文章  <a href="http://www.javabloger.com/article/category/jms" target="_blank" rel="external">http://www.javabloger.com/article/category/jms</a></p>
-<h2 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h2><p>NIO是在JDK1.4后的版本中出现的，在Java 1.4之前，Jdk提供的都是面向流的I/O系统，例如读/写文件则是一次一个字节地处理数据，一个输入流产生一个字节的数据，一个输出流消费一个字节的数据， 面向流的I/O速度非常慢，并且一个数据包要么整个数据报已经收到，要么还没有。Java NIO非堵塞技术实际是采取Reactor模式，有内容进来会自动通知,不必死等、死循环，大大的提升了系统性能。在现实场景中NIO技术多数运用两个方面，1是文件的读写操作，2是网络上数据流的操作。在NIO中有几个核心对象需要掌握：1选择器(Selector)、2通道(Channel)、3缓冲区(Buffer)。<br>我的废话：<br>1.在Java NIO的技术范畴中内存映射文件是一种高效的做法，可以用于缓存中存储的冷/热数据分离，将缓存中的一部分冷数据进行这样的处理，这种做法上比常规的基于流或者基于通道的I/O快的多，通过使文件中的数据出现为内存数组的内容来完成的，将文件中实际读取或者写入的部分才会映射到内存中，并不是将整个文件读到内存中。<br>2.在Mysql的jdbc驱动中也可以使用NIO技术对数据库进行操作来提升系统的性能。</p>
-<h2 id="长连接-Servlet3-0"><a href="#长连接-Servlet3-0" class="headerlink" title="长连接/Servlet3.0"></a>长连接/Servlet3.0</h2><p>这里说的长连接就是长轮询，以前浏览器(客户端)需要关注服务器端发生的数据变化需要不断的访问服务器，这样客户端的数量一多必然会给服务器端造成很大的压力，例如：论坛中的站内消息。现在Servlet3.0规范中提供了一个新的特性：异步IO通信；该特性会保持一个长连接。利用Servlet3异步请求的这项技术可以大大的缓解服务器端的压力。<br>Servlet3.0的原理就是将request的请求开启一个线程挂起，中间设置等待超时的时间，如果后台事件触发request请求，得到的结果返回给客户端的request请求，如果在设置等待超时的时间内没有任何事件发生也将请求返回给客户端，客户端将再次发起request请求，客户端与服务器端的交互可以与此往复。<br>就好比，你先过来跟我说如果有人找你，我就立马通知你你来见他，原先你需要不断的问我有没有要找你，而不管有没有人找你，你都需要不断的问我有没有人找你，这样的话不论问的人还是被问的人都会累死。</p>
-<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>Log4J是通常被人们使用的工具，系统在刚刚上线的时候日志一般都设置在INFO的级，真正上线后一般设置在ERROR级，但无论在任何时候，日志的输入内容都是需要关注的，开发人员一般可以依靠输出的日志查找出现的问题或者依靠输出的日志对系统的性能进行优化，日志也是系统运行状态的报告和排错的依据。<br>简单来说日志按照定义的不同策略和等级输出到不同的环境，那样便于我们分析和管理。相反你没有策略的输出，那么机器一多，时间一长，会有一大推乱糟糟的日志，会让你排错的时候无从下手，所以日志的输出策略是使用日志的关键点。<br>参考资料：<a href="http://logging.apache.org/log4j/1.2/manual.html" target="_blank" rel="external">http://logging.apache.org/log4j/1.2/manual.html</a></p>
-<h2 id="打包-部署"><a href="#打包-部署" class="headerlink" title="打包/部署"></a>打包/部署</h2><p>在代码设计的时候最好能将不同类型的功能模块在IDE环境中粗粒度的分为不同的工程，便于打成不同jar包部署在不同的环境中。有这样的一个应用场景：需要每天定时远程从SP那边获得当天100条新闻和部分城市的天气预报，虽然每天的数据量不多，但是前端访问的并发量很大，显然需要在系统架构上做到读写分离。<br>如果把web工程和定时抓取的功能模块完全集中在一个工程里打包，将导致需要扩展的时候每台机器上既有web应用也有定时器，因为功能模块没有分开，每台机器上都有定时器工作将会造成数据库里面的数据重复。<br>如果开发的时候就将web和定时器分为2个工程，打包的时候就可以分开部署，10台web对应一台定期器，分解了前端请求的压力，数据的写入也不会重复。<br>这样做的另一个好处就是可以共用，在上述的场景中web和定时器都需要对数据库进行读取，那么web和定时器的工程里都有操作数据库的代码，在代码的逻辑上还是感觉乱乱的。如果再抽出一个DAL层的jar，web和定时器的应用模块开发者只需要引用DAL层的jar，开发相关的业务逻辑，面向接口编程，无需考虑具体的数据库操作，具体的对数据库操作由其他开发者完成，可以在开发任务分工上很明确，并且互不干涉。</p>
-<h2 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h2><p>所谓流行的SSH(Struts/Spring/Hiberanet)轻量级框架,对于很多中小型项目而言一点都不轻量级，开发者不仅需要维护代码，还需要维护繁琐的xml配置文件，而且说不定某个配置文件写的不对就让整个都工程无法运行。无配置文件可以取代SSH(struts/Spring/Hiberanet)框架的产品真的太多了，我之前就向大家介绍过一些个产品(Ref)。<br>这个我并不是一味的反对使用SSH(Struts/Spring/Hiberanet)框架，在我眼里SSH框架真的作用是做到了规范开发，而并不使用了SSH(Struts/Spring/Hiberanet)框架能提高多少性能。<br>SSH框架只是对于非常大的项目人数上百人的团队，还需要、继续增加团队规模的公司而言，是需要选择一些市面上大家都认可，并且熟悉的技术，SSH(Struts/Spring/Hiberanet)框架比较成熟所以是首先产品。<br>但是对于一些小团队中间有个把技术高人的团队而言完全可以选择更加简洁的框架，真正的做到提速你的开发效率，早日抛弃SSH框架选择更简洁的技术在小团队开发中是一种比较明知的选择。</p>
-]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Java </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[ZooKeeper经典应用场景]]></title>
       <url>http://Melodylican.github.io/2017/01/10/ZooKeeper%E7%BB%8F%E5%85%B8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/</url>
       <content type="html"><![CDATA[<p>转载自：<a href="http://rdc.taobao.com/team/jm/archives/1232" target="_blank" rel="external">http://rdc.taobao.com/team/jm/archives/1232</a></p>
@@ -3092,6 +3134,46 @@ scala&gt; df.select(df(<span class="string">"name"</span>).as(<span class="strin
             <tag> Java </tag>
             
             <tag> ZooKeeper </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[使用Java开发高性能网站需要注意的那些事]]></title>
+      <url>http://Melodylican.github.io/2017/01/10/Java%E5%BC%80%E5%8F%91%E9%AB%98%E6%80%A7%E8%83%BD%E7%BD%91%E7%AB%99%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/</url>
+      <content type="html"><![CDATA[<p><center><br><img src="http://www.javabloger.com/wp-content/uploads/2016/02/li8hzoM36n1XM.jpg" alt=""><br></center><br><a id="more"></a><br>近期各家IT媒体举办的业内技术大会让很多网站都在披露自己的技术内幕与同行们分享，大到facebook，百度，小到刚起步的网站。facebook，百度之类的大型网站采用的技术和超凡的处理能力的确给人耳目一新的感觉，但并不是每个网站都是像facebook，百度 有上亿的用户访问流量，有海量的数据需要存储，需要使用到mapreduce/并行计算，HBase/列存储这些技术不可。技术手段始终是运营的支撑，对于当前的运营环境适用就好，没有必要非要赶个时髦，一定要和某项流行的技术产生点关系才善罢甘休。</p>
+<p>在最近的技术大会中我们更多的目光都聚焦在这些大型网站，其实中小型门户网站的技术体系也是值得去探讨和关注。全天下的攻城师们并不是都在为这些大型门户网站服务，更多的攻城师们正在默默无闻的为一些刚刚起步的中小型网站服务，而且占据了攻城师队伍中的60%以上的人群。在关注大型门户网站的时候，中小型门户网站的技术发展和实战经验更值得去分享。</p>
+<p>无论大型门户网站还是中小型垂直类型网站都会对稳定性、性能和可伸缩性有所追求。大型网站的技术经验分享值得我们去学习和借用，但落实到更具体的实践上并不是对所有网站可以适用,其他语言开发的网站我还不敢多说，但Java开发的系统，我还是能您给插上几句话：</p>
+<h2 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h2><p>JEE容器中运行的JVM参数配置参数的正确使用直接关系到整个系统的性能和处理能力，JVM的调优主要是对内存管理方面的调优，优化的方向分为以下4点：<br>1.HeapSize             堆的大小，也可以说Java虚拟机使用内存的策略，这点是非常关键的。<br>2.GarbageCollector  通过配置相关的参数进行Java中的垃圾收集器的4个算法(策略)进行使用。<br>3.StackSize             栈是JVM的内存指令区,每个线程都有他自己的Stack，Stack的大小限制着线程的数量。<br>4.DeBug/Log           在JVM中还可以设置对JVM运行时的日志和JVM挂掉后的日志输出，这点非常的关键，根据各类JVM的日志输出才能配置合适的参数。<br>网上随处可见JVM的配置技巧，但是我还是推荐阅读Sun官方的2篇文章，可以对配置参数的其所依然有一个了解<br>1.Java HotSpot VM Options<br><a href="http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html" target="_blank" rel="external">http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html</a><br>2.Troubleshooting Guide for Java SE 6 with HotSpot VM <a href="http://www.oracle.com/technetwork/java/javase/index-137495.html" target="_blank" rel="external">http://www.oracle.com/technetwork/java/javase/index-137495.html</a><br>另外，我相信不是每个人攻城师都是天天对着这些JVM参数的，如果你忘记了那些关键的参数你可以输入Java -X(大写X)进行提示。</p>
+<h2 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h2><p>针对MySQL的JDBC的参数在之前的文章中也有介绍过，在单台机器或者集群的环境下合理的使用JDBC中的配置参数对操作数据库也有很大的影响。<br>一些所谓高性能的 Java ORM开源框架也就是打开了很多JDBC中的默认参数：<br>1.例如：autoReconnect、prepStmtCacheSize、cachePrepStmts、useNewIO、blobSendChunkSize 等，<br>2.例如集群环境下：roundRobinLoadBalance、failOverReadOnly、autoReconnectForPools、secondsBeforeRetryMaster。<br>具体内容可以参阅MySQL的JDBC官方使用手册：<br><a href="http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-jdbc-reference" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-jdbc-reference</a></p>
+<h2 id="数据库连接池-DataSource"><a href="#数据库连接池-DataSource" class="headerlink" title="数据库连接池(DataSource)"></a>数据库连接池(DataSource)</h2><p>应用程序与数据库连接频繁的交互会给系统带来瓶颈和大量的开销会影响到系统的性能，JDBC连接池负责分配、管理和释放数据库连接，它允许应用程序重复使用一个现有的数据库连接，而再不是重新建立一个连接，因此应用程序不需要频繁的与数据库开关连接，并且可以释放空闲时间超过最大空闲时间的数据库连接来避免因为没有释放数据库连接而引起的数据库连接遗漏。这项技术能明显提高对数据库操作的性能。<br>在此我认为有一点需要说明：<br>连接池的使用也是需要关闭，因为在数据库连接池启动的时候就预先和数据库获得了相应的连接，之后不再需要应用程序直接的和数据库打交道，因为应用程序使用数据库连接池是一个“借”的概念，应用程序从数据库连接池中获得资源是“借出”，还需要还回去，就好比有20个水桶放在这里，需要拿水的人都可以使用这些木桶从水池里面拿水，如果20个人都拿完水，不将水桶还回原地，那么后面来的人再需要拿水，只能在旁边等待有人将木桶还回去，之前的人用完后需要放回去，不然后面的人就会一直等待，造成资源堵塞，同理，应用程序获取数据库连接的时候Connection连接对象的时候是从“池”中分配一个数据库连接出去，在使用完毕后，归还这个数据库连接，这样才能保持数据库的连接“有借有还”准则。</p>
+<p><font color="red">参考资料</font>：<br><a href="http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-connection-pooling" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-connection-pooling</a></p>
+<h2 id="数据存取"><a href="#数据存取" class="headerlink" title="数据存取"></a>数据存取</h2><p>数据库服务器的优化和数据的存取，什么类型的数据放在什么地方更好是值得去思考的问题，将来的存储很可能是混用的，Cache，NOSQL，DFS，DataBase 在一个系统中都会有，生活的餐具和平日里穿衣服需要摆放在家里，但是不会用同一种类型的家具存放，貌似没有那个人家把餐具和衣服放在同一个柜子里面的。这就像是系统中不同类型的数据一样，对不同类型的数据需要使用合适的存储环境。文件和图片的存储，首先按照访问的热度分类，或者按照文件的大小。强关系类型并且需要事务支持的采用传统的数据库，弱关系型不需要事务支持的可以考虑NOSQL，海量文件存储可以考虑一下支持网络存储的DFS，至于缓存要看你单个数据存储的大小和读写的比例。<br>还有一点值得注意就是数据读写分离，无论在DataBase还是NOSQL的环境中大部分都是读大于写，因此在设计时还需考虑 不仅仅需要让数据的读分散在多台机器上，还需要考虑多台机器之间的数据一致性，MySQL的一主多从，在加上MySQL-Proxy或者借用JDBC中的一些参数(roundRobinLoadBalance、failOverReadOnly、autoReconnectForPools、secondsBeforeRetryMaster)对后续应用程序开发，可以将读和写分离，将大量读的压力分散在多台机器上，并且还保证了数据的一致性。</p>
+<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><p>在宏观上看缓存一般分为2种：本地缓存和分布式缓存</p>
+<ol>
+<li>本地缓存，对于Java的本地缓存而言就是讲数据放入静态(static)的数据结合中，然后需要用的时候就从静态数据结合中拿出来,对于高并发的环境建议使用 ConcurrentHashMap或者CopyOnWriteArrayList作为本地缓存。缓存的使用更具体点说就是对系统内存的使用，使用多少内存的资源需要有一个适当比例，如果超过适当的使用存储访问，将会适得其反，导致整个系统的运行效率低下。</li>
+<li>分布式缓存，一般用于分布式的环境，将每台机器上的缓存进行集中化的存储，并且不仅仅用于缓存的使用范畴，还可以作为分布式系统数据同步/传输的一种手段，一般被使用最多的就是Memcached和Redis。<br>数据存储在不同的介质上读/写得到的效率是不同的，在系统中如何善用缓存，让你的数据更靠近cpu，下面有一张图你需要永远牢记在心里，来自Google的技术大牛Jeff Dean(Ref)的杰作，如图所示：<br><img src="http://www.javabloger.com/wp-content/uploads/2016/02/cache-speed.png" alt=""></li>
+</ol>
+<h2 id="并发-多线程"><a href="#并发-多线程" class="headerlink" title="并发/多线程"></a>并发/多线程</h2><p>在高并发环境下建议开发者使用JDK中自带的并发包(java.util.concurrent)，在JDK1.5以后使用java.util.concurrent下的工具类可以简化多线程开发，在java.util.concurrent的工具中主要分为以下几个主要部分：<br>1.线程池，线程池的接口(Executor、ExecutorService)与实现类(ThreadPoolExecutor、 ScheduledThreadPoolExecutor），利用jdk自带的线程池框架可以管理任务的排队和安排，并允许受控制的关闭。因为运行一个线程需要消耗系统CPU资源，而创建、结束一个线程也对系统CPU资源有开销，使用线程池不仅仅可以有效的管理多线程的使用，还是可以提高线程的运行效率。<br>2.本地队列，提供了高效的、可伸缩的、线程安全的非阻塞 FIFO 队列。java.util.concurrent 中的五个实现都支持扩展的 BlockingQueue 接口，该接口定义了 put 和 take 的阻塞版本：LinkedBlockingQueue、ArrayBlockingQueue、SynchronousQueue、PriorityBlockingQueue 和 DelayQueue。这些不同的类覆盖了生产者-使用者、消息传递、并行任务执行和相关并发设计的大多数常见使用的上下文。<br>3.同步器，四个类可协助实现常见的专用同步语句。Semaphore 是一个经典的并发工具。CountDownLatch 是一个极其简单但又极其常用的实用工具，用于在保持给定数目的信号、事件或条件前阻塞执行。CyclicBarrier 是一个可重置的多路同步点，在某些并行编程风格中很有用。Exchanger 允许两个线程在 collection 点交换对象，它在多流水线设计中是有用的。<br>4.并发包 Collection，此包还提供了设计用于多线程上下文中的 Collection 实现：ConcurrentHashMap、ConcurrentSkipListMap、ConcurrentSkipListSet、CopyOnWriteArrayList 和 CopyOnWriteArraySet。当期望许多线程访问一个给定 collection 时，ConcurrentHashMap 通常优于同步的 HashMap，ConcurrentSkipListMap 通常优于同步的 TreeMap。当期望的读数和遍历远远大于列表的更新数时，CopyOnWriteArrayList 优于同步的 ArrayList。</p>
+<h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><p>关于队列可以分为：本地的队列 和 分布式队列 2类<br>本地队列：一般常见的用于非及时性的数据批量写入，可以将获取的数据缓存在一个数组中等达到一定数量的时候在进行批量的一次写入，可以使用BlockingQueue或者List/Map来实现。<br>相关资料：Sun Java API.<br>分布式队列：一般作为消息中间件，构建分布式环境下子系统与子系统之间通信的桥梁，JEE环境中使用最多的就是Apache的AvtiveMQ和Sun公司的OpenMQ。<br>轻量级的MQ中间件之前也向大家介绍过一些例如：Kestrel和Redis(Ref <a href="http://www.javabloger.com/article/mq-kestrel-redis-for-java.html)，最近又听说LinkedIn的搜索技术团队推出了一个MQ产品-kaukaf(Ref" target="_blank" rel="external">http://www.javabloger.com/article/mq-kestrel-redis-for-java.html)，最近又听说LinkedIn的搜索技术团队推出了一个MQ产品-kaukaf(Ref</a> <a href="http://sna-projects.com/kafka" target="_blank" rel="external">http://sna-projects.com/kafka</a> )，对此保持关注。<br>相关资料：<br>1.ActiveMQ <a href="http://activemq.apache.org/getting-started.html" target="_blank" rel="external">http://activemq.apache.org/getting-started.html</a><br>2.OpenMQ  <a href="http://mq.java.net/about.html" target="_blank" rel="external">http://mq.java.net/about.html</a><br>3.Kafka       <a href="http://sna-projects.com/kafka" target="_blank" rel="external">http://sna-projects.com/kafka</a><br>4.JMS文章  <a href="http://www.javabloger.com/article/category/jms" target="_blank" rel="external">http://www.javabloger.com/article/category/jms</a></p>
+<h2 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h2><p>NIO是在JDK1.4后的版本中出现的，在Java 1.4之前，Jdk提供的都是面向流的I/O系统，例如读/写文件则是一次一个字节地处理数据，一个输入流产生一个字节的数据，一个输出流消费一个字节的数据， 面向流的I/O速度非常慢，并且一个数据包要么整个数据报已经收到，要么还没有。Java NIO非堵塞技术实际是采取Reactor模式，有内容进来会自动通知,不必死等、死循环，大大的提升了系统性能。在现实场景中NIO技术多数运用两个方面，1是文件的读写操作，2是网络上数据流的操作。在NIO中有几个核心对象需要掌握：1选择器(Selector)、2通道(Channel)、3缓冲区(Buffer)。<br>我的废话：<br>1.在Java NIO的技术范畴中内存映射文件是一种高效的做法，可以用于缓存中存储的冷/热数据分离，将缓存中的一部分冷数据进行这样的处理，这种做法上比常规的基于流或者基于通道的I/O快的多，通过使文件中的数据出现为内存数组的内容来完成的，将文件中实际读取或者写入的部分才会映射到内存中，并不是将整个文件读到内存中。<br>2.在Mysql的jdbc驱动中也可以使用NIO技术对数据库进行操作来提升系统的性能。</p>
+<h2 id="长连接-Servlet3-0"><a href="#长连接-Servlet3-0" class="headerlink" title="长连接/Servlet3.0"></a>长连接/Servlet3.0</h2><p>这里说的长连接就是长轮询，以前浏览器(客户端)需要关注服务器端发生的数据变化需要不断的访问服务器，这样客户端的数量一多必然会给服务器端造成很大的压力，例如：论坛中的站内消息。现在Servlet3.0规范中提供了一个新的特性：异步IO通信；该特性会保持一个长连接。利用Servlet3异步请求的这项技术可以大大的缓解服务器端的压力。<br>Servlet3.0的原理就是将request的请求开启一个线程挂起，中间设置等待超时的时间，如果后台事件触发request请求，得到的结果返回给客户端的request请求，如果在设置等待超时的时间内没有任何事件发生也将请求返回给客户端，客户端将再次发起request请求，客户端与服务器端的交互可以与此往复。<br>就好比，你先过来跟我说如果有人找你，我就立马通知你你来见他，原先你需要不断的问我有没有要找你，而不管有没有人找你，你都需要不断的问我有没有人找你，这样的话不论问的人还是被问的人都会累死。</p>
+<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>Log4J是通常被人们使用的工具，系统在刚刚上线的时候日志一般都设置在INFO的级，真正上线后一般设置在ERROR级，但无论在任何时候，日志的输入内容都是需要关注的，开发人员一般可以依靠输出的日志查找出现的问题或者依靠输出的日志对系统的性能进行优化，日志也是系统运行状态的报告和排错的依据。<br>简单来说日志按照定义的不同策略和等级输出到不同的环境，那样便于我们分析和管理。相反你没有策略的输出，那么机器一多，时间一长，会有一大推乱糟糟的日志，会让你排错的时候无从下手，所以日志的输出策略是使用日志的关键点。<br>参考资料：<a href="http://logging.apache.org/log4j/1.2/manual.html" target="_blank" rel="external">http://logging.apache.org/log4j/1.2/manual.html</a></p>
+<h2 id="打包-部署"><a href="#打包-部署" class="headerlink" title="打包/部署"></a>打包/部署</h2><p>在代码设计的时候最好能将不同类型的功能模块在IDE环境中粗粒度的分为不同的工程，便于打成不同jar包部署在不同的环境中。有这样的一个应用场景：需要每天定时远程从SP那边获得当天100条新闻和部分城市的天气预报，虽然每天的数据量不多，但是前端访问的并发量很大，显然需要在系统架构上做到读写分离。<br>如果把web工程和定时抓取的功能模块完全集中在一个工程里打包，将导致需要扩展的时候每台机器上既有web应用也有定时器，因为功能模块没有分开，每台机器上都有定时器工作将会造成数据库里面的数据重复。<br>如果开发的时候就将web和定时器分为2个工程，打包的时候就可以分开部署，10台web对应一台定期器，分解了前端请求的压力，数据的写入也不会重复。<br>这样做的另一个好处就是可以共用，在上述的场景中web和定时器都需要对数据库进行读取，那么web和定时器的工程里都有操作数据库的代码，在代码的逻辑上还是感觉乱乱的。如果再抽出一个DAL层的jar，web和定时器的应用模块开发者只需要引用DAL层的jar，开发相关的业务逻辑，面向接口编程，无需考虑具体的数据库操作，具体的对数据库操作由其他开发者完成，可以在开发任务分工上很明确，并且互不干涉。</p>
+<h2 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h2><p>所谓流行的SSH(Struts/Spring/Hiberanet)轻量级框架,对于很多中小型项目而言一点都不轻量级，开发者不仅需要维护代码，还需要维护繁琐的xml配置文件，而且说不定某个配置文件写的不对就让整个都工程无法运行。无配置文件可以取代SSH(struts/Spring/Hiberanet)框架的产品真的太多了，我之前就向大家介绍过一些个产品(Ref)。<br>这个我并不是一味的反对使用SSH(Struts/Spring/Hiberanet)框架，在我眼里SSH框架真的作用是做到了规范开发，而并不使用了SSH(Struts/Spring/Hiberanet)框架能提高多少性能。<br>SSH框架只是对于非常大的项目人数上百人的团队，还需要、继续增加团队规模的公司而言，是需要选择一些市面上大家都认可，并且熟悉的技术，SSH(Struts/Spring/Hiberanet)框架比较成熟所以是首先产品。<br>但是对于一些小团队中间有个把技术高人的团队而言完全可以选择更加简洁的框架，真正的做到提速你的开发效率，早日抛弃SSH框架选择更简洁的技术在小团队开发中是一种比较明知的选择。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Java </tag>
             
         </tags>
         
@@ -4578,7 +4660,7 @@ end <span class="keyword">for</span>
     
     <entry>
       <title><![CDATA[Hello World]]></title>
-      <url>http://Melodylican.github.io/2012/06/01/test/</url>
+      <url>http://Melodylican.github.io/2012/06/01/hello-world/</url>
       <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.<br><a id="more"></a></p>
 <h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
 <p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
@@ -4601,7 +4683,7 @@ end <span class="keyword">for</span>
     
     <entry>
       <title><![CDATA[Hello World]]></title>
-      <url>http://Melodylican.github.io/2012/06/01/hello-world/</url>
+      <url>http://Melodylican.github.io/2012/06/01/test/</url>
       <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.<br><a id="more"></a></p>
 <h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
 <p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
