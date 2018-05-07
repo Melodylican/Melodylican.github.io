@@ -141,25 +141,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </item>
     
     <item>
-      <title>Ansible when register使用</title>
-      <link>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</link>
-      <guid>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</guid>
-      <pubDate>Wed, 22 Nov 2017 16:00:00 GMT</pubDate>
-      <description>
-      
-        &lt;p&gt;当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下&lt;br&gt;任务配置文件test.yml：&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/ansible1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-      
-      </description>
-      
-      <content:encoded><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible1.png" alt=""></p>
-<a id="more"></a>
-<p>执行演示：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible2.png" alt=""></p>
-]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/#disqus_thread</comments>
-    </item>
-    
-    <item>
       <title>“秒杀”问题的数据库和SQL设计</title>
       <link>http://Melodylican.github.io/2017/11/23/%E7%A7%92%E6%9D%80%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8CSQL%E8%AE%BE%E8%AE%A1/</link>
       <guid>http://Melodylican.github.io/2017/11/23/%E7%A7%92%E6%9D%80%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8CSQL%E8%AE%BE%E8%AE%A1/</guid>
@@ -261,6 +242,25 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 ]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/11/23/%E7%A7%92%E6%9D%80%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8CSQL%E8%AE%BE%E8%AE%A1/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Ansible when register使用</title>
+      <link>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</link>
+      <guid>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</guid>
+      <pubDate>Wed, 22 Nov 2017 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;p&gt;当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下&lt;br&gt;任务配置文件test.yml：&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/ansible1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible1.png" alt=""></p>
+<a id="more"></a>
+<p>执行演示：<br><img src="http://ojwkevhas.bkt.clouddn.com/ansible2.png" alt=""></p>
+]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/#disqus_thread</comments>
     </item>
     
     <item>
