@@ -988,7 +988,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/08/20/spark优化/">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/08/20/spark完成PV和UV的计算/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Melodylican">
@@ -1010,8 +1010,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/08/20/spark优化/" itemprop="url">
-                  Spark优化
+                <a class="post-title-link" href="/2017/08/20/spark完成PV和UV的计算/" itemprop="url">
+                  Spark应用案例-Spark完成PV和UV的计算
                 </a>
               
             
@@ -1067,7 +1067,7 @@
 
           
           
-             <span id="/2017/08/20/spark优化/" class="leancloud_visitors" data-flag-title="Spark优化">
+             <span id="/2017/08/20/spark完成PV和UV的计算/" class="leancloud_visitors" data-flag-title="Spark应用案例-Spark完成PV和UV的计算">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1098,8 +1098,7 @@
       
         
           
-            <center><br><br><img src="http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png" alt=""><br><br></center>
-
+            <figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>
           
         
