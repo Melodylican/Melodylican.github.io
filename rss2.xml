@@ -8,8 +8,69 @@
     <atom:link href="/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description>life is struggle</description>
-    <pubDate>Mon, 07 May 2018 12:25:28 GMT</pubDate>
+    <pubDate>Thu, 24 May 2018 11:51:01 GMT</pubDate>
     <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>Java面试小结</title>
+      <link>http://Melodylican.github.io/2018/05/20/Java%E9%9D%A2%E8%AF%95%E5%B0%8F%E7%BB%93/</link>
+      <guid>http://Melodylican.github.io/2018/05/20/Java%E9%9D%A2%E8%AF%95%E5%B0%8F%E7%BB%93/</guid>
+      <pubDate>Sat, 19 May 2018 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;p&gt;Java面试小结&lt;/p&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<p>Java面试小结</p>
+<a id="more"></a> 
+<p>1.一面主要问基础，包括几方面:</p>
+<p>1) collection接口下面有哪些集合，hashmap的实现原理，要把1.7和1.8的区别(红黑树)讲出来，map有哪些实现类以及使用场景，hashmap, hashtable, linkedhashmap,weakHashMap, treemap, concurrentmap，你要是讲的好这里可以说十几分钟，linkedhashmap和treemap排序的区别，concurrenthashmap如何实现线程安全，这里也要把1.7和1.8实现差异说出来(分段加锁和cas技术)，说到这里以后就会问你cas实现原理( CPU Lock前缀指令),它是如何保证其他cpu core的cache失效的，然后会问你volatile的实现原理，要结合java内存模型来讲，可见性是如何实现的(内存屏障)，synchronized锁和reentrantlock的区别以及内部怎么实现的:常用的gc算法及优缺点，如何判断对象的存活性</p>
+<p>2) mysql有哪些索引，底层数据结构是什么，画一下b+树的结构以及数据的插入过程，聚集索引的特点，如何做索引优化，给你一个sql语句select a,b,c from t where a&lt;某个值 and  b&gt;某个值 and c = 1,如何建索引(可以是c,a,b或者c,b, a的联合索引，但要分析什么场景下分别用哪个);结合Innodb的实现说下数据库的隔离级别，分别是怎么解决脏读、不可重复读和幻读取的;对mysql最新版本的同步机制有没有了解,比如一个主节点和多个备份节点,mysql怎么保证可用性和性能；</p>
+<p>3) redis有哪些数据结构，分别用在哪些场景,对redis的pipeline有没有了解，解决什么问题,redis采用了什么方式来节省内存</p>
+<p>4) Spring IOC的理解以及IOC容器的初始化过程,Spring里的Bean是保存在哪里的,BeanFactory和FactoryBean的区别,Spring AOP怎么实现的(需要讲出来JDK动态代理和CGLib动态代理优缺点),头条还问了如果一个类的某个方法没有在接口里定义,这两种动态代理方式是怎么实现的；</p>
+<p>5) 线程池有哪些实现类，ThreadPoolExecutor有哪些参数，讲下它的工作原理，在使用过程中有哪些经验(比如工作队列大小的设置,ThreadFactory和ExjectExcutionHandler)</p>
+<p>6) 线程有哪些状态以及怎么转换的</p>
+<ol>
+<li>二面主要结合项目来问</li>
+</ol>
+<p>1). GC的常用算法以及优缺点，项目中用的什么垃圾回收算法,怎么做GC调优,对G1收集器有没有了解(要说出G1的出现主要解决了什么问题,为什么CMS算法会有内存碎片)</p>
+<p>在介绍GC算法的时候可能会提到GC Roots，面试官会问你哪些对象可以作为GC Roots，栈里面的局部变量表里有基本数据类型和引用类型，怎么找到引用类型;有个对象引用比如Hello,hello.sayHello()调用的时候怎么找到类里的sayHello()这个方法</p>
+<p>2). 项目里有用到限流，具体怎么做的</p>
+<p>3). 看你对Netty有了解，能不能讲下它的工作原理,netty里ChannelInBoundHandler和ChannelOutBoundHandler的区别，netty在读写数据的时候是先调用head还是tail handler,既然你知道NIO，有没有听说</p>
+<p>JDK epoll的BUG，Netty是怎么解决的,如何解决TCP粘包和拆包的问题,为什么会出现粘包和拆包</p>
+<p>4). 讲下你项目里做的数据库索引优化,如何去分析一条语句的执行性能,explain语句你会关注哪些字段</p>
+<p>5). 分别在什么场景使用synchronized和Lock，ReentrantLock内部怎么实现的，多线程通信有哪些方式(要把JUC包下的常用实现类说出来,比如CountDownLantch,信号量,栅栏)</p>
+<p>6). 如何实现分布式锁,一开始说了redis的实现,redis可能在锁超时后还没执行完任务,这个时候要怎么做，有没有更好的方式,后面说了用zookeeper的实现</p>
+<p>7). 项目里有用到ElasticSearch，能介绍ES的工作原理吗,什么是正向索引和反向索引，如何对ES进行优化</p>
+<p>8). 为什么会出现大量CLOSE_WAIT连接，能不能画一下TCP挥手的流程图介绍下,后面是怎么解决句柄泄露的问题</p>
+<p>9). 写代码实现一个EnumSet(阿里),用数组或者链表实现一个阻塞队列(美团)</p>
+<p>10). 哪些场景下会出现内存泄露(可以讲下HashMap,ThreadLocal,WeakHashMap,finalize),会问你ThreadLocal的原理以及为什么会有内存泄露</p>
+<p>11). 如何获取Redis里所有的keys(可以先说下keys *命令,然后再介绍可能导致系统阻塞无法对外响应,再介绍更好的scan命令)</p>
+<p>12). Java类加载机制，为什么要双亲委派</p>
+<p>13). Spring Bean的作用域有哪些，单例是线程安全的吗，怎么保证线程安全</p>
+<p>14). java里的Exception信息是怎么保存的,有没有用到java8的一些特性,Lambda表达式是语法糖吗，怎么实现的，和匿名内部类有什么区别; </p>
+<ol>
+<li>三面,一般是技术总监或者某个部门的主管面</li>
+</ol>
+<p>1). 简历里有提到有定位系统响应慢的经验，具体怎么做的</p>
+<p>2). 如果有个节点一直在做FullGC，你要怎么快速定位并恢复环境</p>
+<p>3). 如果要做一个秒杀系统，你会怎么设计，把能想到的点都说出来</p>
+<p>4). 假设数据库里有100W条数据，要把他们全部加载到Redis里，你会怎么设计这个系统(这里可能是个坑,缓存一般保存的热点数据,要讲下分布式缓存、缓存击穿、雪崩、并发更新等问题)</p>
+<p>5). ElasticSearch的分片机制,ES搜索过程是如何工作的,如果有很多网卡信息怎么做分片，如果一个Document有2个网卡呢</p>
+<p>6). 用过哪些消息中间件,能不能说下Kafka的工作原理，如果保证分布式系统的数据的一致性,给Kafka发消息如何保证消息的幂等性</p>
+<p>7). 如何对数据库做分库分表</p>
+<ol>
+<li>四面,基本上也是结合项目来问一些知识点,面试官一般会比较强势,会经常打断你说话,给你压力,这个时候千万不要慌,问的问题和上面差不多</li>
+</ol>
+<p>你在项目中遇到的最难的一个问题是什么，自己对未来3-5年的一个规划</p>
+<ol>
+<li>五面,HR面，随便聊聊</li>
+</ol>
+]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2018/05/20/Java%E9%9D%A2%E8%AF%95%E5%B0%8F%E7%BB%93/#disqus_thread</comments>
+    </item>
     
     <item>
       <title>Kafka常用命令</title>
@@ -160,6 +221,68 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </item>
     
     <item>
+      <title>高性能、最终一致性的数据同步方案</title>
+      <link>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</link>
+      <guid>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</guid>
+      <pubDate>Wed, 22 Nov 2017 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;p&gt;问题的来源&lt;br&gt;先描述一下问题：&lt;/p&gt;
+&lt;p&gt;两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。&lt;br&gt;&lt;/p&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<p>问题的来源<br>先描述一下问题：</p>
+<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br><a id="more"></a></p>
+<p>利用 Job 来定时同步数据<br>首先，如果是中小型系统，可以接受秒级别的延时，数据变更频率不是非常高的话，可以用这个方案。</p>
+<p>常见的场景有：后台系统用户数据，后台系统角色、组织架构数据。</p>
+<p>Job 处理过程</p>
+<p>那 Job 的数据逻辑是怎么样的呢？</p>
+<p>查询数据 -&gt; 可能需要做一些转换 -&gt; 然后插入数据</p>
+<p>看上去好简单的样子，但是如何查询数据会是一个挑战。因为假如你的表很大，而实际每分钟只会变更几条，难道你每次都要全量同步一边？</p>
+<p>如何识别出那些变过的数据呢？</p>
+<p>为你的数据加上 UpdateTime 字段</p>
+<p>为了解决这个问题，需要对你的数据库表进行一定的改造。其实，所有的数据库表都应该这么设计。</p>
+<p>第一个要改造的点是加上一个UpdateTime字段，每次更新数据的时候都需要去更新这个字段。</p>
+<p>如果用的是 MySQL 的话，可以直接把这个字段定义成这样子：</p>
+<p>UpdateTime timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP</p>
+<p>这样设置以后，每次数据变更 MySQL 会自动更新这个字段。另外，如果你进行了Update操作而数据其实没变，那么这个字段不会更新，非常贴心。</p>
+<p>这个是为了解决什么问题？</p>
+<p>我必须要知道所有数据的变更时间，我才能找到那些新插入或者新更新的数据。所以加上这个字段后，Insert和Update的问题就解决了，但是还有Delete！</p>
+<p>为你的数据加上 IsDeleted 字段</p>
+<p>你还在直接删除数据？如果是的话，赶紧改改吧，因为这么做在 ETL 系统中非常不友好。源表中的数据都删了，那 Job 还怎么找到它？难道要做两遍的数据比对？这个又要全表扫描目标表了。性能会非常差。</p>
+<p>所以最简单的方案就是加上IsDeleted字段进行软删除，这样删除的数据其实就是Update了一下，处理起来就非常简单了。</p>
+<p>如果你的系统在设计之初就用了软删除，那么你会轻松很多，如果不是，那么就需要修改你的程序了。</p>
+<p>相信我，越早改越好！除非你的系统永远那么小…</p>
+<p>选择合适的时间</p>
+<p>下面一个问题才是真正头疼的地方。我们也用过很多现成的 ETL 系统来同步数据了，源表也加上了上面提到的两个字段来识别有变更的数据。</p>
+<p>假设作业5分钟跑一次，那怎么写 SQL 语句呢？</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(Now(),INTERVAL 5 MINUTE)</p>
+<p>这么写有什么缺点呢？第一个缺点就是，你没办法保证你的 Job 真的是5分钟运行一次的，如果是5分01秒呢？那多出来的1秒的数据就丢了。</p>
+<p>另外，如果你 Job 所在机器的时间和数据库的时间不一致呢？极端情况假设你的 Job 机器快了10分钟，那么 Job 就永远取不到数据了。别以为这种情况不会发生…</p>
+<p>这个方案直接被拍死，那么下一个方案：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRunTime#</p>
+<p>这里需要加入一个LastRunTime变量，直接变量由 Job 程序自己记录。加上这个变量后，就解决了 Job 没办法准确地5分钟跑一次的问题。</p>
+<p>但是机器时间不一致的问题解决了吗？好像还没有…</p>
+<p>那来一个终极完美的方案吧：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRowTime#</p>
+<p>这里的LastRowTime是什么含义呢？它是你上次取到数据的最新一条。恩，这样就完全不依赖 Job 所在机器的时间了。哪怕它们相隔几年，数据也不会丢。因为你用的是相对时间。</p>
+<p>那为什么是&gt;=而不是&gt;呢？</p>
+<p>极端情况下，假设在同一个时间插入两条数据，它们的LastUpdateTime是一样的。而你取数据的时候，只插入了第一条，取完了才插入第二条。如果你后面查询的时候用&gt;，这个这里第二条数据就丢掉了。</p>
+<p>最后，还有一个折中方案，因为很多现成的 ETL 系统没办法记录LastRowTime，只能记录LastRunTime，那么可以这么写：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(#LastRunTime#,INTERVAL 10 MINUTE)</p>
+<p>这里我们可以接受两台机器有时间差，但是最多十分钟，这样做也会有缺点，每次都会有一些数据重复同步。</p>
+<p>或者，你的 ETL 系统连LastRunTime都没有（那还算是一个合格的 ETL 系统吗？），那么只能这样了，每五分钟同步一次：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(NOW(),INTERVAL 10 MINUTE)</p>
+<p>利用阿里巴巴开源组件 canal<br>上面的方案虽说只支持中小型系统，但是你们的数据库表真的会有频繁变更吗？如果没有，那么上面的方案一直是适用的。</p>
+<p>但是如果你们系统的更新真的非常频繁，而且你们要接近实时的同步效率那怎么办？</p>
+<p>如果有这样需求的话，建议尝试看看阿里巴巴的canal，项目地址在这里：<a href="https://github.com/alibaba/canal" target="_blank" rel="external">https://github.com/alibaba/canal</a></p>
+]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/#disqus_thread</comments>
+    </item>
+    
+    <item>
       <title>“秒杀”问题的数据库和SQL设计</title>
       <link>http://Melodylican.github.io/2017/11/23/%E7%A7%92%E6%9D%80%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8CSQL%E8%AE%BE%E8%AE%A1/</link>
       <guid>http://Melodylican.github.io/2017/11/23/%E7%A7%92%E6%9D%80%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8CSQL%E8%AE%BE%E8%AE%A1/</guid>
@@ -264,68 +387,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </item>
     
     <item>
-      <title>高性能、最终一致性的数据同步方案</title>
-      <link>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</link>
-      <guid>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</guid>
-      <pubDate>Wed, 22 Nov 2017 16:00:00 GMT</pubDate>
-      <description>
-      
-        &lt;p&gt;问题的来源&lt;br&gt;先描述一下问题：&lt;/p&gt;
-&lt;p&gt;两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。&lt;br&gt;&lt;/p&gt;
-      
-      </description>
-      
-      <content:encoded><![CDATA[<p>问题的来源<br>先描述一下问题：</p>
-<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br><a id="more"></a></p>
-<p>利用 Job 来定时同步数据<br>首先，如果是中小型系统，可以接受秒级别的延时，数据变更频率不是非常高的话，可以用这个方案。</p>
-<p>常见的场景有：后台系统用户数据，后台系统角色、组织架构数据。</p>
-<p>Job 处理过程</p>
-<p>那 Job 的数据逻辑是怎么样的呢？</p>
-<p>查询数据 -&gt; 可能需要做一些转换 -&gt; 然后插入数据</p>
-<p>看上去好简单的样子，但是如何查询数据会是一个挑战。因为假如你的表很大，而实际每分钟只会变更几条，难道你每次都要全量同步一边？</p>
-<p>如何识别出那些变过的数据呢？</p>
-<p>为你的数据加上 UpdateTime 字段</p>
-<p>为了解决这个问题，需要对你的数据库表进行一定的改造。其实，所有的数据库表都应该这么设计。</p>
-<p>第一个要改造的点是加上一个UpdateTime字段，每次更新数据的时候都需要去更新这个字段。</p>
-<p>如果用的是 MySQL 的话，可以直接把这个字段定义成这样子：</p>
-<p>UpdateTime timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP</p>
-<p>这样设置以后，每次数据变更 MySQL 会自动更新这个字段。另外，如果你进行了Update操作而数据其实没变，那么这个字段不会更新，非常贴心。</p>
-<p>这个是为了解决什么问题？</p>
-<p>我必须要知道所有数据的变更时间，我才能找到那些新插入或者新更新的数据。所以加上这个字段后，Insert和Update的问题就解决了，但是还有Delete！</p>
-<p>为你的数据加上 IsDeleted 字段</p>
-<p>你还在直接删除数据？如果是的话，赶紧改改吧，因为这么做在 ETL 系统中非常不友好。源表中的数据都删了，那 Job 还怎么找到它？难道要做两遍的数据比对？这个又要全表扫描目标表了。性能会非常差。</p>
-<p>所以最简单的方案就是加上IsDeleted字段进行软删除，这样删除的数据其实就是Update了一下，处理起来就非常简单了。</p>
-<p>如果你的系统在设计之初就用了软删除，那么你会轻松很多，如果不是，那么就需要修改你的程序了。</p>
-<p>相信我，越早改越好！除非你的系统永远那么小…</p>
-<p>选择合适的时间</p>
-<p>下面一个问题才是真正头疼的地方。我们也用过很多现成的 ETL 系统来同步数据了，源表也加上了上面提到的两个字段来识别有变更的数据。</p>
-<p>假设作业5分钟跑一次，那怎么写 SQL 语句呢？</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(Now(),INTERVAL 5 MINUTE)</p>
-<p>这么写有什么缺点呢？第一个缺点就是，你没办法保证你的 Job 真的是5分钟运行一次的，如果是5分01秒呢？那多出来的1秒的数据就丢了。</p>
-<p>另外，如果你 Job 所在机器的时间和数据库的时间不一致呢？极端情况假设你的 Job 机器快了10分钟，那么 Job 就永远取不到数据了。别以为这种情况不会发生…</p>
-<p>这个方案直接被拍死，那么下一个方案：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRunTime#</p>
-<p>这里需要加入一个LastRunTime变量，直接变量由 Job 程序自己记录。加上这个变量后，就解决了 Job 没办法准确地5分钟跑一次的问题。</p>
-<p>但是机器时间不一致的问题解决了吗？好像还没有…</p>
-<p>那来一个终极完美的方案吧：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRowTime#</p>
-<p>这里的LastRowTime是什么含义呢？它是你上次取到数据的最新一条。恩，这样就完全不依赖 Job 所在机器的时间了。哪怕它们相隔几年，数据也不会丢。因为你用的是相对时间。</p>
-<p>那为什么是&gt;=而不是&gt;呢？</p>
-<p>极端情况下，假设在同一个时间插入两条数据，它们的LastUpdateTime是一样的。而你取数据的时候，只插入了第一条，取完了才插入第二条。如果你后面查询的时候用&gt;，这个这里第二条数据就丢掉了。</p>
-<p>最后，还有一个折中方案，因为很多现成的 ETL 系统没办法记录LastRowTime，只能记录LastRunTime，那么可以这么写：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(#LastRunTime#,INTERVAL 10 MINUTE)</p>
-<p>这里我们可以接受两台机器有时间差，但是最多十分钟，这样做也会有缺点，每次都会有一些数据重复同步。</p>
-<p>或者，你的 ETL 系统连LastRunTime都没有（那还算是一个合格的 ETL 系统吗？），那么只能这样了，每五分钟同步一次：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(NOW(),INTERVAL 10 MINUTE)</p>
-<p>利用阿里巴巴开源组件 canal<br>上面的方案虽说只支持中小型系统，但是你们的数据库表真的会有频繁变更吗？如果没有，那么上面的方案一直是适用的。</p>
-<p>但是如果你们系统的更新真的非常频繁，而且你们要接近实时的同步效率那怎么办？</p>
-<p>如果有这样需求的话，建议尝试看看阿里巴巴的canal，项目地址在这里：<a href="https://github.com/alibaba/canal" target="_blank" rel="external">https://github.com/alibaba/canal</a></p>
-]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/#disqus_thread</comments>
-    </item>
-    
-    <item>
       <title>浅谈Java动态代理</title>
       <link>http://Melodylican.github.io/2017/11/21/%E6%B5%85%E8%B0%88Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</link>
       <guid>http://Melodylican.github.io/2017/11/21/%E6%B5%85%E8%B0%88Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</guid>
@@ -351,22 +412,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">运行结果：</div><div class="line">++++++before CGLIB$getName$0++++++</div><div class="line">getName</div><div class="line">------getName------</div><div class="line">++++++before CGLIB$getName$0++++++</div><div class="line">++++++before CGLIB$getAge$1++++++</div><div class="line">getAge</div><div class="line">------getAge------</div><div class="line">++++++before CGLIB$getAge$1++++++</div></pre></td></tr></table></figure>]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/11/21/%E6%B5%85%E8%B0%88Java%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/#disqus_thread</comments>
-    </item>
-    
-    <item>
-      <title>Netty 架构原理图</title>
-      <link>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</link>
-      <guid>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</guid>
-      <pubDate>Thu, 16 Nov 2017 16:00:00 GMT</pubDate>
-      <description>
-      
-        &lt;center&gt;&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg&quot; alt=&quot;&quot;&gt;&lt;br&gt;&lt;/center&gt;
-      
-      </description>
-      
-      <content:encoded><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/#disqus_thread</comments>
     </item>
     
     <item>
@@ -461,6 +506,22 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 ]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/11/17/%E6%B5%85%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Netty 架构原理图</title>
+      <link>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</link>
+      <guid>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</guid>
+      <pubDate>Thu, 16 Nov 2017 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;center&gt;&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg&quot; alt=&quot;&quot;&gt;&lt;br&gt;&lt;/center&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/#disqus_thread</comments>
     </item>
     
     <item>
@@ -667,6 +728,26 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </item>
     
     <item>
+      <title>Elasticsearch日志清理脚本</title>
+      <link>http://Melodylican.github.io/2017/10/20/ES%E6%97%A5%E5%BF%97%E6%B8%85%E9%99%A4%E5%B7%A5%E5%85%B7%E8%84%9A%E6%9C%AC/</link>
+      <guid>http://Melodylican.github.io/2017/10/20/ES%E6%97%A5%E5%BF%97%E6%B8%85%E9%99%A4%E5%B7%A5%E5%85%B7%E8%84%9A%E6%9C%AC/</guid>
+      <pubDate>Thu, 19 Oct 2017 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;p&gt;有的时候我们在使用ES时，由于资源有限或业务需求，我们只想保存最近一段时间的数据，所以有如下脚本可以定时删除数据&lt;/p&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<p>有的时候我们在使用ES时，由于资源有限或业务需求，我们只想保存最近一段时间的数据，所以有如下脚本可以定时删除数据</p>
+<a id="more"></a> 
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#!/bin/sh</span></div><div class="line"><span class="comment"># example: sh  delete_es_by_day.sh logstash-* logsdate 30</span></div><div class="line"></div><div class="line">index_name=<span class="variable">$1</span></div><div class="line">daycolumn=<span class="variable">$2</span></div><div class="line">savedays=<span class="variable">$3</span></div><div class="line">format_day=<span class="variable">$4</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> [ ! -n <span class="string">"<span class="variable">$savedays</span>"</span> ]; <span class="keyword">then</span></div><div class="line">  <span class="built_in">echo</span> <span class="string">"the args is not right,please input again...."</span></div><div class="line">  <span class="built_in">exit</span> 1</div><div class="line"><span class="keyword">fi</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> [ ! -n <span class="string">"<span class="variable">$format_day</span>"</span> ]; <span class="keyword">then</span></div><div class="line">   format_day=<span class="string">'%Y%m%d'</span></div><div class="line"><span class="keyword">fi</span></div><div class="line"></div><div class="line">sevendayago=`date <span class="_">-d</span> <span class="string">"-<span class="variable">$&#123;savedays&#125;</span> day "</span> +<span class="variable">$&#123;format_day&#125;</span>`</div><div class="line"></div><div class="line">curl -XDELETE <span class="string">"172.16.150.170:9200/<span class="variable">$&#123;index_name&#125;</span>/_query?pretty"</span> <span class="_">-d</span> <span class="string">"</span></div><div class="line">&#123;</div><div class="line">        "query<span class="string">": &#123;</span></div><div class="line">                "filtered<span class="string">": &#123;</span></div><div class="line">                        "filter<span class="string">": &#123;</span></div><div class="line">                                "bool<span class="string">": &#123;</span></div><div class="line">                                        "must<span class="string">": &#123;</span></div><div class="line">                                                "range<span class="string">": &#123;</span></div><div class="line">                                                        "<span class="variable">$&#123;daycolumn&#125;</span><span class="string">": &#123;</span></div><div class="line">                                                                "from<span class="string">": null,</span></div><div class="line">                                                                "to<span class="string">": <span class="variable">$&#123;sevendayago&#125;</span>,</span></div><div class="line">                                                                "include_lower<span class="string">": true,</span></div><div class="line">                                                                "include_upper<span class="string">": true</span></div><div class="line">                                                        &#125;</div><div class="line">                                                &#125;</div><div class="line">                                        &#125;</div><div class="line">                                &#125;</div><div class="line">                        &#125;</div><div class="line">                &#125;</div><div class="line">        &#125;</div><div class="line">&#125;"</div><div class="line"></div><div class="line"><span class="built_in">echo</span> <span class="string">"ok"</span></div></pre></td></tr></table></figure>
+<p>注解：脚本传入参数说明：1.索引名；2.日期字段名；3.保留最近几天数据，单位天；4.日期格式，可不输（默认形式20171020）</p>
+]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/10/20/ES%E6%97%A5%E5%BF%97%E6%B8%85%E9%99%A4%E5%B7%A5%E5%85%B7%E8%84%9A%E6%9C%AC/#disqus_thread</comments>
+    </item>
+    
+    <item>
       <title>Linux日志清理</title>
       <link>http://Melodylican.github.io/2017/10/16/Linux%E5%AE%9A%E6%97%B6%E6%B8%85%E7%90%86%E6%97%A5%E5%BF%97/</link>
       <guid>http://Melodylican.github.io/2017/10/16/Linux%E5%AE%9A%E6%97%B6%E6%B8%85%E7%90%86%E6%97%A5%E5%BF%97/</guid>
@@ -862,43 +943,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/08/21/spark%E8%B4%AD%E7%89%A9%E7%AF%AE%E5%AE%9E%E7%8E%B0/#disqus_thread</comments>
-    </item>
-    
-    <item>
-      <title>Spark应用案例-Spark完成PV和UV的计算</title>
-      <link>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</link>
-      <guid>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</guid>
-      <pubDate>Sun, 20 Aug 2017 08:42:23 GMT</pubDate>
-      <description>
-      
-        &lt;figure class=&quot;highlight scala&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/di
-      
-      </description>
-      
-      <content:encoded><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/#disqus_thread</comments>
-    </item>
-    
-    <item>
-      <title>Spark优化</title>
-      <link>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</link>
-      <guid>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</guid>
-      <pubDate>Sun, 20 Aug 2017 08:42:23 GMT</pubDate>
-      <description>
-      
-        &lt;center&gt;&lt;br&gt;&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png&quot; alt=&quot;&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;/center&gt;
-
-&lt;font color=&quot;grey&quot; size=&quot;1
-      
-      </description>
-      
-      <content:encoded><![CDATA[<center><br><br><img src="http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png" alt=""><br><br></center>
-
-<font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/#disqus_thread</comments>
     </item>
     
   </channel>
