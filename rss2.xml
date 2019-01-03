@@ -197,13 +197,13 @@ Note: This will have no impact if delete.topic.enable is not set to true.
       <pubDate>Wed, 22 Nov 2017 16:00:00 GMT</pubDate>
       <description>
       
-        &lt;p&gt;当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下&lt;br&gt;任务配置文件test.yml：&lt;br&gt;&lt;img src=&quot;https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+        &lt;p&gt;当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下&lt;br&gt;任务配置文件test.yml：&lt;br&gt;&lt;img src=&quot;https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;amp;q-sign-time=1546519044;1546520844&amp;amp;q-key-time=1546519044;1546520844&amp;amp;q-header-list=&amp;amp;q-url-param-list=&amp;amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
       
       </description>
       
-      <content:encoded><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png" alt=""></p>
+      <content:encoded><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;q-sign-time=1546519044;1546520844&amp;q-key-time=1546519044;1546520844&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001" alt=""></p>
 <a id="more"></a>
-<p>执行演示：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible2.png" alt=""></p>
+<p>执行演示：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible2.png?q-sign-algorithm=sha1&amp;q-ak=AKIDYQ69MWC4WgrrGtqZ1F4YTldb0IrcYnWH&amp;q-sign-time=1546517765;1546519565&amp;q-key-time=1546517765;1546519565&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=588e23def46b660536584cbaa5199ea48710a838&amp;x-cos-security-token=9880b484ed7c6fb712b98ee72bea31340760a58310001" alt=""></p>
 ]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/#disqus_thread</comments>
@@ -404,22 +404,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </item>
     
     <item>
-      <title>Netty 架构原理图</title>
-      <link>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</link>
-      <guid>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</guid>
-      <pubDate>Thu, 16 Nov 2017 16:00:00 GMT</pubDate>
-      <description>
-      
-        &lt;center&gt;&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg&quot; alt=&quot;&quot;&gt;&lt;br&gt;&lt;/center&gt;
-      
-      </description>
-      
-      <content:encoded><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/#disqus_thread</comments>
-    </item>
-    
-    <item>
       <title>浅谈分布式锁</title>
       <link>http://Melodylican.github.io/2017/11/17/%E6%B5%85%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</link>
       <guid>http://Melodylican.github.io/2017/11/17/%E6%B5%85%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</guid>
@@ -511,6 +495,22 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 ]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/11/17/%E6%B5%85%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Netty 架构原理图</title>
+      <link>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</link>
+      <guid>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/</guid>
+      <pubDate>Thu, 16 Nov 2017 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;center&gt;&lt;br&gt;&lt;img src=&quot;http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg&quot; alt=&quot;&quot;&gt;&lt;br&gt;&lt;/center&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/11/17/Netty%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86%E5%9B%BE/#disqus_thread</comments>
     </item>
     
     <item>
