@@ -1,0 +1,1139 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="缓存,Redis,">
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="不卑不亢不慌不忙" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0">
+
+
+
+
+
+
+<meta name="description" content="今天讲的这个话题，我相信是众多工程师和团队的痛。从我刚开始工作，那时候构建本地缓存，到后续memcache, Redis的出现，到现在各种分布式集群的缓存，例如redis Cluster等产品的出现，缓存越来越发达和复杂了，缓存对我们的系统也越发重要，现在很难相信一个后端服务里没有缓存的存在。在这篇文章里，我会和大家分享一下过去踩到的缓存坑，然后试图给出一些解决方案，大家可以一起讨论，最终拿出更好">
+<meta name="keywords" content="缓存,Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="缓存踩过的坑">
+<meta property="og:url" content="http://Melodylican.github.io/2017/12/07/缓存踩过的坑/index.html">
+<meta property="og:site_name" content="不卑不亢不慌不忙">
+<meta property="og:description" content="今天讲的这个话题，我相信是众多工程师和团队的痛。从我刚开始工作，那时候构建本地缓存，到后续memcache, Redis的出现，到现在各种分布式集群的缓存，例如redis Cluster等产品的出现，缓存越来越发达和复杂了，缓存对我们的系统也越发重要，现在很难相信一个后端服务里没有缓存的存在。在这篇文章里，我会和大家分享一下过去踩到的缓存坑，然后试图给出一些解决方案，大家可以一起讨论，最终拿出更好">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png?q-sign-algorithm=sha1&q-ak=AKIDFLFUVTSk49SYY75C6dqnJvFccrQIA1Pf&q-sign-time=1546567812;1546569612&q-key-time=1546567812;1546569612&q-header-list=&q-url-param-list=&q-signature=8971da722fe2babf53eb2cd4b7bca25a54a1b0d1&x-cos-security-token=64a37535ddb277d64574168bd6be06ef386d489610001">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%912.png?q-sign-algorithm=sha1&q-ak=AKID6spKzC48NfvpuRa63tmJsAru2vl4ToTB&q-sign-time=1546567834;1546569634&q-key-time=1546567834;1546569634&q-header-list=&q-url-param-list=&q-signature=4e9881e43f7d56168da30114a6487f4ae83d9863&x-cos-security-token=6260c6d047a05cb66b62ee881a44d16eae29106c10001">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%913.png?q-sign-algorithm=sha1&q-ak=AKIDj9PDdTLJn0PIakb01iaJU2LOVh6I3Fhn&q-sign-time=1546567860;1546569660&q-key-time=1546567860;1546569660&q-header-list=&q-url-param-list=&q-signature=ab781a53ea82de240aa7d39b13e9cbf9d2ee6003&x-cos-security-token=4d979f8abc7e22ee3e82906df1dbb79a2909f6d310001">
+<meta property="og:updated_time" content="2019-01-04T02:11:18.240Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="缓存踩过的坑">
+<meta name="twitter:description" content="今天讲的这个话题，我相信是众多工程师和团队的痛。从我刚开始工作，那时候构建本地缓存，到后续memcache, Redis的出现，到现在各种分布式集群的缓存，例如redis Cluster等产品的出现，缓存越来越发达和复杂了，缓存对我们的系统也越发重要，现在很难相信一个后端服务里没有缓存的存在。在这篇文章里，我会和大家分享一下过去踩到的缓存坑，然后试图给出一些解决方案，大家可以一起讨论，最终拿出更好">
+<meta name="twitter:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png?q-sign-algorithm=sha1&q-ak=AKIDFLFUVTSk49SYY75C6dqnJvFccrQIA1Pf&q-sign-time=1546567812;1546569612&q-key-time=1546567812;1546569612&q-header-list=&q-url-param-list=&q-signature=8971da722fe2babf53eb2cd4b7bca25a54a1b0d1&x-cos-security-token=64a37535ddb277d64574168bd6be06ef386d489610001">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://Melodylican.github.io/2017/12/07/缓存踩过的坑/">
+
+
+
+
+
+  <title> 缓存踩过的坑 | 不卑不亢不慌不忙 </title>
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b882a8b6fdb7e13666299576d25a043a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+<a href="https://github.com/Melodylican"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">不卑不亢不慌不忙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">life is struggle</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-collect">
+          <a href="/collect" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-flag"></i> <br>
+            
+            收集
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/12/07/缓存踩过的坑/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                缓存踩过的坑
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-07T00:00:00+08:00">
+                2017-12-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/12/07/缓存踩过的坑/" class="leancloud_visitors" data-flag-title="缓存踩过的坑">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>今天讲的这个话题，我相信是众多工程师和团队的痛。从我刚开始工作，那时候构建本地缓存，到后续memcache, Redis的出现，到现在各种分布式集群的缓存，例如redis Cluster等产品的出现，缓存越来越发达和复杂了，缓存对我们的系统也越发重要，现在很难相信一个后端服务里没有缓存的存在。在这篇文章里，我会和大家分享一下过去踩到的缓存坑，然后试图给出一些解决方案，大家可以一起讨论，最终拿出更好的方法。由于篇幅有限，所以这里的缓存讨论，只局限于后端服务的缓存，并且不涉及具体的框架，对于H5,iOS和Android等前端缓存的讨论本文暂时不会涉及。<br><a id="more"></a><br><strong>案例1，缓存和DB的同步更新不在同一个事务里并且没有重试补偿机制</strong></p>
+<p>为了减少系统间的依赖，不同系统的数据更新往往不放在同一个事务里，采用MQ来进行通信。大家可以看下图，后台系统CRM更新产品数据到DB，Product系统收到异步消息通知后，更新最新数据到缓存。这是一个最常见的缓存应用场景，我相信很多团队都是这样用的。在这个Case里容易出现的问题在于，如果批处理任务收到消息后服务crash掉了，缓存没有正常更新，就出现了与DB的数据不同步，前端系统一直不能读到最新数据，导致业务异常。</p>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png?q-sign-algorithm=sha1&amp;q-ak=AKIDFLFUVTSk49SYY75C6dqnJvFccrQIA1Pf&amp;q-sign-time=1546567812;1546569612&amp;q-key-time=1546567812;1546569612&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=8971da722fe2babf53eb2cd4b7bca25a54a1b0d1&amp;x-cos-security-token=64a37535ddb277d64574168bd6be06ef386d489610001" alt=""><br></center>
+
+<p><strong>解决方案：</strong></p>
+<ol>
+<li><p>失败消息一定要建立一定时间间隔的重试机制</p>
+</li>
+<li><p>系统要有缓存更新的报警机制，方便更新失败或者重试超时后，可以人工介入进行补偿。</p>
+</li>
+</ol>
+<p><strong>案例2， 同一数据被1个以上的服务执行写操作，其中一个服务的缓存数据没有版本控制</strong></p>
+<p>这也是两个不同服务更新数据过程中很常见的情况，见下图，CRM系统更新了某个用户的Profile, 保存更新数据库后，通过MQ通知用户系统更新缓存，由于是异步更新延迟，在缓存更新前，用户系统收到前端的指令，读取了当前缓存里的用户数据，做了修改，并更新到DB中。出现的结果就是数据库里的CRM的更新被错误覆盖。</p>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%912.png?q-sign-algorithm=sha1&amp;q-ak=AKID6spKzC48NfvpuRa63tmJsAru2vl4ToTB&amp;q-sign-time=1546567834;1546569634&amp;q-key-time=1546567834;1546569634&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=4e9881e43f7d56168da30114a6487f4ae83d9863&amp;x-cos-security-token=6260c6d047a05cb66b62ee881a44d16eae29106c10001" alt=""><br></center>
+
+<p><strong>解决方案</strong>：缓存里的数据有一个标志位可以作为更新数据库数据的依据（Update_time or Version）, 如果缓存里数据时间与数据库时间不能匹配，意味着另外一个服务更新了该数据，那么就先从DB里读取最新数据版本，然后在新版本上提交数据。</p>
+<p><strong>案例3， 并发查询缓存中同一数据，如果缓存没命中，导致DB瞬时被打爆</strong></p>
+<p>做促销活动的时候，存在大量用户的并发访问某一个特定商品，该商品数据缓存失效，或者做了数据更改，但是对应缓存还没有更新，那么所有这些访问将同时直接被作用到DB上。</p>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%913.png?q-sign-algorithm=sha1&amp;q-ak=AKIDj9PDdTLJn0PIakb01iaJU2LOVh6I3Fhn&amp;q-sign-time=1546567860;1546569660&amp;q-key-time=1546567860;1546569660&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=ab781a53ea82de240aa7d39b13e9cbf9d2ee6003&amp;x-cos-security-token=4d979f8abc7e22ee3e82906df1dbb79a2909f6d310001" alt=""><br></center>
+
+<p><strong>解决方案</strong>：做一个计数器或者锁（没有特别复杂逻辑的话，可以直接用HashMap），如果发现某个KEY缓存没有命中，那么在计数器+1, 然后访问数据库，拿到结果更新缓存，清理掉计数器中的key。 在这个过程中，如果有第二个线程或者更多的线程需要访问这个KEY时，发现计数器的值&gt;1 或者被加锁, 那么wait, 直到计数器清理掉，当然，这个技术器阈值是可以在配置文件里配置的，不一定是1。</p>
+<p><strong>案例4， 缓存没有设置默认值，被攻击，缓存一直保持在被“穿透”状态</strong></p>
+<p>这个情况，和案例3比较类似，都是缓存无法命中，但不一样的地方在于，数据的KEY值是无法控制的，所以没法简单的用计数器和锁来处理, 比方，被人为攻击，制造的大量的无效userID访问。</p>
+<p><strong>解决方案</strong>：所有没有在缓存的KEY，全部分配一个默认VALUE “UNKOWN-KEY” ，具体是什么情况下，将默认值分配给没有命中的KEY， 这个可以根据自己的业务系统来定，比方说，可以根据特定的IP段，或者没有命中的总次数等，然后我们就可以决定是否继续访问DB还是直接返回默认值给前端，拒绝本次数据访问。这种做法的核心在于，每次数据访问，都会有缓存结果返回，根据系统的情况来决定是否要进一步访问DB。</p>
+<p>总结，今天列举的这几个案例，归纳起来，可以总结为以下几点：</p>
+<ol>
+<li><p>保证缓存同步</p>
+</li>
+<li><p>减少缓存并发</p>
+</li>
+<li><p>杜绝缓存穿透</p>
+</li>
+</ol>
+<p>缓存与背后的DB是相互依存的关系，缓存系统的设计原则，就是将访问的异常处理或者压力尽可能的前置处理掉，将DB还原成它最初本来的存储功能。</p>
+<font size="1"><a href="https://mp.weixin.qq.com/s?__biz=MzI3OTUwMjM4MA%3D%3D&mid=2247483718&idx=1&sn=3324abf6b2a3245e330b35213ee922a5&chksm=eb478a05dc300313355f4e437ec701b58356c4aa19ad36c46c4031216dab3016e016bda8afee" target="_blank" rel="noopener">原文地址</a> </font>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/img/wechat.png" alt="Melodylican WeChat Pay">
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/img/zhifubao.png" alt="Melodylican Alipay">
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+	
+
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/缓存/" rel="tag"><i class="fa fa-tag"></i> 缓存</a>
+          
+            <a href="/tags/Redis/" rel="tag"><i class="fa fa-tag"></i> Redis</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/23/Ansible-when-register使用/" rel="next" title="Ansible when register使用">
+                <i class="fa fa-chevron-left"></i> Ansible when register使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/20/Kafka常用命令/" rel="prev" title="Kafka常用命令">
+                Kafka常用命令 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Melodylican">
+          <p class="site-author-name" itemprop="name">Melodylican</p>
+           
+              <p class="site-description motion-element" itemprop="description">life is struggle</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">97</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">77</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/your-user-name" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/your-user-name" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3235750572" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://jm.taobao.org" title="阿里中间件技术团队" target="_blank">阿里中间件技术团队</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.ruanyifeng.com/home.html" title="阮一峰" target="_blank">阮一峰</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Powered By <a href="#">Melodylican</a></span>
+</div>
+
+
+<div class="powered-by">
+    个人专属
+</div>
+
+<div class="theme-info">
+  博客 
+  
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2128487"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="local-search-pop-overlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("nCYvmPGeqGhuuM0qkwvIf2k1-gzGzoHsz", "dnC7e97rmSEwVQKrjxAE7oRR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+  
+  <!-- 随机线条
+  
+	<script type="text/javascript" color="0,0,255" opacity='0.7' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+  -->
+<!-- 小红心 -->
+<script type="text/javascript" src="/js/src/love.js"></script>
+</body>
+</html>

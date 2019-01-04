@@ -1,0 +1,1215 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Java,MapReduce,">
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="不卑不亢不慌不忙" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0">
+
+
+
+
+
+
+<meta name="description" content="MapReduce 工作原理一图胜千言：">
+<meta name="keywords" content="Java,MapReduce">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MapReduce">
+<meta property="og:url" content="http://Melodylican.github.io/2016/05/15/MapReduce/index.html">
+<meta property="og:site_name" content="不卑不亢不慌不忙">
+<meta property="og:description" content="MapReduce 工作原理一图胜千言：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/mapreduce.png">
+<meta property="og:updated_time" content="2019-01-03T12:11:37.914Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MapReduce">
+<meta name="twitter:description" content="MapReduce 工作原理一图胜千言：">
+<meta name="twitter:image" content="http://ojwkevhas.bkt.clouddn.com/mapreduce.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://Melodylican.github.io/2016/05/15/MapReduce/">
+
+
+
+
+
+  <title> MapReduce | 不卑不亢不慌不忙 </title>
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b882a8b6fdb7e13666299576d25a043a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+<a href="https://github.com/Melodylican"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">不卑不亢不慌不忙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">life is struggle</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-collect">
+          <a href="/collect" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-flag"></i> <br>
+            
+            收集
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2016/05/15/MapReduce/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                MapReduce
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-15T00:00:00+08:00">
+                2016-05-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/算法/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2016/05/15/MapReduce/" class="leancloud_visitors" data-flag-title="MapReduce">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="MapReduce-工作原理"><a href="#MapReduce-工作原理" class="headerlink" title="MapReduce 工作原理"></a>MapReduce 工作原理</h2><p>一图胜千言：<br><a id="more"></a></p>
+<p><center><br><img src="http://ojwkevhas.bkt.clouddn.com/mapreduce.png" alt=""><br></center></p>
+<h3 id="Mapper"><a href="#Mapper" class="headerlink" title="Mapper:"></a>Mapper:</h3><ol>
+<li>Mapper 主要做些信息抽取、过滤等工作</li>
+<li>Mapper 数量由输入的 split 数决定，hadoop 会尽量选择靠近数据的节点运行 mapper 任务，因此可以认为 mapper 是 data-local 的</li>
+<li>生成的<h2 id="常见算法的-MapReduce-实现"><a href="#常见算法的-MapReduce-实现" class="headerlink" title="常见算法的 MapReduce 实现"></a>常见算法的 MapReduce 实现</h2></li>
+</ol>
+<h3 id="count-distinct"><a href="#count-distinct" class="headerlink" title="count / distinct"></a>count / distinct</h3><h4 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h4><p>其实就是 Hadoop wordcount 的例子：一堆文档，每个文档内一堆单词，统计每个单词出现次数。</p>
+<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p><strong>Mapper：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">raw data    --&gt;    对每个碰到的单词，输出 &lt;word,1&gt;</span><br></pre></td></tr></table></figure></p>
+<p>Shuffle 后可以保证同一个单词的所有键值对被一个 Reducer 处理</p>
+<p><strong>Reducer：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;word,[1,1,1...]&gt;   --(sum)--&gt;    &lt;word,5&gt;</span><br></pre></td></tr></table></figure></p>
+<p><strong>优化</strong></p>
+<p>用 combiner 合并 mapper 的输出，减少传输数据量：<br><strong>Mapper：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">raw data </span><br><span class="line">1. --(mapper)--&gt;    &lt;word1,1&gt; &lt;word1,1&gt; &lt;word2,1&gt; </span><br><span class="line">2. --(combine)--&gt;   &lt;word1,2&gt; &lt;word2,1&gt;</span><br></pre></td></tr></table></figure></p>
+<p><strong>distinct</strong><br>distinct 就是集合去重，解决思路和 count 问题一样，不过不需要记录单词出现次数，键值对的 value 用 null 就可以了：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Mapper:</span><br><span class="line">raw data    --&gt;    &lt;word,null&gt;</span><br><span class="line"></span><br><span class="line">Reducer:</span><br><span class="line">&lt;word,[null,null...]&gt;   --&gt;    &lt;word,null&gt;</span><br></pre></td></tr></table></figure></p>
+<h3 id="group-by-aggregation"><a href="#group-by-aggregation" class="headerlink" title="group by / aggregation"></a>group by / aggregation</h3><h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>实现类似数据库的 group by 及聚合函数的功能</p>
+<h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><p>Mapreduce 的 shuffle 过程其实已经帮我们做了 group by 的工作，Reducer 拿到的输入就是 group by 后的结果，对其 value 应用聚合函数即可。</p>
+<h2 id="inverted-index"><a href="#inverted-index" class="headerlink" title="inverted index"></a>inverted index</h2><h3 id="问题-1"><a href="#问题-1" class="headerlink" title="问题"></a>问题</h3><p>一堆文档，构造对应的倒排索引。</p>
+<h3 id="解决-1"><a href="#解决-1" class="headerlink" title="解决"></a>解决</h3><p>思路和 wordcount 是一样的。</p>
+<p><strong>Mapper：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">对一个文档中的每个单词，输出 &lt;word,fileName&gt;</span><br></pre></td></tr></table></figure></p>
+<p>优化：可以用 Combiner 合并 Mapper 的输出。</p>
+<p><strong>Reducer</strong>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Rducuer 的输入是 &lt;word,[file1,file2...]&gt;，直接输出就好了</span><br></pre></td></tr></table></figure></p>
+<h2 id="sort"><a href="#sort" class="headerlink" title="sort"></a>sort</h2><h3 id="问题-2"><a href="#问题-2" class="headerlink" title="问题"></a>问题</h3><p>一堆文件，每个文件都有若干行，一行是一个数字，数字的范围是确定的，要求对其排序。</p>
+<h3 id="解决-2"><a href="#解决-2" class="headerlink" title="解决"></a>解决</h3><p>利用 Reducer 拿到的输入是有序的这一特性，Mapper 和 Recuder 如果都用 identity function，那么每个 Reducer 的输出都是有序的，但 Reducer 之间无法保证有序。</p>
+<p>如果用归并排序的思路， 那么最后还需要一个只有一个 Reducer 的 Mapreduce 任务对所有数据做一次 merge，这显然是无法接受的。</p>
+<p>真正可行的算法是 桶排序。回顾桶排序的过程，它首先将数据分布范围划分为若干个桶，接着遍历一遍元素并分配到对应的桶中，然后对每个桶做一次排序，因为桶之间是有序的，所以不需要 merge。</p>
+<p>在 Mapreduce 中，Partitioner 负责划分桶。举个例子，假设数据分布在 1 到 1w 之间，我们可以将其划分为 10 个桶，同时用 10 个 Reducer 处理每个桶内的数据，这样 Reducer 间就是有序的。为了实现这个效果，可以用一个自定义的Partitioner，将 Mapper 输出划分到上述 10 个桶内即可。</p>
+<h2 id="median-第-k-大数"><a href="#median-第-k-大数" class="headerlink" title="median / 第 k 大数"></a>median / 第 k 大数</h2><h3 id="问题-3"><a href="#问题-3" class="headerlink" title="问题"></a>问题</h3><p>一堆数字，找中位数或第 k 大数。</p>
+<p>工作中遇见过一个类似的问题，场景是：</p>
+<blockquote>
+<p>有一堆 Nginx 登陆日志，每条 log 都有一个时间点，要求找到一个时间点，使得该时间点之前的日志数占总日志数的 30%。</p>
+<h3 id="解决-3"><a href="#解决-3" class="headerlink" title="解决"></a>解决</h3></blockquote>
+<p>在小数据量场景下，反复利用快速排序的分割可以在 O(n) 范围内找到第 K 大数。我们可以将这个思路扩展到分布式环境下：</p>
+<ol>
+<li>用一个 MapReduce 任务统计所有日志的时间范围和日志总数；</li>
+<li>随机选一个时间点，用一个新的任务统计该时间点之前和之后的日志数；</li>
+<li>如果该时间点不满足要求，则根据 2 的结果找一个新的时间点，重复步骤2。<br>通常这类统计需求不要求非常精确，得到一个差不多的值就可以了。</li>
+</ol>
+<h2 id="top-k"><a href="#top-k" class="headerlink" title="top k"></a>top k</h2><h3 id="问题-4"><a href="#问题-4" class="headerlink" title="问题"></a>问题</h3><p>求一堆数前 k 大的数。</p>
+<h3 id="解决-4"><a href="#解决-4" class="headerlink" title="解决"></a>解决</h3><p>其实这个问题和上面的第 k 大数是一样的，可以用上面的思路解决，这里介绍一种 k 比较小时效率更高的算法。</p>
+<p>如果数据量很小，求 top k 可以用一个小根堆维护 top k，堆顶为这最大的 k 个数中的最小元素，把所有数据过一遍，最后堆内就是所求值了。这个算法可以很容易地扩展到分布式的环境中：先求出每个 split 的 top k，合并这些元素再求一次 top k 即得结果。</p>
+<p><strong>Mapper</strong>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">维护一个小根堆，任务结束后对堆内每个元素输出一个键值对 &lt;&quot;&quot;,num1&gt;, &lt;&quot;&quot;,num2&gt; ...</span><br></pre></td></tr></table></figure></p>
+<p><strong>Reducer</strong>（数量为 1）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">得到的输入为 &lt;&quot;&quot;,[每个 split 的 top k]&gt;，对 value 求一次 top k 就可以了。</span><br></pre></td></tr></table></figure></p>
+<p>该算法的优势在于只要一次 Mapreduce 任务即可，但缺点是只适用于 k 比较小的情况，如果 k 很大：</p>
+<ol>
+<li>如果 k 大于每个 split 内包含的记录数，算法失效；</li>
+<li>Reducer 可能没有足够的内存容纳输入<h3 id="出现次数-top-k-的元素"><a href="#出现次数-top-k-的元素" class="headerlink" title="出现次数 top k 的元素"></a>出现次数 top k 的元素</h3></li>
+</ol>
+<p>比上面的 top k 问题多了一个步骤，要求出每个元素的出现次数。如果数据量比较小，可以用下面方法：</p>
+<ol>
+<li><p><strong>bitmap（如果不是数字的话则用 hashmap）+ 堆 / 快排的分割 </strong><br>bitmap / hashmap 用来统计元素的出现次数，堆用来保存当前 top k，只需一次遍历即可。 用快排的分割的话，要先统计出次数再分割，不只一次遍历。</p>
+</li>
+<li><p>不要求精确的话，可以用 计数版本的 BloomFilter + 堆<br>BloomFilter 只保存了元素的次数，没有保存元素，因此只能边统计边记录 top k，一次遍历。</p>
+</li>
+</ol>
+<p>如果是大数据量就需要先用一个 hadoop 任务来分割，保证同一个元素的记录被分配到同一个 reducer，这样可以求出每个元素的出现次数；以这个任务的输出为输入，用上面提到的 top k 算法求出每个 split 的 top k；最后用一个 reducer 进行 merge，求出 top k 的 top k。</p>
+<h2 id="join"><a href="#join" class="headerlink" title="join"></a>join</h2><h3 id="问题-5"><a href="#问题-5" class="headerlink" title="问题"></a>问题</h3><p>join！</p>
+<h3 id="解决-5"><a href="#解决-5" class="headerlink" title="解决"></a>解决</h3><p>通常有以下两种算法：</p>
+<p><strong>Replicated Join (Map Join, Hash Join)</strong></p>
+<p>如果 join 的一方数据量较小，可以载入内存，则可以用 Hadoop 的 Distributed Cache 将其分发到每个 Mapper 节点，在 Mapper 端进行 join。较小数据集在 Mapper 端通常被构造成一个 HashMap 以加速查找，因此 Mapper Join 实质上是一种 Hash join。</p>
+<p><strong>Repartition Join (Reduce Join, Sort-Merge Join)</strong></p>
+<p>如果两个数据集都很大，可在 Reducer 侧做 join：</p>
+<p>Mapper 同时处理两个集合的数据，为遇到的每个记录生成一个键值对，key 是 join 的列值，value 除了该记录还需要一个 tag 表明它来自哪个集合:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">raw data    --&gt;    &lt;key,(record,fromA)&gt;, &lt;key,(record,fromB)&gt; ...</span><br></pre></td></tr></table></figure></p>
+<p>Shuffle 后 Reducer 得到一个 key 对应的所有记录，无论是来自集合 A 还是 B。接下来 Reducer 用循环，根据 join 的类型对这些记录做连接即可。</p>
+<p>该算法的关键在于 shuffle 阶段的排序，因此本质上是一种 Sort-Merge join。</p>
+<p>Reducer 侧 join 是一种通用的 join 算法，但它有以下缺点：</p>
+<ol>
+<li>Mapper 侧根本不过滤数据，所有数据，即使是那些无法 join 的记录，都会被传输到 Reducer 侧，再由 Reducer 过滤，这样性能很差；</li>
+<li>Reducer 侧可能没有足够的内存装下一个 key 对应的所有记录。<h3 id="join-优化"><a href="#join-优化" class="headerlink" title="join 优化"></a>join 优化</h3></li>
+</ol>
+<p>考虑这样一个场景：有两个数据集，Customer 和 Order，要求对他们进行 join，但仅限于地区在上海的顾客。</p>
+<p>有几种可能的优化方式：</p>
+<ol>
+<li><p><strong>预先过滤一个集合，使用 Replicated Join</strong></p>
+<p>利用“地区为上海”这个约束过滤 Customer，如果过滤后的数据集足够小，则可以采用 Replicated Join；</p>
+</li>
+<li><p>用半连接(semi join)优化 Reduce Join：先过滤集合 A ，再用得到的结果在 Mapper 处过滤集合 B，最后在 Reducer 处 Join</p>
+<p>如果过滤后的数据集依然很大，那么只能采用低效率的 Reduce join。优化 Reduce join 的主要策略是 尽量将数据过滤动作放在 Mapper 进行（这也是一个通用准则），在上述例子中， Mapper 在处理某个 Order 时，如果知道其对应的 Customer 不在 Customer 集合中，或者不在上海地区，那么就可以跳过它而不用传输到 Reducer 侧。为了达到这一点，我们可以先对 Customer 过滤（就像1一样），将上海的顾客的<em> ID </em>选出来，这样得到的文件比1得到的文件更小（因为它只有一个 ID），很有可能可以被装入内存。用 Distributed Cache 将该 ID 文件分发到所有 Mapper 节点，Mapper 在处理 Customer 或 Order 的记录时就可以根据这个集合过滤所有非上海的顾客了。</p>
+<p>如果过滤得到的 ID 文件依然很大，这时判重利器 BloomFilter 就派上用场了。我们可以建立一个 BloomFilter 表示过滤后的顾客 ID 集合，它的尺寸要远小于原始集合。BloomFilter 存在的误判率也不是问题，它只会把不存在的元素误判为存在，Reducer 处也会进行过滤，可以把误判的元素剔除掉。</p>
+</li>
+</ol>
+<p><strong>基于 Mapreduce 为超大集合建立 BloomFilter 的方法：</strong></p>
+<p>每个 Mapper 对自己负责的 split 建立 BloomFilter，用一个 Reducer 接收它们并两两相“或”，即得到整体集合的 BloomFilter。</p>
+<p>这利用了 BloomFilter 的性质：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">filter1 | filter2 == 并集</span><br><span class="line">filter1 &amp; filter2 == 交集</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="http://highlyscalable.wordpress.com/2012/02/01/mapreduce-patterns/" target="_blank" rel="noopener">Mapreduce patterns</a></li>
+<li><a href="http://blog.cloudera.com/wp-content/uploads/2010/01/5-MapReduceAlgorithms.pdf" target="_blank" rel="noopener">Mapreduce algorithms.pdf</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/img/wechat.png" alt="Melodylican WeChat Pay">
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/img/zhifubao.png" alt="Melodylican Alipay">
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+	
+
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"><i class="fa fa-tag"></i> Java</a>
+          
+            <a href="/tags/MapReduce/" rel="tag"><i class="fa fa-tag"></i> MapReduce</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/01/Hadoop执行过程/" rel="next" title="Hadoop执行过程">
+                <i class="fa fa-chevron-left"></i> Hadoop执行过程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/09/storm_fieldsgrouping/" rel="prev" title="Storm 笔记 fieldsGrouping">
+                Storm 笔记 fieldsGrouping <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Melodylican">
+          <p class="site-author-name" itemprop="name">Melodylican</p>
+           
+              <p class="site-description motion-element" itemprop="description">life is struggle</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">97</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">77</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/your-user-name" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/your-user-name" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3235750572" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://jm.taobao.org" title="阿里中间件技术团队" target="_blank">阿里中间件技术团队</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.ruanyifeng.com/home.html" title="阮一峰" target="_blank">阮一峰</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MapReduce-工作原理"><span class="nav-number">1.</span> <span class="nav-text">MapReduce 工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mapper"><span class="nav-number">1.1.</span> <span class="nav-text">Mapper:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见算法的-MapReduce-实现"><span class="nav-number">2.</span> <span class="nav-text">常见算法的 MapReduce 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#count-distinct"><span class="nav-number">2.1.</span> <span class="nav-text">count / distinct</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#问题描述"><span class="nav-number">2.1.1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解决"><span class="nav-number">2.1.2.</span> <span class="nav-text">解决</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#group-by-aggregation"><span class="nav-number">2.2.</span> <span class="nav-text">group by / aggregation</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#问题"><span class="nav-number">2.2.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现"><span class="nav-number">2.2.2.</span> <span class="nav-text">实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#inverted-index"><span class="nav-number">3.</span> <span class="nav-text">inverted index</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题-1"><span class="nav-number">3.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决-1"><span class="nav-number">3.2.</span> <span class="nav-text">解决</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sort"><span class="nav-number">4.</span> <span class="nav-text">sort</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题-2"><span class="nav-number">4.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决-2"><span class="nav-number">4.2.</span> <span class="nav-text">解决</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#median-第-k-大数"><span class="nav-number">5.</span> <span class="nav-text">median / 第 k 大数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题-3"><span class="nav-number">5.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决-3"><span class="nav-number">5.2.</span> <span class="nav-text">解决</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#top-k"><span class="nav-number">6.</span> <span class="nav-text">top k</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题-4"><span class="nav-number">6.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决-4"><span class="nav-number">6.2.</span> <span class="nav-text">解决</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#出现次数-top-k-的元素"><span class="nav-number">6.3.</span> <span class="nav-text">出现次数 top k 的元素</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#join"><span class="nav-number">7.</span> <span class="nav-text">join</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题-5"><span class="nav-number">7.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决-5"><span class="nav-number">7.2.</span> <span class="nav-text">解决</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#join-优化"><span class="nav-number">7.3.</span> <span class="nav-text">join 优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Powered By <a href="#">Melodylican</a></span>
+</div>
+
+
+<div class="powered-by">
+    个人专属
+</div>
+
+<div class="theme-info">
+  博客 
+  
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2128487"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="local-search-pop-overlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("nCYvmPGeqGhuuM0qkwvIf2k1-gzGzoHsz", "dnC7e97rmSEwVQKrjxAE7oRR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+  
+  <!-- 随机线条
+  
+	<script type="text/javascript" color="0,0,255" opacity='0.7' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+  -->
+<!-- 小红心 -->
+<script type="text/javascript" src="/js/src/love.js"></script>
+</body>
+</html>

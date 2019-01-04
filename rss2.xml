@@ -191,6 +191,25 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </item>
     
     <item>
+      <title>Ansible when register使用</title>
+      <link>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</link>
+      <guid>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</guid>
+      <pubDate>Wed, 22 Nov 2017 16:00:00 GMT</pubDate>
+      <description>
+      
+        &lt;p&gt;当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下&lt;br&gt;任务配置文件test.yml：&lt;br&gt;&lt;img src=&quot;https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;amp;q-sign-time=1546519044;1546520844&amp;amp;q-key-time=1546519044;1546520844&amp;amp;q-header-list=&amp;amp;q-url-param-list=&amp;amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+      
+      </description>
+      
+      <content:encoded><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;q-sign-time=1546519044;1546520844&amp;q-key-time=1546519044;1546520844&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001" alt=""></p>
+<a id="more"></a>
+<p>执行演示：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible2.png?q-sign-algorithm=sha1&amp;q-ak=AKIDYQ69MWC4WgrrGtqZ1F4YTldb0IrcYnWH&amp;q-sign-time=1546517765;1546519565&amp;q-key-time=1546517765;1546519565&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=588e23def46b660536584cbaa5199ea48710a838&amp;x-cos-security-token=9880b484ed7c6fb712b98ee72bea31340760a58310001" alt=""></p>
+]]></content:encoded>
+      
+      <comments>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/#disqus_thread</comments>
+    </item>
+    
+    <item>
       <title>高性能、最终一致性的数据同步方案</title>
       <link>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</link>
       <guid>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</guid>
@@ -250,25 +269,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 ]]></content:encoded>
       
       <comments>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/#disqus_thread</comments>
-    </item>
-    
-    <item>
-      <title>Ansible when register使用</title>
-      <link>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</link>
-      <guid>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</guid>
-      <pubDate>Wed, 22 Nov 2017 16:00:00 GMT</pubDate>
-      <description>
-      
-        &lt;p&gt;当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下&lt;br&gt;任务配置文件test.yml：&lt;br&gt;&lt;img src=&quot;https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;amp;q-sign-time=1546519044;1546520844&amp;amp;q-key-time=1546519044;1546520844&amp;amp;q-header-list=&amp;amp;q-url-param-list=&amp;amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-      
-      </description>
-      
-      <content:encoded><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;q-sign-time=1546519044;1546520844&amp;q-key-time=1546519044;1546520844&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001" alt=""></p>
-<a id="more"></a>
-<p>执行演示：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible2.png?q-sign-algorithm=sha1&amp;q-ak=AKIDYQ69MWC4WgrrGtqZ1F4YTldb0IrcYnWH&amp;q-sign-time=1546517765;1546519565&amp;q-key-time=1546517765;1546519565&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=588e23def46b660536584cbaa5199ea48710a838&amp;x-cos-security-token=9880b484ed7c6fb712b98ee72bea31340760a58310001" alt=""></p>
-]]></content:encoded>
-      
-      <comments>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/#disqus_thread</comments>
     </item>
     
     <item>

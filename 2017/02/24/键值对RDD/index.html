@@ -1,0 +1,1162 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Spark,">
+
+
+
+
+
+  <link rel="alternate" href="/rss2.xml" title="不卑不亢不慌不忙" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0">
+
+
+
+
+
+
+<meta name="description" content="虽然RDD中可以包含任何类型的对象，但是“键值对”是一种比较常见的RDD元素类型，分组和聚合操作中经常会用到。Spark操作中经常会用到“键值对RDD”（Pair RDD），用于完成聚合计算。普通RDD里面存储的数据类型是Int、String等，而“键值对RDD”里面存储的数据类型是“键值对”。">
+<meta name="keywords" content="Spark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark入门 第三章 第二节 键值对RDD">
+<meta property="og:url" content="http://Melodylican.github.io/2017/02/24/键值对RDD/index.html">
+<meta property="og:site_name" content="不卑不亢不慌不忙">
+<meta property="og:description" content="虽然RDD中可以包含任何类型的对象，但是“键值对”是一种比较常见的RDD元素类型，分组和聚合操作中经常会用到。Spark操作中经常会用到“键值对RDD”（Pair RDD），用于完成聚合计算。普通RDD里面存储的数据类型是Int、String等，而“键值对RDD”里面存储的数据类型是“键值对”。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-01-03T12:11:37.940Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark入门 第三章 第二节 键值对RDD">
+<meta name="twitter:description" content="虽然RDD中可以包含任何类型的对象，但是“键值对”是一种比较常见的RDD元素类型，分组和聚合操作中经常会用到。Spark操作中经常会用到“键值对RDD”（Pair RDD），用于完成聚合计算。普通RDD里面存储的数据类型是Int、String等，而“键值对RDD”里面存储的数据类型是“键值对”。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://Melodylican.github.io/2017/02/24/键值对RDD/">
+
+
+
+
+
+  <title> Spark入门 第三章 第二节 键值对RDD | 不卑不亢不慌不忙 </title>
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?b882a8b6fdb7e13666299576d25a043a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+<a href="https://github.com/Melodylican"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">不卑不亢不慌不忙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">life is struggle</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-collect">
+          <a href="/collect" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-flag"></i> <br>
+            
+            收集
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/02/24/键值对RDD/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Spark入门 第三章 第二节 键值对RDD
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-24T00:00:00+08:00">
+                2017-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/02/24/键值对RDD/" class="leancloud_visitors" data-flag-title="Spark入门 第三章 第二节 键值对RDD">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>虽然RDD中可以包含任何类型的对象，但是“键值对”是一种比较常见的RDD元素类型，分组和聚合操作中经常会用到。<br>Spark操作中经常会用到“键值对RDD”（Pair RDD），用于完成聚合计算。普通RDD里面存储的数据类型是Int、String等，而“键值对RDD”里面存储的数据类型是“键值对”。<br><a id="more"></a></p>
+<div class="note success"><h2 id="创建RDD之前的准备工作"><a href="#创建RDD之前的准备工作" class="headerlink" title="创建RDD之前的准备工作"></a>创建RDD之前的准备工作</h2></div>
+<p>在即将进行相关的实践操作之前，我们首先要登录Linux系统（本教程统一采用hadoop用户登录），然后，打开命令行“终端”，请按照下面的命令启动Hadoop中的HDFS组件：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span>  /usr/<span class="built_in">local</span>/hadoop</span><br><span class="line">./sbin/start-dfs.sh</span><br></pre></td></tr></table></figure></p>
+<p>然后，我们按照下面命令启动spark-shell：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/spark</span><br><span class="line">./bin/spark-shell</span><br></pre></td></tr></table></figure></p>
+<p>然后，新建第二个“终端”，方法是，在前面已经建设的第一个终端窗口的左上方，点击“终端”菜单，在弹出的子菜单中选择“新建终端”，就可以打开第二个终端窗口，现在，我们切换到第二个终端窗口，在第二个终端窗口中，执行以下命令，进入之前已经创建好的“/usr/local/spark/mycode/”目录，在这个目录下新建pairrdd子目录，用来存放本章的代码和相关文件：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/spark/mycode/</span><br><span class="line">mkdir pairrdd</span><br></pre></td></tr></table></figure></p>
+<p>然后，使用vim编辑器，在pairrdd目录下新建一个word.txt文件，你可以在文件里面随便输入几行英文语句用来测试。</p>
+<p>经过上面的准备工作以后，我们就可以开始创建RDD了。</p>
+<div class="note success"><h2 id="键值对RDD的创建"><a href="#键值对RDD的创建" class="headerlink" title="键值对RDD的创建"></a>键值对RDD的创建</h2></div>
+<div class="note success"><h3 id="第一种创建方式：从文件中加载"><a href="#第一种创建方式：从文件中加载" class="headerlink" title="第一种创建方式：从文件中加载"></a>第一种创建方式：从文件中加载</h3></div>
+<p>我们可以采用多种方式创建键值对RDD，其中一种主要方式是使用map()函数来实现，如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">scala&gt;  <span class="keyword">val</span> lines = sc.textFile(<span class="string">"file:///usr/local/spark/mycode/pairrdd/word.txt"</span>)</span><br><span class="line">lines: org.apache.spark.rdd.<span class="type">RDD</span>[<span class="type">String</span>] = file:<span class="comment">///usr/local/spark/mycode/pairrdd/word.txt MapPartitionsRDD[1] at textFile at &lt;console&gt;:27</span></span><br><span class="line">scala&gt; <span class="keyword">val</span> pairRDD = lines.flatMap(line =&gt; line.split(<span class="string">" "</span>)).map(word =&gt; (word,<span class="number">1</span>))</span><br><span class="line">pairRDD: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">MapPartitionsRDD</span>[<span class="number">3</span>] at map at &lt;console&gt;:<span class="number">29</span></span><br><span class="line">scala&gt; pairRDD.foreach(println)</span><br><span class="line">(i,<span class="number">1</span>)</span><br><span class="line">(love,<span class="number">1</span>)</span><br><span class="line">(hadoop,<span class="number">1</span>)</span><br><span class="line">(i,<span class="number">1</span>)</span><br><span class="line">(love,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">1</span>)</span><br><span class="line">(is,<span class="number">1</span>)</span><br><span class="line">(fast,<span class="number">1</span>)</span><br><span class="line">(than,<span class="number">1</span>)</span><br><span class="line">(hadoop,<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<p>我们之前在“第一个Spark应用程序:WordCount”章节已经详细解释过类似代码，所以，上面代码不再做细节分析。从代码执行返回信息：pairRDD: org.apache.spark.rdd.RDD[(String, Int)] = MapPartitionsRDD[3] at map at :29，可以看出，返回的结果是键值对类型的RDD，即RDD[(String, Int)]。从pairRDD.foreach(println)执行的打印输出结果也可以看到，都是由(单词,1)这种形式的键值对。</p>
+<div class="note success"><h3 id="第二种创建方式：通过并行集合（数组）创建RDD"><a href="#第二种创建方式：通过并行集合（数组）创建RDD" class="headerlink" title="第二种创建方式：通过并行集合（数组）创建RDD"></a>第二种创建方式：通过并行集合（数组）创建RDD</h3></div>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> list = <span class="type">List</span>(<span class="string">"Hadoop"</span>,<span class="string">"Spark"</span>,<span class="string">"Hive"</span>,<span class="string">"Spark"</span>)</span><br><span class="line">list: <span class="type">List</span>[<span class="type">String</span>] = <span class="type">List</span>(<span class="type">Hadoop</span>, <span class="type">Spark</span>, <span class="type">Hive</span>, <span class="type">Spark</span>)</span><br><span class="line"> </span><br><span class="line">scala&gt; <span class="keyword">val</span> rdd = sc.parallelize(list)</span><br><span class="line">rdd: org.apache.spark.rdd.<span class="type">RDD</span>[<span class="type">String</span>] = <span class="type">ParallelCollectionRDD</span>[<span class="number">11</span>] at parallelize at &lt;console&gt;:<span class="number">29</span></span><br><span class="line"> </span><br><span class="line">scala&gt; <span class="keyword">val</span> pairRDD = rdd.map(word =&gt; (word,<span class="number">1</span>))</span><br><span class="line">pairRDD: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">MapPartitionsRDD</span>[<span class="number">12</span>] at map at &lt;console&gt;:<span class="number">31</span></span><br><span class="line"> </span><br><span class="line">scala&gt; pairRDD.foreach(println)</span><br><span class="line">(<span class="type">Hadoop</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Hive</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>我们下面实例都是采用这种方式得到的pairRDD作为基础。</p>
+<div class="note success"><h2 id="常用的键值对转换操作"><a href="#常用的键值对转换操作" class="headerlink" title="常用的键值对转换操作"></a>常用的键值对转换操作</h2></div>
+<p>常用的键值对转换操作包括reduceByKey()、groupByKey()、sortByKey()、join()、cogroup()等，下面我们通过实例来介绍。<br><div class="note success"><h3 id="reduceByKey-func"><a href="#reduceByKey-func" class="headerlink" title="reduceByKey(func)"></a>reduceByKey(func)</h3></div><br>reduceByKey(func)的功能是，使用func函数合并具有相同键的值。比如，reduceByKey((a,b) =&gt; a+b)，有四个键值对(“spark”,1)、(“spark”,2)、(“hadoop”,3)和(“hadoop”,5)，对具有相同key的键值对进行合并后的结果就是：(“spark”,3)、(“hadoop”,8)。可以看出，(a,b) =&gt; a+b这个Lamda表达式中，a和b都是指value，比如，对于两个具有相同key的键值对(“spark”,1)、(“spark”,2)，a就是1，b就是2。<br>我们对上面第二种方式创建得到的pairRDD进行reduceByKey()操作，代码如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; pairRDD.reduceByKey((a,b)=&gt;a+b).foreach(println)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="type">Hive</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Hadoop</span>,<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="groupByKey"><a href="#groupByKey" class="headerlink" title="groupByKey()"></a>groupByKey()</h3></div>
+<p>groupByKey()的功能是，对具有相同键的值进行分组。比如，对四个键值对(“spark”,1)、(“spark”,2)、(“hadoop”,3)和(“hadoop”,5)，采用groupByKey()后得到的结果是：(“spark”,(1,2))和(“hadoop”,(3,5))。<br>我们对上面第二种方式创建得到的pairRDD进行groupByKey()操作，代码如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; pairRDD.groupByKey()</span><br><span class="line">res15: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Iterable</span>[<span class="type">Int</span>])] = <span class="type">ShuffledRDD</span>[<span class="number">15</span>] at groupByKey at &lt;console&gt;:<span class="number">34</span></span><br><span class="line"><span class="comment">//从上面执行结果信息中可以看出，分组后，value被保存到Iterable[Int]中</span></span><br><span class="line">scala&gt; pairRDD.groupByKey().foreach(println)</span><br><span class="line">(<span class="type">Spark</span>,<span class="type">CompactBuffer</span>(<span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line">(<span class="type">Hive</span>,<span class="type">CompactBuffer</span>(<span class="number">1</span>))</span><br><span class="line">(<span class="type">Hadoop</span>,<span class="type">CompactBuffer</span>(<span class="number">1</span>))</span><br></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="keys"><a href="#keys" class="headerlink" title="keys"></a>keys</h3></div>
+<p>keys只会把键值对RDD中的key返回形成一个新的RDD。比如，对四个键值对(“spark”,1)、(“spark”,2)、(“hadoop”,3)和(“hadoop”,5)构成的RDD，采用keys后得到的结果是一个RDD[Int]，内容是{“spark”,”spark”,”hadoop”,”hadoop”}。<br>我们对上面第二种方式创建得到的pairRDD进行keys操作，代码如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; pairRDD.keys</span><br><span class="line">res17: org.apache.spark.rdd.<span class="type">RDD</span>[<span class="type">String</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">17</span>] at keys at &lt;console&gt;:<span class="number">34</span></span><br><span class="line">scala&gt; pairRDD.keys.foreach(println)</span><br><span class="line"><span class="type">Hadoop</span></span><br><span class="line"><span class="type">Spark</span></span><br><span class="line"><span class="type">Hive</span></span><br><span class="line"><span class="type">Spark</span></span><br></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="values"><a href="#values" class="headerlink" title="values"></a>values</h3></div>
+<p>values只会把键值对RDD中的value返回形成一个新的RDD。比如，对四个键值对(“spark”,1)、(“spark”,2)、(“hadoop”,3)和(“hadoop”,5)构成的RDD，采用keys后得到的结果是一个RDD[Int]，内容是{1,2,3,5}。<br>我们对上面第二种方式创建得到的pairRDD进行values操作，代码如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; pairRDD.values</span><br><span class="line">res0: org.apache.spark.rdd.<span class="type">RDD</span>[<span class="type">Int</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">2</span>] at values at &lt;console&gt;:<span class="number">34</span></span><br><span class="line"> </span><br><span class="line">scala&gt; pairRDD.values.foreach(println)</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="sortByKey"><a href="#sortByKey" class="headerlink" title="sortByKey()"></a>sortByKey()</h3></div>
+<p>sortByKey()的功能是返回一个根据键排序的RDD。<br>我们对上面第二种方式创建得到的pairRDD进行keys操作，代码如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; pairRDD.sortByKey()</span><br><span class="line">res0: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">ShuffledRDD</span>[<span class="number">2</span>] at sortByKey at &lt;console&gt;:<span class="number">34</span></span><br><span class="line">scala&gt; pairRDD.sortByKey().foreach(println)</span><br><span class="line">(<span class="type">Hadoop</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Hive</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="mapValues-func"><a href="#mapValues-func" class="headerlink" title="mapValues(func)"></a>mapValues(func)</h3></div>
+<p>我们经常会遇到一种情形，我们只想对键值对RDD的value部分进行处理，而不是同时对key和value进行处理。对于这种情形，Spark提供了mapValues(func)，它的功能是，对键值对RDD中的每个value都应用一个函数，但是，key不会发生变化。比如，对四个键值对(“spark”,1)、(“spark”,2)、(“hadoop”,3)和(“hadoop”,5)构成的pairRDD，如果执行pairRDD.mapValues(x =&gt; x+1)，就会得到一个新的键值对RDD，它包含下面四个键值对(“spark”,2)、(“spark”,3)、(“hadoop”,4)和(“hadoop”,6)。<br>我们对上面第二种方式创建得到的pairRDD进行keys操作，代码如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; pairRDD.mapValues(x =&gt; x+<span class="number">1</span>)</span><br><span class="line">res2: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">MapPartitionsRDD</span>[<span class="number">4</span>] at mapValues at &lt;console&gt;:<span class="number">34</span></span><br><span class="line">scala&gt; pairRDD.mapValues(x =&gt; x+<span class="number">1</span>).foreach(println)</span><br><span class="line">(<span class="type">Hadoop</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="type">Hive</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="type">Spark</span>,<span class="number">2</span>)</span><br></pre></td></tr></table></figure></p>
+<div class="note success"><h3 id="join"><a href="#join" class="headerlink" title="join"></a>join</h3></div>
+<p>join(连接)操作是键值对常用的操作。“连接”(join)这个概念来自于关系数据库领域，因此，join的类型也和关系数据库中的join一样，包括内连接(join)、左外连接(leftOuterJoin)、右外连接(rightOuterJoin)等。最常用的情形是内连接，所以，join就表示内连接。<br>对于内连接，对于给定的两个输入数据集(K,V1)和(K,V2)，只有在两个数据集中都存在的key才会被输出，最终得到一个(K,(V1,V2))类型的数据集。</p>
+<p>比如，pairRDD1是一个键值对集合{(“spark”,1)、(“spark”,2)、(“hadoop”,3)和(“hadoop”,5)}，pairRDD2是一个键值对集合{(“spark”,”fast”)}，那么，pairRDD1.join(pairRDD2)的结果就是一个新的RDD，这个新的RDD是键值对集合{(“spark”,1,”fast”),(“spark”,2,”fast”)}。对于这个实例，我们下面在spark-shell中运行一下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> pairRDD1 = sc.parallelize(<span class="type">Array</span>((<span class="string">"spark"</span>,<span class="number">1</span>),(<span class="string">"spark"</span>,<span class="number">2</span>),(<span class="string">"hadoop"</span>,<span class="number">3</span>),(<span class="string">"hadoop"</span>,<span class="number">5</span>)))</span><br><span class="line">pairRDD1: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">ParallelCollectionRDD</span>[<span class="number">24</span>] at parallelize at &lt;console&gt;:<span class="number">27</span></span><br><span class="line"> </span><br><span class="line">scala&gt; <span class="keyword">val</span> pairRDD2 = sc.parallelize(<span class="type">Array</span>((<span class="string">"spark"</span>,<span class="string">"fast"</span>)))</span><br><span class="line">pairRDD2: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">String</span>)] = <span class="type">ParallelCollectionRDD</span>[<span class="number">25</span>] at parallelize at &lt;console&gt;:<span class="number">27</span></span><br><span class="line"> </span><br><span class="line">scala&gt; pairRDD1.join(pairRDD2)</span><br><span class="line">res9: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, (<span class="type">Int</span>, <span class="type">String</span>))] = <span class="type">MapPartitionsRDD</span>[<span class="number">28</span>] at join at &lt;console&gt;:<span class="number">32</span></span><br><span class="line"> </span><br><span class="line">scala&gt; pairRDD1.join(pairRDD2).foreach(println)</span><br><span class="line">(spark,(<span class="number">1</span>,fast))</span><br><span class="line">(spark,(<span class="number">2</span>,fast))</span><br></pre></td></tr></table></figure></p>
+<div class="note success"><h2 id="一个综合实例"><a href="#一个综合实例" class="headerlink" title="一个综合实例"></a>一个综合实例</h2></div>
+<p>题目：给定一组键值对(“spark”,2),(“hadoop”,6),(“hadoop”,4),(“spark”,6)，键值对的key表示图书名称，value表示某天图书销量，请计算每个键对应的平均值，也就是计算每种图书的每天平均销量。<br>很显然，对于上面的题目，结果是很显然的，(“spark”,4),(“hadoop”,5)。<br>下面，我们在spark-shell中演示代码执行过程：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> rdd = sc.parallelize(<span class="type">Array</span>((<span class="string">"spark"</span>,<span class="number">2</span>),(<span class="string">"hadoop"</span>,<span class="number">6</span>),(<span class="string">"hadoop"</span>,<span class="number">4</span>),(<span class="string">"spark"</span>,<span class="number">6</span>)))</span><br><span class="line">rdd: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">ParallelCollectionRDD</span>[<span class="number">38</span>] at parallelize at &lt;console&gt;:<span class="number">27</span></span><br><span class="line"> </span><br><span class="line">scala&gt; rdd.mapValues(x =&gt; (x,<span class="number">1</span>)).reduceByKey((x,y) =&gt; (x._1+y._1,x._2 + y._2)).mapValues(x =&gt; (x._1 / x._2)).collect()</span><br><span class="line">res22: <span class="type">Array</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">Array</span>((spark,<span class="number">4</span>), (hadoop,<span class="number">5</span>))</span><br></pre></td></tr></table></figure></p>
+<p>要注意，上面语句中，mapValues(x =&gt; (x,1))中出现了变量x，reduceByKey((x,y) =&gt; (x._1+y._1,x._2 + y._2))中也出现了变量x，mapValues(x =&gt; (x._1 / x._2))也出现了变量x。但是，必须要清楚，这三个地方出现的x，虽然都具有相同的变量名称x，但是，彼此之间没有任何关系，它们都处在不同的变量作用域内。如果你觉得这样会误导自己，造成理解上的掌握，实际上，你可以把三个出现x的地方分别替换成x1、x2、x3也是可以的，但是，很显然没有必要这么做。<br>上面是完整的语句和执行过程，可能不太好理解，下面我们进行逐条语句分解给大家介绍。每条语句执行后返回的屏幕信息，可以帮助大家更好理解语句的执行效果，比如生成了什么类型的RDD。</p>
+<p>（1）首先构建一个数组，数组里面包含了四个键值对，然后，调用parallelize()方法生成RDD，从执行结果反馈信息，可以看出，rdd类型是RDD[(String, Int)]。<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> rdd = sc.parallelize(<span class="type">Array</span>((<span class="string">"spark"</span>,<span class="number">2</span>),(<span class="string">"hadoop"</span>,<span class="number">6</span>),(<span class="string">"hadoop"</span>,<span class="number">4</span>),(<span class="string">"spark"</span>,<span class="number">6</span>)))</span><br><span class="line">rdd: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">ParallelCollectionRDD</span>[<span class="number">38</span>] at parallelize at &lt;console&gt;:<span class="number">27</span></span><br></pre></td></tr></table></figure></p>
+<p>（2）针对构建得到的rdd，我们调用mapValues()函数，把rdd中的每个每个键值对(key,value)的value部分进行修改，把value转换成键值对(value,1)，其中，数值1表示这个key在rdd中出现了1次，为什么要记录出现次数呢？因为，我们最终要计算每个key对应的平均值，所以，必须记住这个key出现了几次，最后用value的总和除以key的出现次数，就是这个key对应的平均值。比如，键值对(“spark”,2)经过mapValues()函数处理后，就变成了(“spark”,(2,1))，其中，数值1表示“spark”这个键的1次出现。下面就是rdd.mapValues()操作在spark-shell中的执行演示：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; rdd.mapValues(x =&gt; (x,<span class="number">1</span>)).collect()</span><br><span class="line">res23: <span class="type">Array</span>[(<span class="type">String</span>, (<span class="type">Int</span>, <span class="type">Int</span>))] = <span class="type">Array</span>((spark,(<span class="number">2</span>,<span class="number">1</span>)), (hadoop,(<span class="number">6</span>,<span class="number">1</span>)), (hadoop,(<span class="number">4</span>,<span class="number">1</span>)), (spark,(<span class="number">6</span>,<span class="number">1</span>)))</span><br></pre></td></tr></table></figure></p>
+<p>上面语句中，collect()是一个行动操作，功能是以数组的形式返回数据集中的所有元素，当我们要实时查看一个RDD中的元素内容时，就可以调用collect()函数。</p>
+<p>（3）然后，再对上一步得到的RDD调用reduceByKey()函数，在spark-shell中演示如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; rdd.mapValues(x =&gt; (x,<span class="number">1</span>)).reduceByKey((x,y) =&gt; (x._1+y._1,x._2 + y._2)).collect()</span><br><span class="line">res24: <span class="type">Array</span>[(<span class="type">String</span>, (<span class="type">Int</span>, <span class="type">Int</span>))] = <span class="type">Array</span>((spark,(<span class="number">8</span>,<span class="number">2</span>)), (hadoop,(<span class="number">10</span>,<span class="number">2</span>)))</span><br></pre></td></tr></table></figure></p>
+<p>这里，必须要十分准确地理解reduceByKey()函数的功能。可以参考上面我们对该函数的介绍，reduceByKey(func)的功能是使用func函数合并具有相同键的值。这里的func函数就是Lamda表达式(x,y) =&gt; (x._1+y._1,x._2 + y._2)，这个表达式中，x和y都是value，而且是具有相同key的两个键值对所对应的value，比如，在这个例子中， (“hadoop”,(6,1))和(“hadoop”,(4,1))这两个键值对具有相同的key，所以，对于函数中的输入参数(x,y)而言，x就是(6,1)，x._1表示这个键值对中的第1个元素6，x._2表示这个键值对中的第二个元素1，y就是(4,1)，y._1表示这个键值对中的第1个元素4，y._2表示这个键值对中的第二个元素1，所以，函数体(x._1+y._1,x._2 + y._2)，相当于生成一个新的键值对(key,value)，其中，key是x._1+y._1，也就是6+4=10，value是x._2 + y._2，也就是1+1=2，因此，函数体(x._1+y._1,x._2 + y._2)执行后得到的value是(10,2)，但是，要注意，这个(10,2)是reduceByKey()函数执行后，”hadoop”这个key对应的value，也就是，实际上reduceByKey()函数执行后，会生成一个键值对(“hadoop”,(10,2))，其中，10表示hadoop书籍的总销量，2表示两天。同理，reduceByKey()函数执行后会生成另外一个键值对(“spark”,(8,2))。</p>
+<p>(4)最后，就可以求出最终结果。我们可以对上面得到的两个键值对(“hadoop”,(10,2))和(“spark”,(8,2))所构成的RDD执行mapValues()操作，得到每种书的每天平均销量。当第一个键值对(“hadoop”,(10,2))输入给mapValues(x =&gt; (x._1 / x._2))操作时，key是”hadoop”，保持不变，value是(10,2)，会被赋值给Lamda表达式x =&gt; (x._1 / x._2中的x，因此，x的值就是(10,2)，x._1就是10，表示hadoop书总销量是10，x._2就是2，表示2天，因此，hadoop书籍的每天平均销量就是x._1 / x._2，也就是5。mapValues()输出的一个键值对就是(“hadoop”,5)。同理，当把(“spark”,(8,2))输入给mapValues()时，会计算得到另外一个键值对(“spark”,4)。在spark-shell中演示如下：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; rdd.mapValues(x =&gt; (x,<span class="number">1</span>)).reduceByKey((x,y) =&gt; (x._1+y._1,x._2 + y._2)).mapValues(x =&gt; (x._1 / x._2)).collect()</span><br><span class="line">res25: <span class="type">Array</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">Array</span>((spark,<span class="number">4</span>), (hadoop,<span class="number">5</span>))</span><br></pre></td></tr></table></figure></p>
+<font color="grey">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/img/wechat.png" alt="Melodylican WeChat Pay">
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/img/zhifubao.png" alt="Melodylican Alipay">
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+	
+
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"><i class="fa fa-tag"></i> Spark</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/22/RDD编程/" rel="next" title="Spark入门 第三章 第一节 RDD编程">
+                <i class="fa fa-chevron-left"></i> Spark入门 第三章 第一节 RDD编程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/25/Spark共享变量/" rel="prev" title="Spark入门 第三章 第三节 Spark 共享变量">
+                Spark入门 第三章 第三节 Spark 共享变量 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="uyan_frame"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="Melodylican">
+          <p class="site-author-name" itemprop="name">Melodylican</p>
+           
+              <p class="site-description motion-element" itemprop="description">life is struggle</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">97</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">77</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/rss2.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/your-user-name" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/your-user-name" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3235750572" target="_blank" title="微博">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  微博
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+            </a>
+          </div>
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://jm.taobao.org" title="阿里中间件技术团队" target="_blank">阿里中间件技术团队</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.ruanyifeng.com/home.html" title="阮一峰" target="_blank">阮一峰</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建RDD之前的准备工作"><span class="nav-number">1.</span> <span class="nav-text">创建RDD之前的准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#键值对RDD的创建"><span class="nav-number">2.</span> <span class="nav-text">键值对RDD的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一种创建方式：从文件中加载"><span class="nav-number">2.1.</span> <span class="nav-text">第一种创建方式：从文件中加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二种创建方式：通过并行集合（数组）创建RDD"><span class="nav-number">2.2.</span> <span class="nav-text">第二种创建方式：通过并行集合（数组）创建RDD</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用的键值对转换操作"><span class="nav-number">3.</span> <span class="nav-text">常用的键值对转换操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#reduceByKey-func"><span class="nav-number">3.1.</span> <span class="nav-text">reduceByKey(func)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#groupByKey"><span class="nav-number">3.2.</span> <span class="nav-text">groupByKey()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#keys"><span class="nav-number">3.3.</span> <span class="nav-text">keys</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#values"><span class="nav-number">3.4.</span> <span class="nav-text">values</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sortByKey"><span class="nav-number">3.5.</span> <span class="nav-text">sortByKey()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mapValues-func"><span class="nav-number">3.6.</span> <span class="nav-text">mapValues(func)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#join"><span class="nav-number">3.7.</span> <span class="nav-text">join</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一个综合实例"><span class="nav-number">4.</span> <span class="nav-text">一个综合实例</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Powered By <a href="#">Melodylican</a></span>
+</div>
+
+
+<div class="powered-by">
+    个人专属
+</div>
+
+<div class="theme-info">
+  博客 
+  
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    
+
+    
+      <!-- UY BEGIN -->
+      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2128487"></script>
+      <!-- UY END -->
+    
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="local-search-pop-overlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("nCYvmPGeqGhuuM0qkwvIf2k1-gzGzoHsz", "dnC7e97rmSEwVQKrjxAE7oRR");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+  
+  <!-- 随机线条
+  
+	<script type="text/javascript" color="0,0,255" opacity='0.7' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+  -->
+<!-- 小红心 -->
+<script type="text/javascript" src="/js/src/love.js"></script>
+</body>
+</html>
