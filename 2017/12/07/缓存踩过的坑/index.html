@@ -96,14 +96,14 @@
 <meta property="og:url" content="http://Melodylican.github.io/2017/12/07/缓存踩过的坑/index.html">
 <meta property="og:site_name" content="不卑不亢不慌不忙">
 <meta property="og:description" content="今天讲的这个话题，我相信是众多工程师和团队的痛。从我刚开始工作，那时候构建本地缓存，到后续memcache, Redis的出现，到现在各种分布式集群的缓存，例如redis Cluster等产品的出现，缓存越来越发达和复杂了，缓存对我们的系统也越发重要，现在很难相信一个后端服务里没有缓存的存在。在这篇文章里，我会和大家分享一下过去踩到的缓存坑，然后试图给出一些解决方案，大家可以一起讨论，最终拿出更好">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%912.png">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%913.png">
-<meta property="og:updated_time" content="2019-01-03T12:11:37.944Z">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png?q-sign-algorithm=sha1&q-ak=AKIDFLFUVTSk49SYY75C6dqnJvFccrQIA1Pf&q-sign-time=1546567812;1546569612&q-key-time=1546567812;1546569612&q-header-list=&q-url-param-list=&q-signature=8971da722fe2babf53eb2cd4b7bca25a54a1b0d1&x-cos-security-token=64a37535ddb277d64574168bd6be06ef386d489610001">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%912.png?q-sign-algorithm=sha1&q-ak=AKID6spKzC48NfvpuRa63tmJsAru2vl4ToTB&q-sign-time=1546567834;1546569634&q-key-time=1546567834;1546569634&q-header-list=&q-url-param-list=&q-signature=4e9881e43f7d56168da30114a6487f4ae83d9863&x-cos-security-token=6260c6d047a05cb66b62ee881a44d16eae29106c10001">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%913.png?q-sign-algorithm=sha1&q-ak=AKIDj9PDdTLJn0PIakb01iaJU2LOVh6I3Fhn&q-sign-time=1546567860;1546569660&q-key-time=1546567860;1546569660&q-header-list=&q-url-param-list=&q-signature=ab781a53ea82de240aa7d39b13e9cbf9d2ee6003&x-cos-security-token=4d979f8abc7e22ee3e82906df1dbb79a2909f6d310001">
+<meta property="og:updated_time" content="2019-01-04T02:11:18.240Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="缓存踩过的坑">
 <meta name="twitter:description" content="今天讲的这个话题，我相信是众多工程师和团队的痛。从我刚开始工作，那时候构建本地缓存，到后续memcache, Redis的出现，到现在各种分布式集群的缓存，例如redis Cluster等产品的出现，缓存越来越发达和复杂了，缓存对我们的系统也越发重要，现在很难相信一个后端服务里没有缓存的存在。在这篇文章里，我会和大家分享一下过去踩到的缓存坑，然后试图给出一些解决方案，大家可以一起讨论，最终拿出更好">
-<meta name="twitter:image" content="http://ojwkevhas.bkt.clouddn.com/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png">
+<meta name="twitter:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png?q-sign-algorithm=sha1&q-ak=AKIDFLFUVTSk49SYY75C6dqnJvFccrQIA1Pf&q-sign-time=1546567812;1546569612&q-key-time=1546567812;1546569612&q-header-list=&q-url-param-list=&q-signature=8971da722fe2babf53eb2cd4b7bca25a54a1b0d1&x-cos-security-token=64a37535ddb277d64574168bd6be06ef386d489610001">
 
 
 
@@ -446,7 +446,7 @@
       
         <p>今天讲的这个话题，我相信是众多工程师和团队的痛。从我刚开始工作，那时候构建本地缓存，到后续memcache, Redis的出现，到现在各种分布式集群的缓存，例如redis Cluster等产品的出现，缓存越来越发达和复杂了，缓存对我们的系统也越发重要，现在很难相信一个后端服务里没有缓存的存在。在这篇文章里，我会和大家分享一下过去踩到的缓存坑，然后试图给出一些解决方案，大家可以一起讨论，最终拿出更好的方法。由于篇幅有限，所以这里的缓存讨论，只局限于后端服务的缓存，并且不涉及具体的框架，对于H5,iOS和Android等前端缓存的讨论本文暂时不会涉及。<br><a id="more"></a><br><strong>案例1，缓存和DB的同步更新不在同一个事务里并且没有重试补偿机制</strong></p>
 <p>为了减少系统间的依赖，不同系统的数据更新往往不放在同一个事务里，采用MQ来进行通信。大家可以看下图，后台系统CRM更新产品数据到DB，Product系统收到异步消息通知后，更新最新数据到缓存。这是一个最常见的缓存应用场景，我相信很多团队都是这样用的。在这个Case里容易出现的问题在于，如果批处理任务收到消息后服务crash掉了，缓存没有正常更新，就出现了与DB的数据不同步，前端系统一直不能读到最新数据，导致业务异常。</p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png" alt=""><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%911.png?q-sign-algorithm=sha1&amp;q-ak=AKIDFLFUVTSk49SYY75C6dqnJvFccrQIA1Pf&amp;q-sign-time=1546567812;1546569612&amp;q-key-time=1546567812;1546569612&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=8971da722fe2babf53eb2cd4b7bca25a54a1b0d1&amp;x-cos-security-token=64a37535ddb277d64574168bd6be06ef386d489610001" alt=""><br></center>
 
 <p><strong>解决方案：</strong></p>
 <ol>
@@ -457,12 +457,12 @@
 </ol>
 <p><strong>案例2， 同一数据被1个以上的服务执行写操作，其中一个服务的缓存数据没有版本控制</strong></p>
 <p>这也是两个不同服务更新数据过程中很常见的情况，见下图，CRM系统更新了某个用户的Profile, 保存更新数据库后，通过MQ通知用户系统更新缓存，由于是异步更新延迟，在缓存更新前，用户系统收到前端的指令，读取了当前缓存里的用户数据，做了修改，并更新到DB中。出现的结果就是数据库里的CRM的更新被错误覆盖。</p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%912.png" alt=""><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%912.png?q-sign-algorithm=sha1&amp;q-ak=AKID6spKzC48NfvpuRa63tmJsAru2vl4ToTB&amp;q-sign-time=1546567834;1546569634&amp;q-key-time=1546567834;1546569634&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=4e9881e43f7d56168da30114a6487f4ae83d9863&amp;x-cos-security-token=6260c6d047a05cb66b62ee881a44d16eae29106c10001" alt=""><br></center>
 
 <p><strong>解决方案</strong>：缓存里的数据有一个标志位可以作为更新数据库数据的依据（Update_time or Version）, 如果缓存里数据时间与数据库时间不能匹配，意味着另外一个服务更新了该数据，那么就先从DB里读取最新数据版本，然后在新版本上提交数据。</p>
 <p><strong>案例3， 并发查询缓存中同一数据，如果缓存没命中，导致DB瞬时被打爆</strong></p>
 <p>做促销活动的时候，存在大量用户的并发访问某一个特定商品，该商品数据缓存失效，或者做了数据更改，但是对应缓存还没有更新，那么所有这些访问将同时直接被作用到DB上。</p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%913.png" alt=""><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/%E7%BC%93%E5%AD%98%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%913.png?q-sign-algorithm=sha1&amp;q-ak=AKIDj9PDdTLJn0PIakb01iaJU2LOVh6I3Fhn&amp;q-sign-time=1546567860;1546569660&amp;q-key-time=1546567860;1546569660&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=ab781a53ea82de240aa7d39b13e9cbf9d2ee6003&amp;x-cos-security-token=4d979f8abc7e22ee3e82906df1dbb79a2909f6d310001" alt=""><br></center>
 
 <p><strong>解决方案</strong>：做一个计数器或者锁（没有特别复杂逻辑的话，可以直接用HashMap），如果发现某个KEY缓存没有命中，那么在计数器+1, 然后访问数据库，拿到结果更新缓存，清理掉计数器中的key。 在这个过程中，如果有第二个线程或者更多的线程需要访问这个KEY时，发现计数器的值&gt;1 或者被加锁, 那么wait, 直到计数器清理掉，当然，这个技术器阈值是可以在配置文件里配置的，不一定是1。</p>
 <p><strong>案例4， 缓存没有设置默认值，被攻击，缓存一直保持在被“穿透”状态</strong></p>

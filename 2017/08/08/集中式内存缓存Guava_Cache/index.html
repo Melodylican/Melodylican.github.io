@@ -96,12 +96,12 @@
 <meta property="og:url" content="http://Melodylican.github.io/2017/08/08/集中式内存缓存Guava_Cache/index.html">
 <meta property="og:site_name" content="不卑不亢不慌不忙">
 <meta property="og:description" content="背景缓存的主要作用是暂时在内存中保存业务系统的数据处理结果，并且等待下次访问使用。在日长开发有很多场合，有一些数据量不是很大，不会经常改动，并且访问非常频繁。但是由于受限于硬盘IO的性能或者远程网络等原因获取可能非常的费时。会导致我们的程序非常缓慢，这在某些业务上是不能忍的！而缓存正是解决这类问题的神器！">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/guava_cache.png">
-<meta property="og:updated_time" content="2019-01-03T12:11:37.945Z">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/guava_cache.png?q-sign-algorithm=sha1&q-ak=AKIDDWSzwYMo7BwH15G86GMnZnJuMFd97t2g&q-sign-time=1546567971;1546569771&q-key-time=1546567971;1546569771&q-header-list=&q-url-param-list=&q-signature=8cdd2e9b6191afa0693f536bb2fe2b072512e55a&x-cos-security-token=6f9e6650066240affcdf6bf8bd376d101736b4e610001">
+<meta property="og:updated_time" content="2019-01-04T02:13:14.809Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="集中式内存缓存Guava Cache">
 <meta name="twitter:description" content="背景缓存的主要作用是暂时在内存中保存业务系统的数据处理结果，并且等待下次访问使用。在日长开发有很多场合，有一些数据量不是很大，不会经常改动，并且访问非常频繁。但是由于受限于硬盘IO的性能或者远程网络等原因获取可能非常的费时。会导致我们的程序非常缓慢，这在某些业务上是不能忍的！而缓存正是解决这类问题的神器！">
-<meta name="twitter:image" content="http://ojwkevhas.bkt.clouddn.com/guava_cache.png">
+<meta name="twitter:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/guava_cache.png?q-sign-algorithm=sha1&q-ak=AKIDDWSzwYMo7BwH15G86GMnZnJuMFd97t2g&q-sign-time=1546567971;1546569771&q-key-time=1546567971;1546569771&q-header-list=&q-url-param-list=&q-signature=8cdd2e9b6191afa0693f536bb2fe2b072512e55a&x-cos-security-token=6f9e6650066240affcdf6bf8bd376d101736b4e610001">
 
 
 
@@ -443,7 +443,7 @@
 
       
         <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>缓存的主要作用是暂时在内存中保存业务系统的数据处理结果，并且等待下次访问使用。在日长开发有很多场合，有一些数据量不是很大，不会经常改动，并且访问非常频繁。但是由于受限于硬盘IO的性能或者远程网络等原因获取可能非常的费时。会导致我们的程序非常缓慢，这在某些业务上是不能忍的！而缓存正是解决这类问题的神器！<br><a id="more"></a></p>
-<p><center><br><img src="http://ojwkevhas.bkt.clouddn.com/guava_cache.png" alt=""><br></center><br>当然也并不是说你用了缓存你的系统就一定会变快，建议在用之前看一下<a href="http://kb.cnblogs.com/page/138696/" target="_blank" rel="external">使用缓存的9大误区(上)</a> <a href="http://kb.cnblogs.com/page/144396/" target="_blank" rel="external">使用缓存的9大误区(下)</a></p>
+<p><center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/guava_cache.png?q-sign-algorithm=sha1&amp;q-ak=AKIDDWSzwYMo7BwH15G86GMnZnJuMFd97t2g&amp;q-sign-time=1546567971;1546569771&amp;q-key-time=1546567971;1546569771&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=8cdd2e9b6191afa0693f536bb2fe2b072512e55a&amp;x-cos-security-token=6f9e6650066240affcdf6bf8bd376d101736b4e610001" alt=""><br></center><br>当然也并不是说你用了缓存你的系统就一定会变快，建议在用之前看一下<a href="http://kb.cnblogs.com/page/138696/" target="_blank" rel="external">使用缓存的9大误区(上)</a> <a href="http://kb.cnblogs.com/page/144396/" target="_blank" rel="external">使用缓存的9大误区(下)</a></p>
 <p>缓存在很多系统和架构中都用广泛的应用,例如：</p>
 <ul>
 <li>CPU缓存</li>
