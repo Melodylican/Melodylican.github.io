@@ -199,6 +199,73 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
+      <title><![CDATA[高性能、最终一致性的数据同步方案]]></title>
+      <url>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</url>
+      <content type="html"><![CDATA[<p>问题的来源<br>先描述一下问题：</p>
+<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br><a id="more"></a></p>
+<p>利用 Job 来定时同步数据<br>首先，如果是中小型系统，可以接受秒级别的延时，数据变更频率不是非常高的话，可以用这个方案。</p>
+<p>常见的场景有：后台系统用户数据，后台系统角色、组织架构数据。</p>
+<p>Job 处理过程</p>
+<p>那 Job 的数据逻辑是怎么样的呢？</p>
+<p>查询数据 -&gt; 可能需要做一些转换 -&gt; 然后插入数据</p>
+<p>看上去好简单的样子，但是如何查询数据会是一个挑战。因为假如你的表很大，而实际每分钟只会变更几条，难道你每次都要全量同步一边？</p>
+<p>如何识别出那些变过的数据呢？</p>
+<p>为你的数据加上 UpdateTime 字段</p>
+<p>为了解决这个问题，需要对你的数据库表进行一定的改造。其实，所有的数据库表都应该这么设计。</p>
+<p>第一个要改造的点是加上一个UpdateTime字段，每次更新数据的时候都需要去更新这个字段。</p>
+<p>如果用的是 MySQL 的话，可以直接把这个字段定义成这样子：</p>
+<p>UpdateTime timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP</p>
+<p>这样设置以后，每次数据变更 MySQL 会自动更新这个字段。另外，如果你进行了Update操作而数据其实没变，那么这个字段不会更新，非常贴心。</p>
+<p>这个是为了解决什么问题？</p>
+<p>我必须要知道所有数据的变更时间，我才能找到那些新插入或者新更新的数据。所以加上这个字段后，Insert和Update的问题就解决了，但是还有Delete！</p>
+<p>为你的数据加上 IsDeleted 字段</p>
+<p>你还在直接删除数据？如果是的话，赶紧改改吧，因为这么做在 ETL 系统中非常不友好。源表中的数据都删了，那 Job 还怎么找到它？难道要做两遍的数据比对？这个又要全表扫描目标表了。性能会非常差。</p>
+<p>所以最简单的方案就是加上IsDeleted字段进行软删除，这样删除的数据其实就是Update了一下，处理起来就非常简单了。</p>
+<p>如果你的系统在设计之初就用了软删除，那么你会轻松很多，如果不是，那么就需要修改你的程序了。</p>
+<p>相信我，越早改越好！除非你的系统永远那么小…</p>
+<p>选择合适的时间</p>
+<p>下面一个问题才是真正头疼的地方。我们也用过很多现成的 ETL 系统来同步数据了，源表也加上了上面提到的两个字段来识别有变更的数据。</p>
+<p>假设作业5分钟跑一次，那怎么写 SQL 语句呢？</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(Now(),INTERVAL 5 MINUTE)</p>
+<p>这么写有什么缺点呢？第一个缺点就是，你没办法保证你的 Job 真的是5分钟运行一次的，如果是5分01秒呢？那多出来的1秒的数据就丢了。</p>
+<p>另外，如果你 Job 所在机器的时间和数据库的时间不一致呢？极端情况假设你的 Job 机器快了10分钟，那么 Job 就永远取不到数据了。别以为这种情况不会发生…</p>
+<p>这个方案直接被拍死，那么下一个方案：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRunTime#</p>
+<p>这里需要加入一个LastRunTime变量，直接变量由 Job 程序自己记录。加上这个变量后，就解决了 Job 没办法准确地5分钟跑一次的问题。</p>
+<p>但是机器时间不一致的问题解决了吗？好像还没有…</p>
+<p>那来一个终极完美的方案吧：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRowTime#</p>
+<p>这里的LastRowTime是什么含义呢？它是你上次取到数据的最新一条。恩，这样就完全不依赖 Job 所在机器的时间了。哪怕它们相隔几年，数据也不会丢。因为你用的是相对时间。</p>
+<p>那为什么是&gt;=而不是&gt;呢？</p>
+<p>极端情况下，假设在同一个时间插入两条数据，它们的LastUpdateTime是一样的。而你取数据的时候，只插入了第一条，取完了才插入第二条。如果你后面查询的时候用&gt;，这个这里第二条数据就丢掉了。</p>
+<p>最后，还有一个折中方案，因为很多现成的 ETL 系统没办法记录LastRowTime，只能记录LastRunTime，那么可以这么写：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(#LastRunTime#,INTERVAL 10 MINUTE)</p>
+<p>这里我们可以接受两台机器有时间差，但是最多十分钟，这样做也会有缺点，每次都会有一些数据重复同步。</p>
+<p>或者，你的 ETL 系统连LastRunTime都没有（那还算是一个合格的 ETL 系统吗？），那么只能这样了，每五分钟同步一次：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(NOW(),INTERVAL 10 MINUTE)</p>
+<p>利用阿里巴巴开源组件 canal<br>上面的方案虽说只支持中小型系统，但是你们的数据库表真的会有频繁变更吗？如果没有，那么上面的方案一直是适用的。</p>
+<p>但是如果你们系统的更新真的非常频繁，而且你们要接近实时的同步效率那怎么办？</p>
+<p>如果有这样需求的话，建议尝试看看阿里巴巴的canal，项目地址在这里：<a href="https://github.com/alibaba/canal" target="_blank" rel="external">https://github.com/alibaba/canal</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 最终一致 </tag>
+            
+            <tag> 数据同步 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Ansible when register使用]]></title>
       <url>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</url>
       <content type="html"><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;q-sign-time=1546519044;1546520844&amp;q-key-time=1546519044;1546520844&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001" alt=""></p>
@@ -321,73 +388,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
             <tag> 数据库 </tag>
             
             <tag> SQL </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[高性能、最终一致性的数据同步方案]]></title>
-      <url>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</url>
-      <content type="html"><![CDATA[<p>问题的来源<br>先描述一下问题：</p>
-<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br><a id="more"></a></p>
-<p>利用 Job 来定时同步数据<br>首先，如果是中小型系统，可以接受秒级别的延时，数据变更频率不是非常高的话，可以用这个方案。</p>
-<p>常见的场景有：后台系统用户数据，后台系统角色、组织架构数据。</p>
-<p>Job 处理过程</p>
-<p>那 Job 的数据逻辑是怎么样的呢？</p>
-<p>查询数据 -&gt; 可能需要做一些转换 -&gt; 然后插入数据</p>
-<p>看上去好简单的样子，但是如何查询数据会是一个挑战。因为假如你的表很大，而实际每分钟只会变更几条，难道你每次都要全量同步一边？</p>
-<p>如何识别出那些变过的数据呢？</p>
-<p>为你的数据加上 UpdateTime 字段</p>
-<p>为了解决这个问题，需要对你的数据库表进行一定的改造。其实，所有的数据库表都应该这么设计。</p>
-<p>第一个要改造的点是加上一个UpdateTime字段，每次更新数据的时候都需要去更新这个字段。</p>
-<p>如果用的是 MySQL 的话，可以直接把这个字段定义成这样子：</p>
-<p>UpdateTime timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP</p>
-<p>这样设置以后，每次数据变更 MySQL 会自动更新这个字段。另外，如果你进行了Update操作而数据其实没变，那么这个字段不会更新，非常贴心。</p>
-<p>这个是为了解决什么问题？</p>
-<p>我必须要知道所有数据的变更时间，我才能找到那些新插入或者新更新的数据。所以加上这个字段后，Insert和Update的问题就解决了，但是还有Delete！</p>
-<p>为你的数据加上 IsDeleted 字段</p>
-<p>你还在直接删除数据？如果是的话，赶紧改改吧，因为这么做在 ETL 系统中非常不友好。源表中的数据都删了，那 Job 还怎么找到它？难道要做两遍的数据比对？这个又要全表扫描目标表了。性能会非常差。</p>
-<p>所以最简单的方案就是加上IsDeleted字段进行软删除，这样删除的数据其实就是Update了一下，处理起来就非常简单了。</p>
-<p>如果你的系统在设计之初就用了软删除，那么你会轻松很多，如果不是，那么就需要修改你的程序了。</p>
-<p>相信我，越早改越好！除非你的系统永远那么小…</p>
-<p>选择合适的时间</p>
-<p>下面一个问题才是真正头疼的地方。我们也用过很多现成的 ETL 系统来同步数据了，源表也加上了上面提到的两个字段来识别有变更的数据。</p>
-<p>假设作业5分钟跑一次，那怎么写 SQL 语句呢？</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(Now(),INTERVAL 5 MINUTE)</p>
-<p>这么写有什么缺点呢？第一个缺点就是，你没办法保证你的 Job 真的是5分钟运行一次的，如果是5分01秒呢？那多出来的1秒的数据就丢了。</p>
-<p>另外，如果你 Job 所在机器的时间和数据库的时间不一致呢？极端情况假设你的 Job 机器快了10分钟，那么 Job 就永远取不到数据了。别以为这种情况不会发生…</p>
-<p>这个方案直接被拍死，那么下一个方案：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRunTime#</p>
-<p>这里需要加入一个LastRunTime变量，直接变量由 Job 程序自己记录。加上这个变量后，就解决了 Job 没办法准确地5分钟跑一次的问题。</p>
-<p>但是机器时间不一致的问题解决了吗？好像还没有…</p>
-<p>那来一个终极完美的方案吧：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRowTime#</p>
-<p>这里的LastRowTime是什么含义呢？它是你上次取到数据的最新一条。恩，这样就完全不依赖 Job 所在机器的时间了。哪怕它们相隔几年，数据也不会丢。因为你用的是相对时间。</p>
-<p>那为什么是&gt;=而不是&gt;呢？</p>
-<p>极端情况下，假设在同一个时间插入两条数据，它们的LastUpdateTime是一样的。而你取数据的时候，只插入了第一条，取完了才插入第二条。如果你后面查询的时候用&gt;，这个这里第二条数据就丢掉了。</p>
-<p>最后，还有一个折中方案，因为很多现成的 ETL 系统没办法记录LastRowTime，只能记录LastRunTime，那么可以这么写：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(#LastRunTime#,INTERVAL 10 MINUTE)</p>
-<p>这里我们可以接受两台机器有时间差，但是最多十分钟，这样做也会有缺点，每次都会有一些数据重复同步。</p>
-<p>或者，你的 ETL 系统连LastRunTime都没有（那还算是一个合格的 ETL 系统吗？），那么只能这样了，每五分钟同步一次：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(NOW(),INTERVAL 10 MINUTE)</p>
-<p>利用阿里巴巴开源组件 canal<br>上面的方案虽说只支持中小型系统，但是你们的数据库表真的会有频繁变更吗？如果没有，那么上面的方案一直是适用的。</p>
-<p>但是如果你们系统的更新真的非常频繁，而且你们要接近实时的同步效率那怎么办？</p>
-<p>如果有这样需求的话，建议尝试看看阿里巴巴的canal，项目地址在这里：<a href="https://github.com/alibaba/canal" target="_blank" rel="external">https://github.com/alibaba/canal</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> 最终一致 </tag>
-            
-            <tag> 数据同步 </tag>
             
         </tags>
         
@@ -1026,10 +1026,9 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Spark优化]]></title>
-      <url>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</url>
-      <content type="html"><![CDATA[<center><br><br><img src="http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png" alt=""><br><br></center>
-
+      <title><![CDATA[Spark应用案例-Spark完成PV和UV的计算]]></title>
+      <url>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</url>
+      <content type="html"><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content>
       
         <categories>
@@ -1050,9 +1049,10 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Spark应用案例-Spark完成PV和UV的计算]]></title>
-      <url>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</url>
-      <content type="html"><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      <title><![CDATA[Spark优化]]></title>
+      <url>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</url>
+      <content type="html"><![CDATA[<center><br><br><img src="http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png" alt=""><br><br></center>
+
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content>
       
         <categories>
@@ -2137,28 +2137,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Spark入门 第四章 第七节 Spark - 读写Hive数据(DataFrame)]]></title>
-      <url>http://Melodylican.github.io/2017/03/12/Spark%E8%AF%BB%E5%86%99Hive%E6%95%B0%E6%8D%AE/</url>
-      <content type="html"><![CDATA[<div class="note success"><p>该节内容待补充完整</p>
-</div>
-<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Spark </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Spark入门 第四章 第六节 Spark - 通过JDBC连接数据库(DataFrame)]]></title>
       <url>http://Melodylican.github.io/2017/03/12/Spark%E9%80%9A%E8%BF%87JDBC%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93/</url>
       <content type="html"><![CDATA[<p>这里以关系数据库MySQL为例。首先，请参考厦门大学数据库实验室博客教程（Ubuntu安装MySQL），在Linux系统中安装好MySQL数据库。这里假设你已经成功安装了MySQL数据库。下面我们要新建一个测试Spark程序的数据库，数据库名称是“spark”，表的名称是“student”。<br><a id="more"></a><br>请执行下面命令在Linux中启动MySQL数据库，并完成数据库和表的创建，以及样例数据的录入：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">service mysql start</div><div class="line">mysql -u root -p</div><div class="line">//屏幕会提示你输入密码</div></pre></td></tr></table></figure></p>
@@ -2177,6 +2155,28 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 <p>上面的命令行中，在一行的末尾加入斜杠\，是为了告诉spark-shell，命令还没有结束。</p>
 <p>启动进入spark-shell以后，可以执行以下命令连接数据库，写入数据，程序如下（你可以把下面程序一条条拷贝到spark-shell中执行）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.<span class="type">Properties</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.sql.types._</div><div class="line"><span class="keyword">import</span> org.apache.spark.sql.<span class="type">Row</span></div><div class="line"> </div><div class="line"><span class="comment">//下面我们设置两条数据表示两个学生信息</span></div><div class="line"><span class="keyword">val</span> studentRDD = spark.sparkContext.parallelize(<span class="type">Array</span>(<span class="string">"3 Rongcheng M 26"</span>,<span class="string">"4 Guanhua M 27"</span>)).map(_.split(<span class="string">" "</span>))</div><div class="line"> </div><div class="line"><span class="comment">//下面要设置模式信息</span></div><div class="line"><span class="keyword">val</span> schema = <span class="type">StructType</span>(<span class="type">List</span>(<span class="type">StructField</span>(<span class="string">"id"</span>, <span class="type">IntegerType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"name"</span>, <span class="type">StringType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"gender"</span>, <span class="type">StringType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"age"</span>, <span class="type">IntegerType</span>, <span class="literal">true</span>)))</div><div class="line"> </div><div class="line"><span class="comment">//下面创建Row对象，每个Row对象都是rowRDD中的一行</span></div><div class="line"><span class="keyword">val</span> rowRDD = studentRDD.map(p =&gt; <span class="type">Row</span>(p(<span class="number">0</span>).toInt, p(<span class="number">1</span>).trim, p(<span class="number">2</span>).trim, p(<span class="number">3</span>).toInt))</div><div class="line"> </div><div class="line"><span class="comment">//建立起Row对象和模式之间的对应关系，也就是把数据和模式对应起来</span></div><div class="line"><span class="keyword">val</span> studentDF = spark.createDataFrame(rowRDD, schema)</div><div class="line"> </div><div class="line"><span class="comment">//下面创建一个prop变量用来保存JDBC连接参数</span></div><div class="line"><span class="keyword">val</span> prop = <span class="keyword">new</span> <span class="type">Properties</span>()</div><div class="line">prop.put(<span class="string">"user"</span>, <span class="string">"root"</span>) <span class="comment">//表示用户名是root</span></div><div class="line">prop.put(<span class="string">"password"</span>, <span class="string">"hadoop"</span>) <span class="comment">//表示密码是hadoop</span></div><div class="line">prop.put(<span class="string">"driver"</span>,<span class="string">"com.mysql.jdbc.Driver"</span>) <span class="comment">//表示驱动程序是com.mysql.jdbc.Driver</span></div><div class="line"> </div><div class="line"><span class="comment">//下面就可以连接数据库，采用append模式，表示追加记录到数据库spark的student表中</span></div><div class="line">studentDF.write.mode(<span class="string">"append"</span>).jdbc(<span class="string">"jdbc:mysql://localhost:3306/spark"</span>, <span class="string">"spark.student"</span>, prop)</div></pre></td></tr></table></figure></p>
 <p>在spark-shell中执行完上述程序后，我们可以看一下效果，看看MySQL数据库中的spark.student表发生了什么变化。请在刚才的另外一个窗口的MySQL命令提示符下面继续输入下面命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">mysql&gt; select * from student;</div><div class="line">+------+-----------+--------+------+</div><div class="line">| id   | name      | gender | age  |</div><div class="line">+------+-----------+--------+------+</div><div class="line">|    1 | Xueqian   | F      |   23 |</div><div class="line">|    2 | Weiliang  | M      |   24 |</div><div class="line">|    3 | Rongcheng | M      |   26 |</div><div class="line">|    4 | Guanhua   | M      |   27 |</div><div class="line">+------+-----------+--------+------+</div><div class="line">4 rows in set (0.00 sec)</div></pre></td></tr></table></figure></p>
+<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Spark </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Spark入门 第四章 第七节 Spark - 读写Hive数据(DataFrame)]]></title>
+      <url>http://Melodylican.github.io/2017/03/12/Spark%E8%AF%BB%E5%86%99Hive%E6%95%B0%E6%8D%AE/</url>
+      <content type="html"><![CDATA[<div class="note success"><p>该节内容待补充完整</p>
+</div>
 <font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
       
         <categories>
@@ -3117,6 +3117,46 @@ scala&gt; df.select(df(<span class="string">"name"</span>).as(<span class="strin
     </entry>
     
     <entry>
+      <title><![CDATA[使用Java开发高性能网站需要注意的那些事]]></title>
+      <url>http://Melodylican.github.io/2017/01/10/Java%E5%BC%80%E5%8F%91%E9%AB%98%E6%80%A7%E8%83%BD%E7%BD%91%E7%AB%99%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/</url>
+      <content type="html"><![CDATA[<p><center><br><img src="http://www.javabloger.com/wp-content/uploads/2016/02/li8hzoM36n1XM.jpg" alt=""><br></center><br><a id="more"></a><br>近期各家IT媒体举办的业内技术大会让很多网站都在披露自己的技术内幕与同行们分享，大到facebook，百度，小到刚起步的网站。facebook，百度之类的大型网站采用的技术和超凡的处理能力的确给人耳目一新的感觉，但并不是每个网站都是像facebook，百度 有上亿的用户访问流量，有海量的数据需要存储，需要使用到mapreduce/并行计算，HBase/列存储这些技术不可。技术手段始终是运营的支撑，对于当前的运营环境适用就好，没有必要非要赶个时髦，一定要和某项流行的技术产生点关系才善罢甘休。</p>
+<p>在最近的技术大会中我们更多的目光都聚焦在这些大型网站，其实中小型门户网站的技术体系也是值得去探讨和关注。全天下的攻城师们并不是都在为这些大型门户网站服务，更多的攻城师们正在默默无闻的为一些刚刚起步的中小型网站服务，而且占据了攻城师队伍中的60%以上的人群。在关注大型门户网站的时候，中小型门户网站的技术发展和实战经验更值得去分享。</p>
+<p>无论大型门户网站还是中小型垂直类型网站都会对稳定性、性能和可伸缩性有所追求。大型网站的技术经验分享值得我们去学习和借用，但落实到更具体的实践上并不是对所有网站可以适用,其他语言开发的网站我还不敢多说，但Java开发的系统，我还是能您给插上几句话：</p>
+<h2 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h2><p>JEE容器中运行的JVM参数配置参数的正确使用直接关系到整个系统的性能和处理能力，JVM的调优主要是对内存管理方面的调优，优化的方向分为以下4点：<br>1.HeapSize             堆的大小，也可以说Java虚拟机使用内存的策略，这点是非常关键的。<br>2.GarbageCollector  通过配置相关的参数进行Java中的垃圾收集器的4个算法(策略)进行使用。<br>3.StackSize             栈是JVM的内存指令区,每个线程都有他自己的Stack，Stack的大小限制着线程的数量。<br>4.DeBug/Log           在JVM中还可以设置对JVM运行时的日志和JVM挂掉后的日志输出，这点非常的关键，根据各类JVM的日志输出才能配置合适的参数。<br>网上随处可见JVM的配置技巧，但是我还是推荐阅读Sun官方的2篇文章，可以对配置参数的其所依然有一个了解<br>1.Java HotSpot VM Options<br><a href="http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html" target="_blank" rel="external">http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html</a><br>2.Troubleshooting Guide for Java SE 6 with HotSpot VM <a href="http://www.oracle.com/technetwork/java/javase/index-137495.html" target="_blank" rel="external">http://www.oracle.com/technetwork/java/javase/index-137495.html</a><br>另外，我相信不是每个人攻城师都是天天对着这些JVM参数的，如果你忘记了那些关键的参数你可以输入Java -X(大写X)进行提示。</p>
+<h2 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h2><p>针对MySQL的JDBC的参数在之前的文章中也有介绍过，在单台机器或者集群的环境下合理的使用JDBC中的配置参数对操作数据库也有很大的影响。<br>一些所谓高性能的 Java ORM开源框架也就是打开了很多JDBC中的默认参数：<br>1.例如：autoReconnect、prepStmtCacheSize、cachePrepStmts、useNewIO、blobSendChunkSize 等，<br>2.例如集群环境下：roundRobinLoadBalance、failOverReadOnly、autoReconnectForPools、secondsBeforeRetryMaster。<br>具体内容可以参阅MySQL的JDBC官方使用手册：<br><a href="http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-jdbc-reference" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-jdbc-reference</a></p>
+<h2 id="数据库连接池-DataSource"><a href="#数据库连接池-DataSource" class="headerlink" title="数据库连接池(DataSource)"></a>数据库连接池(DataSource)</h2><p>应用程序与数据库连接频繁的交互会给系统带来瓶颈和大量的开销会影响到系统的性能，JDBC连接池负责分配、管理和释放数据库连接，它允许应用程序重复使用一个现有的数据库连接，而再不是重新建立一个连接，因此应用程序不需要频繁的与数据库开关连接，并且可以释放空闲时间超过最大空闲时间的数据库连接来避免因为没有释放数据库连接而引起的数据库连接遗漏。这项技术能明显提高对数据库操作的性能。<br>在此我认为有一点需要说明：<br>连接池的使用也是需要关闭，因为在数据库连接池启动的时候就预先和数据库获得了相应的连接，之后不再需要应用程序直接的和数据库打交道，因为应用程序使用数据库连接池是一个“借”的概念，应用程序从数据库连接池中获得资源是“借出”，还需要还回去，就好比有20个水桶放在这里，需要拿水的人都可以使用这些木桶从水池里面拿水，如果20个人都拿完水，不将水桶还回原地，那么后面来的人再需要拿水，只能在旁边等待有人将木桶还回去，之前的人用完后需要放回去，不然后面的人就会一直等待，造成资源堵塞，同理，应用程序获取数据库连接的时候Connection连接对象的时候是从“池”中分配一个数据库连接出去，在使用完毕后，归还这个数据库连接，这样才能保持数据库的连接“有借有还”准则。</p>
+<p><font color="red">参考资料</font>：<br><a href="http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-connection-pooling" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-connection-pooling</a></p>
+<h2 id="数据存取"><a href="#数据存取" class="headerlink" title="数据存取"></a>数据存取</h2><p>数据库服务器的优化和数据的存取，什么类型的数据放在什么地方更好是值得去思考的问题，将来的存储很可能是混用的，Cache，NOSQL，DFS，DataBase 在一个系统中都会有，生活的餐具和平日里穿衣服需要摆放在家里，但是不会用同一种类型的家具存放，貌似没有那个人家把餐具和衣服放在同一个柜子里面的。这就像是系统中不同类型的数据一样，对不同类型的数据需要使用合适的存储环境。文件和图片的存储，首先按照访问的热度分类，或者按照文件的大小。强关系类型并且需要事务支持的采用传统的数据库，弱关系型不需要事务支持的可以考虑NOSQL，海量文件存储可以考虑一下支持网络存储的DFS，至于缓存要看你单个数据存储的大小和读写的比例。<br>还有一点值得注意就是数据读写分离，无论在DataBase还是NOSQL的环境中大部分都是读大于写，因此在设计时还需考虑 不仅仅需要让数据的读分散在多台机器上，还需要考虑多台机器之间的数据一致性，MySQL的一主多从，在加上MySQL-Proxy或者借用JDBC中的一些参数(roundRobinLoadBalance、failOverReadOnly、autoReconnectForPools、secondsBeforeRetryMaster)对后续应用程序开发，可以将读和写分离，将大量读的压力分散在多台机器上，并且还保证了数据的一致性。</p>
+<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><p>在宏观上看缓存一般分为2种：本地缓存和分布式缓存</p>
+<ol>
+<li>本地缓存，对于Java的本地缓存而言就是讲数据放入静态(static)的数据结合中，然后需要用的时候就从静态数据结合中拿出来,对于高并发的环境建议使用 ConcurrentHashMap或者CopyOnWriteArrayList作为本地缓存。缓存的使用更具体点说就是对系统内存的使用，使用多少内存的资源需要有一个适当比例，如果超过适当的使用存储访问，将会适得其反，导致整个系统的运行效率低下。</li>
+<li>分布式缓存，一般用于分布式的环境，将每台机器上的缓存进行集中化的存储，并且不仅仅用于缓存的使用范畴，还可以作为分布式系统数据同步/传输的一种手段，一般被使用最多的就是Memcached和Redis。<br>数据存储在不同的介质上读/写得到的效率是不同的，在系统中如何善用缓存，让你的数据更靠近cpu，下面有一张图你需要永远牢记在心里，来自Google的技术大牛Jeff Dean(Ref)的杰作，如图所示：<br><img src="http://www.javabloger.com/wp-content/uploads/2016/02/cache-speed.png" alt=""></li>
+</ol>
+<h2 id="并发-多线程"><a href="#并发-多线程" class="headerlink" title="并发/多线程"></a>并发/多线程</h2><p>在高并发环境下建议开发者使用JDK中自带的并发包(java.util.concurrent)，在JDK1.5以后使用java.util.concurrent下的工具类可以简化多线程开发，在java.util.concurrent的工具中主要分为以下几个主要部分：<br>1.线程池，线程池的接口(Executor、ExecutorService)与实现类(ThreadPoolExecutor、 ScheduledThreadPoolExecutor），利用jdk自带的线程池框架可以管理任务的排队和安排，并允许受控制的关闭。因为运行一个线程需要消耗系统CPU资源，而创建、结束一个线程也对系统CPU资源有开销，使用线程池不仅仅可以有效的管理多线程的使用，还是可以提高线程的运行效率。<br>2.本地队列，提供了高效的、可伸缩的、线程安全的非阻塞 FIFO 队列。java.util.concurrent 中的五个实现都支持扩展的 BlockingQueue 接口，该接口定义了 put 和 take 的阻塞版本：LinkedBlockingQueue、ArrayBlockingQueue、SynchronousQueue、PriorityBlockingQueue 和 DelayQueue。这些不同的类覆盖了生产者-使用者、消息传递、并行任务执行和相关并发设计的大多数常见使用的上下文。<br>3.同步器，四个类可协助实现常见的专用同步语句。Semaphore 是一个经典的并发工具。CountDownLatch 是一个极其简单但又极其常用的实用工具，用于在保持给定数目的信号、事件或条件前阻塞执行。CyclicBarrier 是一个可重置的多路同步点，在某些并行编程风格中很有用。Exchanger 允许两个线程在 collection 点交换对象，它在多流水线设计中是有用的。<br>4.并发包 Collection，此包还提供了设计用于多线程上下文中的 Collection 实现：ConcurrentHashMap、ConcurrentSkipListMap、ConcurrentSkipListSet、CopyOnWriteArrayList 和 CopyOnWriteArraySet。当期望许多线程访问一个给定 collection 时，ConcurrentHashMap 通常优于同步的 HashMap，ConcurrentSkipListMap 通常优于同步的 TreeMap。当期望的读数和遍历远远大于列表的更新数时，CopyOnWriteArrayList 优于同步的 ArrayList。</p>
+<h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><p>关于队列可以分为：本地的队列 和 分布式队列 2类<br>本地队列：一般常见的用于非及时性的数据批量写入，可以将获取的数据缓存在一个数组中等达到一定数量的时候在进行批量的一次写入，可以使用BlockingQueue或者List/Map来实现。<br>相关资料：Sun Java API.<br>分布式队列：一般作为消息中间件，构建分布式环境下子系统与子系统之间通信的桥梁，JEE环境中使用最多的就是Apache的AvtiveMQ和Sun公司的OpenMQ。<br>轻量级的MQ中间件之前也向大家介绍过一些例如：Kestrel和Redis(Ref <a href="http://www.javabloger.com/article/mq-kestrel-redis-for-java.html)，最近又听说LinkedIn的搜索技术团队推出了一个MQ产品-kaukaf(Ref" target="_blank" rel="external">http://www.javabloger.com/article/mq-kestrel-redis-for-java.html)，最近又听说LinkedIn的搜索技术团队推出了一个MQ产品-kaukaf(Ref</a> <a href="http://sna-projects.com/kafka" target="_blank" rel="external">http://sna-projects.com/kafka</a> )，对此保持关注。<br>相关资料：<br>1.ActiveMQ <a href="http://activemq.apache.org/getting-started.html" target="_blank" rel="external">http://activemq.apache.org/getting-started.html</a><br>2.OpenMQ  <a href="http://mq.java.net/about.html" target="_blank" rel="external">http://mq.java.net/about.html</a><br>3.Kafka       <a href="http://sna-projects.com/kafka" target="_blank" rel="external">http://sna-projects.com/kafka</a><br>4.JMS文章  <a href="http://www.javabloger.com/article/category/jms" target="_blank" rel="external">http://www.javabloger.com/article/category/jms</a></p>
+<h2 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h2><p>NIO是在JDK1.4后的版本中出现的，在Java 1.4之前，Jdk提供的都是面向流的I/O系统，例如读/写文件则是一次一个字节地处理数据，一个输入流产生一个字节的数据，一个输出流消费一个字节的数据， 面向流的I/O速度非常慢，并且一个数据包要么整个数据报已经收到，要么还没有。Java NIO非堵塞技术实际是采取Reactor模式，有内容进来会自动通知,不必死等、死循环，大大的提升了系统性能。在现实场景中NIO技术多数运用两个方面，1是文件的读写操作，2是网络上数据流的操作。在NIO中有几个核心对象需要掌握：1选择器(Selector)、2通道(Channel)、3缓冲区(Buffer)。<br>我的废话：<br>1.在Java NIO的技术范畴中内存映射文件是一种高效的做法，可以用于缓存中存储的冷/热数据分离，将缓存中的一部分冷数据进行这样的处理，这种做法上比常规的基于流或者基于通道的I/O快的多，通过使文件中的数据出现为内存数组的内容来完成的，将文件中实际读取或者写入的部分才会映射到内存中，并不是将整个文件读到内存中。<br>2.在Mysql的jdbc驱动中也可以使用NIO技术对数据库进行操作来提升系统的性能。</p>
+<h2 id="长连接-Servlet3-0"><a href="#长连接-Servlet3-0" class="headerlink" title="长连接/Servlet3.0"></a>长连接/Servlet3.0</h2><p>这里说的长连接就是长轮询，以前浏览器(客户端)需要关注服务器端发生的数据变化需要不断的访问服务器，这样客户端的数量一多必然会给服务器端造成很大的压力，例如：论坛中的站内消息。现在Servlet3.0规范中提供了一个新的特性：异步IO通信；该特性会保持一个长连接。利用Servlet3异步请求的这项技术可以大大的缓解服务器端的压力。<br>Servlet3.0的原理就是将request的请求开启一个线程挂起，中间设置等待超时的时间，如果后台事件触发request请求，得到的结果返回给客户端的request请求，如果在设置等待超时的时间内没有任何事件发生也将请求返回给客户端，客户端将再次发起request请求，客户端与服务器端的交互可以与此往复。<br>就好比，你先过来跟我说如果有人找你，我就立马通知你你来见他，原先你需要不断的问我有没有要找你，而不管有没有人找你，你都需要不断的问我有没有人找你，这样的话不论问的人还是被问的人都会累死。</p>
+<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>Log4J是通常被人们使用的工具，系统在刚刚上线的时候日志一般都设置在INFO的级，真正上线后一般设置在ERROR级，但无论在任何时候，日志的输入内容都是需要关注的，开发人员一般可以依靠输出的日志查找出现的问题或者依靠输出的日志对系统的性能进行优化，日志也是系统运行状态的报告和排错的依据。<br>简单来说日志按照定义的不同策略和等级输出到不同的环境，那样便于我们分析和管理。相反你没有策略的输出，那么机器一多，时间一长，会有一大推乱糟糟的日志，会让你排错的时候无从下手，所以日志的输出策略是使用日志的关键点。<br>参考资料：<a href="http://logging.apache.org/log4j/1.2/manual.html" target="_blank" rel="external">http://logging.apache.org/log4j/1.2/manual.html</a></p>
+<h2 id="打包-部署"><a href="#打包-部署" class="headerlink" title="打包/部署"></a>打包/部署</h2><p>在代码设计的时候最好能将不同类型的功能模块在IDE环境中粗粒度的分为不同的工程，便于打成不同jar包部署在不同的环境中。有这样的一个应用场景：需要每天定时远程从SP那边获得当天100条新闻和部分城市的天气预报，虽然每天的数据量不多，但是前端访问的并发量很大，显然需要在系统架构上做到读写分离。<br>如果把web工程和定时抓取的功能模块完全集中在一个工程里打包，将导致需要扩展的时候每台机器上既有web应用也有定时器，因为功能模块没有分开，每台机器上都有定时器工作将会造成数据库里面的数据重复。<br>如果开发的时候就将web和定时器分为2个工程，打包的时候就可以分开部署，10台web对应一台定期器，分解了前端请求的压力，数据的写入也不会重复。<br>这样做的另一个好处就是可以共用，在上述的场景中web和定时器都需要对数据库进行读取，那么web和定时器的工程里都有操作数据库的代码，在代码的逻辑上还是感觉乱乱的。如果再抽出一个DAL层的jar，web和定时器的应用模块开发者只需要引用DAL层的jar，开发相关的业务逻辑，面向接口编程，无需考虑具体的数据库操作，具体的对数据库操作由其他开发者完成，可以在开发任务分工上很明确，并且互不干涉。</p>
+<h2 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h2><p>所谓流行的SSH(Struts/Spring/Hiberanet)轻量级框架,对于很多中小型项目而言一点都不轻量级，开发者不仅需要维护代码，还需要维护繁琐的xml配置文件，而且说不定某个配置文件写的不对就让整个都工程无法运行。无配置文件可以取代SSH(struts/Spring/Hiberanet)框架的产品真的太多了，我之前就向大家介绍过一些个产品(Ref)。<br>这个我并不是一味的反对使用SSH(Struts/Spring/Hiberanet)框架，在我眼里SSH框架真的作用是做到了规范开发，而并不使用了SSH(Struts/Spring/Hiberanet)框架能提高多少性能。<br>SSH框架只是对于非常大的项目人数上百人的团队，还需要、继续增加团队规模的公司而言，是需要选择一些市面上大家都认可，并且熟悉的技术，SSH(Struts/Spring/Hiberanet)框架比较成熟所以是首先产品。<br>但是对于一些小团队中间有个把技术高人的团队而言完全可以选择更加简洁的框架，真正的做到提速你的开发效率，早日抛弃SSH框架选择更简洁的技术在小团队开发中是一种比较明知的选择。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Java </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[ZooKeeper经典应用场景]]></title>
       <url>http://Melodylican.github.io/2017/01/10/ZooKeeper%E7%BB%8F%E5%85%B8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF/</url>
       <content type="html"><![CDATA[<p>转载自：<a href="http://rdc.taobao.com/team/jm/archives/1232" target="_blank" rel="external">http://rdc.taobao.com/team/jm/archives/1232</a></p>
@@ -3193,46 +3233,6 @@ scala&gt; df.select(df(<span class="string">"name"</span>).as(<span class="strin
             <tag> Java </tag>
             
             <tag> ZooKeeper </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[使用Java开发高性能网站需要注意的那些事]]></title>
-      <url>http://Melodylican.github.io/2017/01/10/Java%E5%BC%80%E5%8F%91%E9%AB%98%E6%80%A7%E8%83%BD%E7%BD%91%E7%AB%99%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/</url>
-      <content type="html"><![CDATA[<p><center><br><img src="http://www.javabloger.com/wp-content/uploads/2016/02/li8hzoM36n1XM.jpg" alt=""><br></center><br><a id="more"></a><br>近期各家IT媒体举办的业内技术大会让很多网站都在披露自己的技术内幕与同行们分享，大到facebook，百度，小到刚起步的网站。facebook，百度之类的大型网站采用的技术和超凡的处理能力的确给人耳目一新的感觉，但并不是每个网站都是像facebook，百度 有上亿的用户访问流量，有海量的数据需要存储，需要使用到mapreduce/并行计算，HBase/列存储这些技术不可。技术手段始终是运营的支撑，对于当前的运营环境适用就好，没有必要非要赶个时髦，一定要和某项流行的技术产生点关系才善罢甘休。</p>
-<p>在最近的技术大会中我们更多的目光都聚焦在这些大型网站，其实中小型门户网站的技术体系也是值得去探讨和关注。全天下的攻城师们并不是都在为这些大型门户网站服务，更多的攻城师们正在默默无闻的为一些刚刚起步的中小型网站服务，而且占据了攻城师队伍中的60%以上的人群。在关注大型门户网站的时候，中小型门户网站的技术发展和实战经验更值得去分享。</p>
-<p>无论大型门户网站还是中小型垂直类型网站都会对稳定性、性能和可伸缩性有所追求。大型网站的技术经验分享值得我们去学习和借用，但落实到更具体的实践上并不是对所有网站可以适用,其他语言开发的网站我还不敢多说，但Java开发的系统，我还是能您给插上几句话：</p>
-<h2 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h2><p>JEE容器中运行的JVM参数配置参数的正确使用直接关系到整个系统的性能和处理能力，JVM的调优主要是对内存管理方面的调优，优化的方向分为以下4点：<br>1.HeapSize             堆的大小，也可以说Java虚拟机使用内存的策略，这点是非常关键的。<br>2.GarbageCollector  通过配置相关的参数进行Java中的垃圾收集器的4个算法(策略)进行使用。<br>3.StackSize             栈是JVM的内存指令区,每个线程都有他自己的Stack，Stack的大小限制着线程的数量。<br>4.DeBug/Log           在JVM中还可以设置对JVM运行时的日志和JVM挂掉后的日志输出，这点非常的关键，根据各类JVM的日志输出才能配置合适的参数。<br>网上随处可见JVM的配置技巧，但是我还是推荐阅读Sun官方的2篇文章，可以对配置参数的其所依然有一个了解<br>1.Java HotSpot VM Options<br><a href="http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html" target="_blank" rel="external">http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html</a><br>2.Troubleshooting Guide for Java SE 6 with HotSpot VM <a href="http://www.oracle.com/technetwork/java/javase/index-137495.html" target="_blank" rel="external">http://www.oracle.com/technetwork/java/javase/index-137495.html</a><br>另外，我相信不是每个人攻城师都是天天对着这些JVM参数的，如果你忘记了那些关键的参数你可以输入Java -X(大写X)进行提示。</p>
-<h2 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h2><p>针对MySQL的JDBC的参数在之前的文章中也有介绍过，在单台机器或者集群的环境下合理的使用JDBC中的配置参数对操作数据库也有很大的影响。<br>一些所谓高性能的 Java ORM开源框架也就是打开了很多JDBC中的默认参数：<br>1.例如：autoReconnect、prepStmtCacheSize、cachePrepStmts、useNewIO、blobSendChunkSize 等，<br>2.例如集群环境下：roundRobinLoadBalance、failOverReadOnly、autoReconnectForPools、secondsBeforeRetryMaster。<br>具体内容可以参阅MySQL的JDBC官方使用手册：<br><a href="http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-jdbc-reference" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-jdbc-reference</a></p>
-<h2 id="数据库连接池-DataSource"><a href="#数据库连接池-DataSource" class="headerlink" title="数据库连接池(DataSource)"></a>数据库连接池(DataSource)</h2><p>应用程序与数据库连接频繁的交互会给系统带来瓶颈和大量的开销会影响到系统的性能，JDBC连接池负责分配、管理和释放数据库连接，它允许应用程序重复使用一个现有的数据库连接，而再不是重新建立一个连接，因此应用程序不需要频繁的与数据库开关连接，并且可以释放空闲时间超过最大空闲时间的数据库连接来避免因为没有释放数据库连接而引起的数据库连接遗漏。这项技术能明显提高对数据库操作的性能。<br>在此我认为有一点需要说明：<br>连接池的使用也是需要关闭，因为在数据库连接池启动的时候就预先和数据库获得了相应的连接，之后不再需要应用程序直接的和数据库打交道，因为应用程序使用数据库连接池是一个“借”的概念，应用程序从数据库连接池中获得资源是“借出”，还需要还回去，就好比有20个水桶放在这里，需要拿水的人都可以使用这些木桶从水池里面拿水，如果20个人都拿完水，不将水桶还回原地，那么后面来的人再需要拿水，只能在旁边等待有人将木桶还回去，之前的人用完后需要放回去，不然后面的人就会一直等待，造成资源堵塞，同理，应用程序获取数据库连接的时候Connection连接对象的时候是从“池”中分配一个数据库连接出去，在使用完毕后，归还这个数据库连接，这样才能保持数据库的连接“有借有还”准则。</p>
-<p><font color="red">参考资料</font>：<br><a href="http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-connection-pooling" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.1/zh/connectors.html#cj-connection-pooling</a></p>
-<h2 id="数据存取"><a href="#数据存取" class="headerlink" title="数据存取"></a>数据存取</h2><p>数据库服务器的优化和数据的存取，什么类型的数据放在什么地方更好是值得去思考的问题，将来的存储很可能是混用的，Cache，NOSQL，DFS，DataBase 在一个系统中都会有，生活的餐具和平日里穿衣服需要摆放在家里，但是不会用同一种类型的家具存放，貌似没有那个人家把餐具和衣服放在同一个柜子里面的。这就像是系统中不同类型的数据一样，对不同类型的数据需要使用合适的存储环境。文件和图片的存储，首先按照访问的热度分类，或者按照文件的大小。强关系类型并且需要事务支持的采用传统的数据库，弱关系型不需要事务支持的可以考虑NOSQL，海量文件存储可以考虑一下支持网络存储的DFS，至于缓存要看你单个数据存储的大小和读写的比例。<br>还有一点值得注意就是数据读写分离，无论在DataBase还是NOSQL的环境中大部分都是读大于写，因此在设计时还需考虑 不仅仅需要让数据的读分散在多台机器上，还需要考虑多台机器之间的数据一致性，MySQL的一主多从，在加上MySQL-Proxy或者借用JDBC中的一些参数(roundRobinLoadBalance、failOverReadOnly、autoReconnectForPools、secondsBeforeRetryMaster)对后续应用程序开发，可以将读和写分离，将大量读的压力分散在多台机器上，并且还保证了数据的一致性。</p>
-<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><p>在宏观上看缓存一般分为2种：本地缓存和分布式缓存</p>
-<ol>
-<li>本地缓存，对于Java的本地缓存而言就是讲数据放入静态(static)的数据结合中，然后需要用的时候就从静态数据结合中拿出来,对于高并发的环境建议使用 ConcurrentHashMap或者CopyOnWriteArrayList作为本地缓存。缓存的使用更具体点说就是对系统内存的使用，使用多少内存的资源需要有一个适当比例，如果超过适当的使用存储访问，将会适得其反，导致整个系统的运行效率低下。</li>
-<li>分布式缓存，一般用于分布式的环境，将每台机器上的缓存进行集中化的存储，并且不仅仅用于缓存的使用范畴，还可以作为分布式系统数据同步/传输的一种手段，一般被使用最多的就是Memcached和Redis。<br>数据存储在不同的介质上读/写得到的效率是不同的，在系统中如何善用缓存，让你的数据更靠近cpu，下面有一张图你需要永远牢记在心里，来自Google的技术大牛Jeff Dean(Ref)的杰作，如图所示：<br><img src="http://www.javabloger.com/wp-content/uploads/2016/02/cache-speed.png" alt=""></li>
-</ol>
-<h2 id="并发-多线程"><a href="#并发-多线程" class="headerlink" title="并发/多线程"></a>并发/多线程</h2><p>在高并发环境下建议开发者使用JDK中自带的并发包(java.util.concurrent)，在JDK1.5以后使用java.util.concurrent下的工具类可以简化多线程开发，在java.util.concurrent的工具中主要分为以下几个主要部分：<br>1.线程池，线程池的接口(Executor、ExecutorService)与实现类(ThreadPoolExecutor、 ScheduledThreadPoolExecutor），利用jdk自带的线程池框架可以管理任务的排队和安排，并允许受控制的关闭。因为运行一个线程需要消耗系统CPU资源，而创建、结束一个线程也对系统CPU资源有开销，使用线程池不仅仅可以有效的管理多线程的使用，还是可以提高线程的运行效率。<br>2.本地队列，提供了高效的、可伸缩的、线程安全的非阻塞 FIFO 队列。java.util.concurrent 中的五个实现都支持扩展的 BlockingQueue 接口，该接口定义了 put 和 take 的阻塞版本：LinkedBlockingQueue、ArrayBlockingQueue、SynchronousQueue、PriorityBlockingQueue 和 DelayQueue。这些不同的类覆盖了生产者-使用者、消息传递、并行任务执行和相关并发设计的大多数常见使用的上下文。<br>3.同步器，四个类可协助实现常见的专用同步语句。Semaphore 是一个经典的并发工具。CountDownLatch 是一个极其简单但又极其常用的实用工具，用于在保持给定数目的信号、事件或条件前阻塞执行。CyclicBarrier 是一个可重置的多路同步点，在某些并行编程风格中很有用。Exchanger 允许两个线程在 collection 点交换对象，它在多流水线设计中是有用的。<br>4.并发包 Collection，此包还提供了设计用于多线程上下文中的 Collection 实现：ConcurrentHashMap、ConcurrentSkipListMap、ConcurrentSkipListSet、CopyOnWriteArrayList 和 CopyOnWriteArraySet。当期望许多线程访问一个给定 collection 时，ConcurrentHashMap 通常优于同步的 HashMap，ConcurrentSkipListMap 通常优于同步的 TreeMap。当期望的读数和遍历远远大于列表的更新数时，CopyOnWriteArrayList 优于同步的 ArrayList。</p>
-<h2 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h2><p>关于队列可以分为：本地的队列 和 分布式队列 2类<br>本地队列：一般常见的用于非及时性的数据批量写入，可以将获取的数据缓存在一个数组中等达到一定数量的时候在进行批量的一次写入，可以使用BlockingQueue或者List/Map来实现。<br>相关资料：Sun Java API.<br>分布式队列：一般作为消息中间件，构建分布式环境下子系统与子系统之间通信的桥梁，JEE环境中使用最多的就是Apache的AvtiveMQ和Sun公司的OpenMQ。<br>轻量级的MQ中间件之前也向大家介绍过一些例如：Kestrel和Redis(Ref <a href="http://www.javabloger.com/article/mq-kestrel-redis-for-java.html)，最近又听说LinkedIn的搜索技术团队推出了一个MQ产品-kaukaf(Ref" target="_blank" rel="external">http://www.javabloger.com/article/mq-kestrel-redis-for-java.html)，最近又听说LinkedIn的搜索技术团队推出了一个MQ产品-kaukaf(Ref</a> <a href="http://sna-projects.com/kafka" target="_blank" rel="external">http://sna-projects.com/kafka</a> )，对此保持关注。<br>相关资料：<br>1.ActiveMQ <a href="http://activemq.apache.org/getting-started.html" target="_blank" rel="external">http://activemq.apache.org/getting-started.html</a><br>2.OpenMQ  <a href="http://mq.java.net/about.html" target="_blank" rel="external">http://mq.java.net/about.html</a><br>3.Kafka       <a href="http://sna-projects.com/kafka" target="_blank" rel="external">http://sna-projects.com/kafka</a><br>4.JMS文章  <a href="http://www.javabloger.com/article/category/jms" target="_blank" rel="external">http://www.javabloger.com/article/category/jms</a></p>
-<h2 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h2><p>NIO是在JDK1.4后的版本中出现的，在Java 1.4之前，Jdk提供的都是面向流的I/O系统，例如读/写文件则是一次一个字节地处理数据，一个输入流产生一个字节的数据，一个输出流消费一个字节的数据， 面向流的I/O速度非常慢，并且一个数据包要么整个数据报已经收到，要么还没有。Java NIO非堵塞技术实际是采取Reactor模式，有内容进来会自动通知,不必死等、死循环，大大的提升了系统性能。在现实场景中NIO技术多数运用两个方面，1是文件的读写操作，2是网络上数据流的操作。在NIO中有几个核心对象需要掌握：1选择器(Selector)、2通道(Channel)、3缓冲区(Buffer)。<br>我的废话：<br>1.在Java NIO的技术范畴中内存映射文件是一种高效的做法，可以用于缓存中存储的冷/热数据分离，将缓存中的一部分冷数据进行这样的处理，这种做法上比常规的基于流或者基于通道的I/O快的多，通过使文件中的数据出现为内存数组的内容来完成的，将文件中实际读取或者写入的部分才会映射到内存中，并不是将整个文件读到内存中。<br>2.在Mysql的jdbc驱动中也可以使用NIO技术对数据库进行操作来提升系统的性能。</p>
-<h2 id="长连接-Servlet3-0"><a href="#长连接-Servlet3-0" class="headerlink" title="长连接/Servlet3.0"></a>长连接/Servlet3.0</h2><p>这里说的长连接就是长轮询，以前浏览器(客户端)需要关注服务器端发生的数据变化需要不断的访问服务器，这样客户端的数量一多必然会给服务器端造成很大的压力，例如：论坛中的站内消息。现在Servlet3.0规范中提供了一个新的特性：异步IO通信；该特性会保持一个长连接。利用Servlet3异步请求的这项技术可以大大的缓解服务器端的压力。<br>Servlet3.0的原理就是将request的请求开启一个线程挂起，中间设置等待超时的时间，如果后台事件触发request请求，得到的结果返回给客户端的request请求，如果在设置等待超时的时间内没有任何事件发生也将请求返回给客户端，客户端将再次发起request请求，客户端与服务器端的交互可以与此往复。<br>就好比，你先过来跟我说如果有人找你，我就立马通知你你来见他，原先你需要不断的问我有没有要找你，而不管有没有人找你，你都需要不断的问我有没有人找你，这样的话不论问的人还是被问的人都会累死。</p>
-<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>Log4J是通常被人们使用的工具，系统在刚刚上线的时候日志一般都设置在INFO的级，真正上线后一般设置在ERROR级，但无论在任何时候，日志的输入内容都是需要关注的，开发人员一般可以依靠输出的日志查找出现的问题或者依靠输出的日志对系统的性能进行优化，日志也是系统运行状态的报告和排错的依据。<br>简单来说日志按照定义的不同策略和等级输出到不同的环境，那样便于我们分析和管理。相反你没有策略的输出，那么机器一多，时间一长，会有一大推乱糟糟的日志，会让你排错的时候无从下手，所以日志的输出策略是使用日志的关键点。<br>参考资料：<a href="http://logging.apache.org/log4j/1.2/manual.html" target="_blank" rel="external">http://logging.apache.org/log4j/1.2/manual.html</a></p>
-<h2 id="打包-部署"><a href="#打包-部署" class="headerlink" title="打包/部署"></a>打包/部署</h2><p>在代码设计的时候最好能将不同类型的功能模块在IDE环境中粗粒度的分为不同的工程，便于打成不同jar包部署在不同的环境中。有这样的一个应用场景：需要每天定时远程从SP那边获得当天100条新闻和部分城市的天气预报，虽然每天的数据量不多，但是前端访问的并发量很大，显然需要在系统架构上做到读写分离。<br>如果把web工程和定时抓取的功能模块完全集中在一个工程里打包，将导致需要扩展的时候每台机器上既有web应用也有定时器，因为功能模块没有分开，每台机器上都有定时器工作将会造成数据库里面的数据重复。<br>如果开发的时候就将web和定时器分为2个工程，打包的时候就可以分开部署，10台web对应一台定期器，分解了前端请求的压力，数据的写入也不会重复。<br>这样做的另一个好处就是可以共用，在上述的场景中web和定时器都需要对数据库进行读取，那么web和定时器的工程里都有操作数据库的代码，在代码的逻辑上还是感觉乱乱的。如果再抽出一个DAL层的jar，web和定时器的应用模块开发者只需要引用DAL层的jar，开发相关的业务逻辑，面向接口编程，无需考虑具体的数据库操作，具体的对数据库操作由其他开发者完成，可以在开发任务分工上很明确，并且互不干涉。</p>
-<h2 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h2><p>所谓流行的SSH(Struts/Spring/Hiberanet)轻量级框架,对于很多中小型项目而言一点都不轻量级，开发者不仅需要维护代码，还需要维护繁琐的xml配置文件，而且说不定某个配置文件写的不对就让整个都工程无法运行。无配置文件可以取代SSH(struts/Spring/Hiberanet)框架的产品真的太多了，我之前就向大家介绍过一些个产品(Ref)。<br>这个我并不是一味的反对使用SSH(Struts/Spring/Hiberanet)框架，在我眼里SSH框架真的作用是做到了规范开发，而并不使用了SSH(Struts/Spring/Hiberanet)框架能提高多少性能。<br>SSH框架只是对于非常大的项目人数上百人的团队，还需要、继续增加团队规模的公司而言，是需要选择一些市面上大家都认可，并且熟悉的技术，SSH(Struts/Spring/Hiberanet)框架比较成熟所以是首先产品。<br>但是对于一些小团队中间有个把技术高人的团队而言完全可以选择更加简洁的框架，真正的做到提速你的开发效率，早日抛弃SSH框架选择更简洁的技术在小团队开发中是一种比较明知的选择。</p>
-]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Java </tag>
             
         </tags>
         
@@ -4220,7 +4220,7 @@ end <span class="keyword">for</span>
 <p>两个一模一样的碗，一号碗有30颗水果糖和10颗巧克力糖，二号碗有水果糖和巧克力糖各20颗。随机选择一个碗并从中摸一颗糖，求抽到1号碗且摸到的是水果糖的概率。</p>
 </blockquote>
 <p>如果把 <strong>“抽到1号碗” 称为事件 A，“摸到水果糖” 称为事件 B</strong>，问题即求 A/B 两个事件同时发生的概率<em>P(AB)</em> ，很明显结果等于<font color="red">抽到1号碗的概率 * 抽到1号碗后，在1号碗中摸到水果糖的概率：</font></p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/beyes1.jpg" alt=""><br></center><br>现在换一种问法：<br><br>&gt; 随机选择一个碗，从中摸出一颗糖，发现是水果糖。请问这颗水果糖来自一号碗的概率有多大？<br><br>问题变成了求 事件B（从两个碗中摸到水果糖）发生的前提下，事件A（抽到1号碗）的概率，即条件概率<em>P**</em>(A|B)** 。在之前公式的基础上进行推导：<br><center><br>P(AB)=P(A)XP(B|A)<br>P(BA)=P(B)XP(A|B)<br>P(AB)=P(BA)<br><img src="http://ojwkevhas.bkt.clouddn.com/beyes3.jpg" alt=""><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes1.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDbhceJuM8eN6XhAHDCJ4jVqsZ9Ra4OEWA&amp;q-sign-time=1546519309;1546521109&amp;q-key-time=1546519309;1546521109&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=feb526f50c48274811435fa9fd29e4c0deddb16d&amp;x-cos-security-token=f7192c396544af51555f2c6871dc632af4f0145410001" alt=""><br></center><br>现在换一种问法：<br><br>&gt; 随机选择一个碗，从中摸出一颗糖，发现是水果糖。请问这颗水果糖来自一号碗的概率有多大？<br><br>问题变成了求 事件B（从两个碗中摸到水果糖）发生的前提下，事件A（抽到1号碗）的概率，即条件概率<em>P**</em>(A|B)** 。在之前公式的基础上进行推导：<br><center><br>P(AB)=P(A)XP(B|A)<br>P(BA)=P(B)XP(A|B)<br>P(AB)=P(BA)<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes2.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDA17uvLITLJn457V46bm55WlqLw1jBwPM&amp;q-sign-time=1546519334;1546521134&amp;q-key-time=1546519334;1546521134&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=f63f5893a85bfa4c80e183e7d97e2368365db4fb&amp;x-cos-security-token=7b5afee02d1b63addd083a7e8554fd1623f8a2d610001" alt=""><br></center>
 
 <ol>
 <li><em>P(A)</em>抽到1号碗的概率</li>
@@ -4233,13 +4233,13 @@ end <span class="keyword">for</span>
 
 <p>上式亦即所谓的 <strong>全概率公式</strong>。</p>
 <p>最后由贝叶斯公式，有： </p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/beyes5.jpg" alt=""><br></center><br>这表明，来自一号碗的概率是0.6。<br><br>我们可以看到一个有趣的现象，如果仅选择碗，选中1号的概率是0.5；一旦摸到一颗水果糖，这个概率立刻被增加到0.6，即 <strong>摸出水果糖这个事件加强了先验概率</strong>。<br><br>## 贝叶斯定理的应用 ##<br><br>贝叶斯定理经常被用来计算：<strong>当观测到某些事实/特征/数据后， 一个推测成立的概率</strong>。<br><br>在实际应用中，事件 B 通常是一个已经发生的，可被观测到的数据，而 A 是我们根据事件B提供的数据提出来的一个猜测（假设），后验概率<strong>P(A|B)</strong> 可以告诉我们这个猜测有多靠谱。如果有很多可能的猜测，对所有猜测都计算一遍后验概率，就能找到最靠谱的那个。<br><br>### 拼写纠正问题 ###<br><br>拼写纠正器需要解决这样一个问题：<br><br>当用户输入一个不存在的单词时，他真正是想输入什么单词呢？<br>我们可以先从词典中找出所有编辑距离为2的单词作为候选单词，但其中哪个单词概率最大呢？在这个问题中，事件 B 是用户已经输入的单词，我们需要找到这样一个单词，使得以下概率最大：<br><center><br><em>p(猜测的单词1|实际输入的单词)</em><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes3.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDVGx962xNCtobOV3cV4SNDp2Ogb4J9QAz&amp;q-sign-time=1546519357;1546521157&amp;q-key-time=1546519357;1546521157&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=9a8ce38867eb8b73e0673485bc944ac997220280&amp;x-cos-security-token=eb38d305246c78f97975a0b6d630f7dec97c789610001" alt=""><br></center><br>这表明，来自一号碗的概率是0.6。<br><br>我们可以看到一个有趣的现象，如果仅选择碗，选中1号的概率是0.5；一旦摸到一颗水果糖，这个概率立刻被增加到0.6，即 <strong>摸出水果糖这个事件加强了先验概率</strong>。<br><br>## 贝叶斯定理的应用 ##<br><br>贝叶斯定理经常被用来计算：<strong>当观测到某些事实/特征/数据后， 一个推测成立的概率</strong>。<br><br>在实际应用中，事件 B 通常是一个已经发生的，可被观测到的数据，而 A 是我们根据事件B提供的数据提出来的一个猜测（假设），后验概率<strong>P(A|B)</strong> 可以告诉我们这个猜测有多靠谱。如果有很多可能的猜测，对所有猜测都计算一遍后验概率，就能找到最靠谱的那个。<br><br>### 拼写纠正问题 ###<br><br>拼写纠正器需要解决这样一个问题：<br><br>当用户输入一个不存在的单词时，他真正是想输入什么单词呢？<br>我们可以先从词典中找出所有编辑距离为2的单词作为候选单词，但其中哪个单词概率最大呢？在这个问题中，事件 B 是用户已经输入的单词，我们需要找到这样一个单词，使得以下概率最大：<br><center><br><em>p(猜测的单词1|实际输入的单词)</em><br></center>
 
 <p>不妨将我们的多个猜测记为 h1 h2 .. （ h 代表 hypothesis），它们都属于一个有限且离散的猜测空间 H （单词总共就那么多而已），将用户实际输入的单词记为 D （Data ，即观测数据），应用贝叶斯公式：</p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/beyes6.jpg" alt=""><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes4.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDeFGK1Il8YpVKQ6rgt9pEHUYjAPRXGQvp&amp;q-sign-time=1546519383;1546521183&amp;q-key-time=1546519383;1546521183&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=d22e726c0cf9ecb8fa04d841e1ca0a1373b46395&amp;x-cos-security-token=bb311e4084fdef3e409b1e76daa9e6214ee93bf310001" alt=""><br></center>
 
 <p>求最佳猜测这种场景中，对所有的猜测而言，<em>P(D)</em>的值都是一定的，我们在比较时可以忽略这个值，得到（符号 ∝ 表示 “正比例于”）：</p>
-<p><center><br><img src="http://ojwkevhas.bkt.clouddn.com/beyes7.jpg" alt=""><br></center><br>这个结论非常重要，它意味着对于给定观测数据，一个猜测是好是坏，取决于：</p>
+<p><center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes6.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDLMApoF190PtHprKncTfVs770Y42vNLNY&amp;q-sign-time=1546519405;1546521205&amp;q-key-time=1546519405;1546521205&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=0f5a60102cc26d6198704cdaf10080ce86d1a11c&amp;x-cos-security-token=ee5124bbd681d79c88e87c12d3277c8cbf8b188710001" alt=""><br></center><br>这个结论非常重要，它意味着对于给定观测数据，一个猜测是好是坏，取决于：</p>
 <ol>
 <li><em>P(h)</em>猜测自身独立成立的可能性， 即猜测的<font color="red"><strong>先验概率</strong></font></li>
 <li><em>p(D|h)</em>这个猜测下出现观察到的数据的可能性，又称为<font color="red"><strong>似然 Likelihood</strong></font><br>判断一个猜测的质量，往往就是这两个因素的拉锯。</li>

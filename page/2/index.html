@@ -336,7 +336,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/高性能最终一致性的数据同步方案/">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/秒杀问题的数据库和SQL设计/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Melodylican">
@@ -358,8 +358,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/11/23/高性能最终一致性的数据同步方案/" itemprop="url">
-                  高性能、最终一致性的数据同步方案
+                <a class="post-title-link" href="/2017/11/23/秒杀问题的数据库和SQL设计/" itemprop="url">
+                  “秒杀”问题的数据库和SQL设计
                 </a>
               
             
@@ -415,7 +415,7 @@
 
           
           
-             <span id="/2017/11/23/高性能最终一致性的数据同步方案/" class="leancloud_visitors" data-flag-title="高性能、最终一致性的数据同步方案">
+             <span id="/2017/11/23/秒杀问题的数据库和SQL设计/" class="leancloud_visitors" data-flag-title="“秒杀”问题的数据库和SQL设计">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -445,11 +445,17 @@
 
       
         
-          <p>问题的来源<br>先描述一下问题：</p>
-<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br></p>
+          <h2 id="问题的来源"><a href="#问题的来源" class="headerlink" title="问题的来源"></a>问题的来源</h2><p>最近发现很多人被类似秒杀这样的设计困扰，其实这类问题可以很方便地解决，先来说说这类问题的关键点是什么：</p>
+<ol>
+<li>一定要高性能，不然还能叫秒杀吗？</li>
+<li>要强一致性，库存只有100个，不能卖出去101个吧？但是库存10000实际只卖了9999是否允许呢？</li>
+<li>既然这里说了是秒杀，那往往还会针对每个用户有购买数量的限制。<br>总结一下，还是那几个词：高性能强一致性！</li>
+</ol>
+<blockquote>
+<p>下文的所有解决方案是在 Mysql InnoDB 下做的。因为用到了很多数据库特性。其他的数据库或其他的数据库引擎会有不同的表现，请注意。<br></p></blockquote>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/23/高性能最终一致性的数据同步方案/#more" rel="contents">
+            <a class="btn" href="/2017/11/23/秒杀问题的数据库和SQL设计/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>

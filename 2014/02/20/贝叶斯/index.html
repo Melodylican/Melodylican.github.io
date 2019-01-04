@@ -96,16 +96,16 @@
 <meta property="og:url" content="http://Melodylican.github.io/2014/02/20/贝叶斯/index.html">
 <meta property="og:site_name" content="不卑不亢不慌不忙">
 <meta property="og:description" content="贝叶斯定理贝叶斯定理是一个关于 条件概率 的公式。所谓”条件概率”（Conditional probability），就是指在事件B发生的情况下，事件A发生的概率，用 P**(A|B)** 来表示。">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/beyes1.jpg">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/beyes3.jpg">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/beyes5.jpg">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/beyes6.jpg">
-<meta property="og:image" content="http://ojwkevhas.bkt.clouddn.com/beyes7.jpg">
-<meta property="og:updated_time" content="2019-01-03T12:11:37.939Z">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes1.jpg?q-sign-algorithm=sha1&q-ak=AKIDbhceJuM8eN6XhAHDCJ4jVqsZ9Ra4OEWA&q-sign-time=1546519309;1546521109&q-key-time=1546519309;1546521109&q-header-list=&q-url-param-list=&q-signature=feb526f50c48274811435fa9fd29e4c0deddb16d&x-cos-security-token=f7192c396544af51555f2c6871dc632af4f0145410001">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes2.jpg?q-sign-algorithm=sha1&q-ak=AKIDA17uvLITLJn457V46bm55WlqLw1jBwPM&q-sign-time=1546519334;1546521134&q-key-time=1546519334;1546521134&q-header-list=&q-url-param-list=&q-signature=f63f5893a85bfa4c80e183e7d97e2368365db4fb&x-cos-security-token=7b5afee02d1b63addd083a7e8554fd1623f8a2d610001">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes3.jpg?q-sign-algorithm=sha1&q-ak=AKIDVGx962xNCtobOV3cV4SNDp2Ogb4J9QAz&q-sign-time=1546519357;1546521157&q-key-time=1546519357;1546521157&q-header-list=&q-url-param-list=&q-signature=9a8ce38867eb8b73e0673485bc944ac997220280&x-cos-security-token=eb38d305246c78f97975a0b6d630f7dec97c789610001">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes4.jpg?q-sign-algorithm=sha1&q-ak=AKIDeFGK1Il8YpVKQ6rgt9pEHUYjAPRXGQvp&q-sign-time=1546519383;1546521183&q-key-time=1546519383;1546521183&q-header-list=&q-url-param-list=&q-signature=d22e726c0cf9ecb8fa04d841e1ca0a1373b46395&x-cos-security-token=bb311e4084fdef3e409b1e76daa9e6214ee93bf310001">
+<meta property="og:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes6.jpg?q-sign-algorithm=sha1&q-ak=AKIDLMApoF190PtHprKncTfVs770Y42vNLNY&q-sign-time=1546519405;1546521205&q-key-time=1546519405;1546521205&q-header-list=&q-url-param-list=&q-signature=0f5a60102cc26d6198704cdaf10080ce86d1a11c&x-cos-security-token=ee5124bbd681d79c88e87c12d3277c8cbf8b188710001">
+<meta property="og:updated_time" content="2019-01-03T12:44:10.696Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="贝叶斯">
 <meta name="twitter:description" content="贝叶斯定理贝叶斯定理是一个关于 条件概率 的公式。所谓”条件概率”（Conditional probability），就是指在事件B发生的情况下，事件A发生的概率，用 P**(A|B)** 来表示。">
-<meta name="twitter:image" content="http://ojwkevhas.bkt.clouddn.com/beyes1.jpg">
+<meta name="twitter:image" content="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes1.jpg?q-sign-algorithm=sha1&q-ak=AKIDbhceJuM8eN6XhAHDCJ4jVqsZ9Ra4OEWA&q-sign-time=1546519309;1546521109&q-key-time=1546519309;1546521109&q-header-list=&q-url-param-list=&q-signature=feb526f50c48274811435fa9fd29e4c0deddb16d&x-cos-security-token=f7192c396544af51555f2c6871dc632af4f0145410001">
 
 
 
@@ -451,7 +451,7 @@
 <p>两个一模一样的碗，一号碗有30颗水果糖和10颗巧克力糖，二号碗有水果糖和巧克力糖各20颗。随机选择一个碗并从中摸一颗糖，求抽到1号碗且摸到的是水果糖的概率。</p>
 </blockquote>
 <p>如果把 <strong>“抽到1号碗” 称为事件 A，“摸到水果糖” 称为事件 B</strong>，问题即求 A/B 两个事件同时发生的概率<em>P(AB)</em> ，很明显结果等于<font color="red">抽到1号碗的概率 * 抽到1号碗后，在1号碗中摸到水果糖的概率：</font></p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/beyes1.jpg" alt=""><br></center><br>现在换一种问法：<br><br>&gt; 随机选择一个碗，从中摸出一颗糖，发现是水果糖。请问这颗水果糖来自一号碗的概率有多大？<br><br>问题变成了求 事件B（从两个碗中摸到水果糖）发生的前提下，事件A（抽到1号碗）的概率，即条件概率<em>P**</em>(A|B)** 。在之前公式的基础上进行推导：<br><center><br>P(AB)=P(A)XP(B|A)<br>P(BA)=P(B)XP(A|B)<br>P(AB)=P(BA)<br><img src="http://ojwkevhas.bkt.clouddn.com/beyes3.jpg" alt=""><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes1.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDbhceJuM8eN6XhAHDCJ4jVqsZ9Ra4OEWA&amp;q-sign-time=1546519309;1546521109&amp;q-key-time=1546519309;1546521109&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=feb526f50c48274811435fa9fd29e4c0deddb16d&amp;x-cos-security-token=f7192c396544af51555f2c6871dc632af4f0145410001" alt=""><br></center><br>现在换一种问法：<br><br>&gt; 随机选择一个碗，从中摸出一颗糖，发现是水果糖。请问这颗水果糖来自一号碗的概率有多大？<br><br>问题变成了求 事件B（从两个碗中摸到水果糖）发生的前提下，事件A（抽到1号碗）的概率，即条件概率<em>P**</em>(A|B)** 。在之前公式的基础上进行推导：<br><center><br>P(AB)=P(A)XP(B|A)<br>P(BA)=P(B)XP(A|B)<br>P(AB)=P(BA)<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes2.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDA17uvLITLJn457V46bm55WlqLw1jBwPM&amp;q-sign-time=1546519334;1546521134&amp;q-key-time=1546519334;1546521134&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=f63f5893a85bfa4c80e183e7d97e2368365db4fb&amp;x-cos-security-token=7b5afee02d1b63addd083a7e8554fd1623f8a2d610001" alt=""><br></center>
 
 <ol>
 <li><em>P(A)</em>抽到1号碗的概率</li>
@@ -464,13 +464,13 @@
 
 <p>上式亦即所谓的 <strong>全概率公式</strong>。</p>
 <p>最后由贝叶斯公式，有： </p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/beyes5.jpg" alt=""><br></center><br>这表明，来自一号碗的概率是0.6。<br><br>我们可以看到一个有趣的现象，如果仅选择碗，选中1号的概率是0.5；一旦摸到一颗水果糖，这个概率立刻被增加到0.6，即 <strong>摸出水果糖这个事件加强了先验概率</strong>。<br><br>## 贝叶斯定理的应用 ##<br><br>贝叶斯定理经常被用来计算：<strong>当观测到某些事实/特征/数据后， 一个推测成立的概率</strong>。<br><br>在实际应用中，事件 B 通常是一个已经发生的，可被观测到的数据，而 A 是我们根据事件B提供的数据提出来的一个猜测（假设），后验概率<strong>P(A|B)</strong> 可以告诉我们这个猜测有多靠谱。如果有很多可能的猜测，对所有猜测都计算一遍后验概率，就能找到最靠谱的那个。<br><br>### 拼写纠正问题 ###<br><br>拼写纠正器需要解决这样一个问题：<br><br>当用户输入一个不存在的单词时，他真正是想输入什么单词呢？<br>我们可以先从词典中找出所有编辑距离为2的单词作为候选单词，但其中哪个单词概率最大呢？在这个问题中，事件 B 是用户已经输入的单词，我们需要找到这样一个单词，使得以下概率最大：<br><center><br><em>p(猜测的单词1|实际输入的单词)</em><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes3.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDVGx962xNCtobOV3cV4SNDp2Ogb4J9QAz&amp;q-sign-time=1546519357;1546521157&amp;q-key-time=1546519357;1546521157&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=9a8ce38867eb8b73e0673485bc944ac997220280&amp;x-cos-security-token=eb38d305246c78f97975a0b6d630f7dec97c789610001" alt=""><br></center><br>这表明，来自一号碗的概率是0.6。<br><br>我们可以看到一个有趣的现象，如果仅选择碗，选中1号的概率是0.5；一旦摸到一颗水果糖，这个概率立刻被增加到0.6，即 <strong>摸出水果糖这个事件加强了先验概率</strong>。<br><br>## 贝叶斯定理的应用 ##<br><br>贝叶斯定理经常被用来计算：<strong>当观测到某些事实/特征/数据后， 一个推测成立的概率</strong>。<br><br>在实际应用中，事件 B 通常是一个已经发生的，可被观测到的数据，而 A 是我们根据事件B提供的数据提出来的一个猜测（假设），后验概率<strong>P(A|B)</strong> 可以告诉我们这个猜测有多靠谱。如果有很多可能的猜测，对所有猜测都计算一遍后验概率，就能找到最靠谱的那个。<br><br>### 拼写纠正问题 ###<br><br>拼写纠正器需要解决这样一个问题：<br><br>当用户输入一个不存在的单词时，他真正是想输入什么单词呢？<br>我们可以先从词典中找出所有编辑距离为2的单词作为候选单词，但其中哪个单词概率最大呢？在这个问题中，事件 B 是用户已经输入的单词，我们需要找到这样一个单词，使得以下概率最大：<br><center><br><em>p(猜测的单词1|实际输入的单词)</em><br></center>
 
 <p>不妨将我们的多个猜测记为 h1 h2 .. （ h 代表 hypothesis），它们都属于一个有限且离散的猜测空间 H （单词总共就那么多而已），将用户实际输入的单词记为 D （Data ，即观测数据），应用贝叶斯公式：</p>
-<center><br><img src="http://ojwkevhas.bkt.clouddn.com/beyes6.jpg" alt=""><br></center>
+<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes4.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDeFGK1Il8YpVKQ6rgt9pEHUYjAPRXGQvp&amp;q-sign-time=1546519383;1546521183&amp;q-key-time=1546519383;1546521183&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=d22e726c0cf9ecb8fa04d841e1ca0a1373b46395&amp;x-cos-security-token=bb311e4084fdef3e409b1e76daa9e6214ee93bf310001" alt=""><br></center>
 
 <p>求最佳猜测这种场景中，对所有的猜测而言，<em>P(D)</em>的值都是一定的，我们在比较时可以忽略这个值，得到（符号 ∝ 表示 “正比例于”）：</p>
-<p><center><br><img src="http://ojwkevhas.bkt.clouddn.com/beyes7.jpg" alt=""><br></center><br>这个结论非常重要，它意味着对于给定观测数据，一个猜测是好是坏，取决于：</p>
+<p><center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/beyes6.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDLMApoF190PtHprKncTfVs770Y42vNLNY&amp;q-sign-time=1546519405;1546521205&amp;q-key-time=1546519405;1546521205&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=0f5a60102cc26d6198704cdaf10080ce86d1a11c&amp;x-cos-security-token=ee5124bbd681d79c88e87c12d3277c8cbf8b188710001" alt=""><br></center><br>这个结论非常重要，它意味着对于给定观测数据，一个猜测是好是坏，取决于：</p>
 <ol>
 <li><em>P(h)</em>猜测自身独立成立的可能性， 即猜测的<font color="red"><strong>先验概率</strong></font></li>
 <li><em>p(D|h)</em>这个猜测下出现观察到的数据的可能性，又称为<font color="red"><strong>似然 Likelihood</strong></font><br>判断一个猜测的质量，往往就是这两个因素的拉锯。</li>
