@@ -199,29 +199,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Ansible when register使用]]></title>
-      <url>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</url>
-      <content type="html"><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;q-sign-time=1546519044;1546520844&amp;q-key-time=1546519044;1546520844&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001" alt=""></p>
-<a id="more"></a>
-<p>执行演示：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible2.png?q-sign-algorithm=sha1&amp;q-ak=AKIDYQ69MWC4WgrrGtqZ1F4YTldb0IrcYnWH&amp;q-sign-time=1546517765;1546519565&amp;q-key-time=1546517765;1546519565&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=588e23def46b660536584cbaa5199ea48710a838&amp;x-cos-security-token=9880b484ed7c6fb712b98ee72bea31340760a58310001" alt=""></p>
-]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Ansible </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[“秒杀”问题的数据库和SQL设计]]></title>
       <url>http://Melodylican.github.io/2017/11/23/%E7%A7%92%E6%9D%80%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8CSQL%E8%AE%BE%E8%AE%A1/</url>
       <content type="html"><![CDATA[<h2 id="问题的来源"><a href="#问题的来源" class="headerlink" title="问题的来源"></a>问题的来源</h2><p>最近发现很多人被类似秒杀这样的设计困扰，其实这类问题可以很方便地解决，先来说说这类问题的关键点是什么：</p>
@@ -388,6 +365,29 @@ Note: This will have no impact if delete.topic.enable is not set to true.
             <tag> 最终一致 </tag>
             
             <tag> 数据同步 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Ansible when register使用]]></title>
+      <url>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</url>
+      <content type="html"><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;q-sign-time=1546519044;1546520844&amp;q-key-time=1546519044;1546520844&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001" alt=""></p>
+<a id="more"></a>
+<p>执行演示：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible2.png?q-sign-algorithm=sha1&amp;q-ak=AKIDYQ69MWC4WgrrGtqZ1F4YTldb0IrcYnWH&amp;q-sign-time=1546517765;1546519565&amp;q-key-time=1546517765;1546519565&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=588e23def46b660536584cbaa5199ea48710a838&amp;x-cos-security-token=9880b484ed7c6fb712b98ee72bea31340760a58310001" alt=""></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Ansible </tag>
             
         </tags>
         
