@@ -199,6 +199,73 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
+      <title><![CDATA[高性能、最终一致性的数据同步方案]]></title>
+      <url>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</url>
+      <content type="html"><![CDATA[<p>问题的来源<br>先描述一下问题：</p>
+<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br><a id="more"></a></p>
+<p>利用 Job 来定时同步数据<br>首先，如果是中小型系统，可以接受秒级别的延时，数据变更频率不是非常高的话，可以用这个方案。</p>
+<p>常见的场景有：后台系统用户数据，后台系统角色、组织架构数据。</p>
+<p>Job 处理过程</p>
+<p>那 Job 的数据逻辑是怎么样的呢？</p>
+<p>查询数据 -&gt; 可能需要做一些转换 -&gt; 然后插入数据</p>
+<p>看上去好简单的样子，但是如何查询数据会是一个挑战。因为假如你的表很大，而实际每分钟只会变更几条，难道你每次都要全量同步一边？</p>
+<p>如何识别出那些变过的数据呢？</p>
+<p>为你的数据加上 UpdateTime 字段</p>
+<p>为了解决这个问题，需要对你的数据库表进行一定的改造。其实，所有的数据库表都应该这么设计。</p>
+<p>第一个要改造的点是加上一个UpdateTime字段，每次更新数据的时候都需要去更新这个字段。</p>
+<p>如果用的是 MySQL 的话，可以直接把这个字段定义成这样子：</p>
+<p>UpdateTime timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP</p>
+<p>这样设置以后，每次数据变更 MySQL 会自动更新这个字段。另外，如果你进行了Update操作而数据其实没变，那么这个字段不会更新，非常贴心。</p>
+<p>这个是为了解决什么问题？</p>
+<p>我必须要知道所有数据的变更时间，我才能找到那些新插入或者新更新的数据。所以加上这个字段后，Insert和Update的问题就解决了，但是还有Delete！</p>
+<p>为你的数据加上 IsDeleted 字段</p>
+<p>你还在直接删除数据？如果是的话，赶紧改改吧，因为这么做在 ETL 系统中非常不友好。源表中的数据都删了，那 Job 还怎么找到它？难道要做两遍的数据比对？这个又要全表扫描目标表了。性能会非常差。</p>
+<p>所以最简单的方案就是加上IsDeleted字段进行软删除，这样删除的数据其实就是Update了一下，处理起来就非常简单了。</p>
+<p>如果你的系统在设计之初就用了软删除，那么你会轻松很多，如果不是，那么就需要修改你的程序了。</p>
+<p>相信我，越早改越好！除非你的系统永远那么小…</p>
+<p>选择合适的时间</p>
+<p>下面一个问题才是真正头疼的地方。我们也用过很多现成的 ETL 系统来同步数据了，源表也加上了上面提到的两个字段来识别有变更的数据。</p>
+<p>假设作业5分钟跑一次，那怎么写 SQL 语句呢？</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(Now(),INTERVAL 5 MINUTE)</p>
+<p>这么写有什么缺点呢？第一个缺点就是，你没办法保证你的 Job 真的是5分钟运行一次的，如果是5分01秒呢？那多出来的1秒的数据就丢了。</p>
+<p>另外，如果你 Job 所在机器的时间和数据库的时间不一致呢？极端情况假设你的 Job 机器快了10分钟，那么 Job 就永远取不到数据了。别以为这种情况不会发生…</p>
+<p>这个方案直接被拍死，那么下一个方案：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRunTime#</p>
+<p>这里需要加入一个LastRunTime变量，直接变量由 Job 程序自己记录。加上这个变量后，就解决了 Job 没办法准确地5分钟跑一次的问题。</p>
+<p>但是机器时间不一致的问题解决了吗？好像还没有…</p>
+<p>那来一个终极完美的方案吧：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRowTime#</p>
+<p>这里的LastRowTime是什么含义呢？它是你上次取到数据的最新一条。恩，这样就完全不依赖 Job 所在机器的时间了。哪怕它们相隔几年，数据也不会丢。因为你用的是相对时间。</p>
+<p>那为什么是&gt;=而不是&gt;呢？</p>
+<p>极端情况下，假设在同一个时间插入两条数据，它们的LastUpdateTime是一样的。而你取数据的时候，只插入了第一条，取完了才插入第二条。如果你后面查询的时候用&gt;，这个这里第二条数据就丢掉了。</p>
+<p>最后，还有一个折中方案，因为很多现成的 ETL 系统没办法记录LastRowTime，只能记录LastRunTime，那么可以这么写：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(#LastRunTime#,INTERVAL 10 MINUTE)</p>
+<p>这里我们可以接受两台机器有时间差，但是最多十分钟，这样做也会有缺点，每次都会有一些数据重复同步。</p>
+<p>或者，你的 ETL 系统连LastRunTime都没有（那还算是一个合格的 ETL 系统吗？），那么只能这样了，每五分钟同步一次：</p>
+<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(NOW(),INTERVAL 10 MINUTE)</p>
+<p>利用阿里巴巴开源组件 canal<br>上面的方案虽说只支持中小型系统，但是你们的数据库表真的会有频繁变更吗？如果没有，那么上面的方案一直是适用的。</p>
+<p>但是如果你们系统的更新真的非常频繁，而且你们要接近实时的同步效率那怎么办？</p>
+<p>如果有这样需求的话，建议尝试看看阿里巴巴的canal，项目地址在这里：<a href="https://github.com/alibaba/canal" target="_blank" rel="external">https://github.com/alibaba/canal</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 最终一致 </tag>
+            
+            <tag> 数据同步 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Ansible when register使用]]></title>
       <url>http://Melodylican.github.io/2017/11/23/Ansible-when-register%E4%BD%BF%E7%94%A8/</url>
       <content type="html"><![CDATA[<p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;q-sign-time=1546519044;1546520844&amp;q-key-time=1546519044;1546520844&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001" alt=""></p>
@@ -321,73 +388,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
             <tag> 数据库 </tag>
             
             <tag> SQL </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[高性能、最终一致性的数据同步方案]]></title>
-      <url>http://Melodylican.github.io/2017/11/23/%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88/</url>
-      <content type="html"><![CDATA[<p>问题的来源<br>先描述一下问题：</p>
-<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br><a id="more"></a></p>
-<p>利用 Job 来定时同步数据<br>首先，如果是中小型系统，可以接受秒级别的延时，数据变更频率不是非常高的话，可以用这个方案。</p>
-<p>常见的场景有：后台系统用户数据，后台系统角色、组织架构数据。</p>
-<p>Job 处理过程</p>
-<p>那 Job 的数据逻辑是怎么样的呢？</p>
-<p>查询数据 -&gt; 可能需要做一些转换 -&gt; 然后插入数据</p>
-<p>看上去好简单的样子，但是如何查询数据会是一个挑战。因为假如你的表很大，而实际每分钟只会变更几条，难道你每次都要全量同步一边？</p>
-<p>如何识别出那些变过的数据呢？</p>
-<p>为你的数据加上 UpdateTime 字段</p>
-<p>为了解决这个问题，需要对你的数据库表进行一定的改造。其实，所有的数据库表都应该这么设计。</p>
-<p>第一个要改造的点是加上一个UpdateTime字段，每次更新数据的时候都需要去更新这个字段。</p>
-<p>如果用的是 MySQL 的话，可以直接把这个字段定义成这样子：</p>
-<p>UpdateTime timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP</p>
-<p>这样设置以后，每次数据变更 MySQL 会自动更新这个字段。另外，如果你进行了Update操作而数据其实没变，那么这个字段不会更新，非常贴心。</p>
-<p>这个是为了解决什么问题？</p>
-<p>我必须要知道所有数据的变更时间，我才能找到那些新插入或者新更新的数据。所以加上这个字段后，Insert和Update的问题就解决了，但是还有Delete！</p>
-<p>为你的数据加上 IsDeleted 字段</p>
-<p>你还在直接删除数据？如果是的话，赶紧改改吧，因为这么做在 ETL 系统中非常不友好。源表中的数据都删了，那 Job 还怎么找到它？难道要做两遍的数据比对？这个又要全表扫描目标表了。性能会非常差。</p>
-<p>所以最简单的方案就是加上IsDeleted字段进行软删除，这样删除的数据其实就是Update了一下，处理起来就非常简单了。</p>
-<p>如果你的系统在设计之初就用了软删除，那么你会轻松很多，如果不是，那么就需要修改你的程序了。</p>
-<p>相信我，越早改越好！除非你的系统永远那么小…</p>
-<p>选择合适的时间</p>
-<p>下面一个问题才是真正头疼的地方。我们也用过很多现成的 ETL 系统来同步数据了，源表也加上了上面提到的两个字段来识别有变更的数据。</p>
-<p>假设作业5分钟跑一次，那怎么写 SQL 语句呢？</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(Now(),INTERVAL 5 MINUTE)</p>
-<p>这么写有什么缺点呢？第一个缺点就是，你没办法保证你的 Job 真的是5分钟运行一次的，如果是5分01秒呢？那多出来的1秒的数据就丢了。</p>
-<p>另外，如果你 Job 所在机器的时间和数据库的时间不一致呢？极端情况假设你的 Job 机器快了10分钟，那么 Job 就永远取不到数据了。别以为这种情况不会发生…</p>
-<p>这个方案直接被拍死，那么下一个方案：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRunTime#</p>
-<p>这里需要加入一个LastRunTime变量，直接变量由 Job 程序自己记录。加上这个变量后，就解决了 Job 没办法准确地5分钟跑一次的问题。</p>
-<p>但是机器时间不一致的问题解决了吗？好像还没有…</p>
-<p>那来一个终极完美的方案吧：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= #LastRowTime#</p>
-<p>这里的LastRowTime是什么含义呢？它是你上次取到数据的最新一条。恩，这样就完全不依赖 Job 所在机器的时间了。哪怕它们相隔几年，数据也不会丢。因为你用的是相对时间。</p>
-<p>那为什么是&gt;=而不是&gt;呢？</p>
-<p>极端情况下，假设在同一个时间插入两条数据，它们的LastUpdateTime是一样的。而你取数据的时候，只插入了第一条，取完了才插入第二条。如果你后面查询的时候用&gt;，这个这里第二条数据就丢掉了。</p>
-<p>最后，还有一个折中方案，因为很多现成的 ETL 系统没办法记录LastRowTime，只能记录LastRunTime，那么可以这么写：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(#LastRunTime#,INTERVAL 10 MINUTE)</p>
-<p>这里我们可以接受两台机器有时间差，但是最多十分钟，这样做也会有缺点，每次都会有一些数据重复同步。</p>
-<p>或者，你的 ETL 系统连LastRunTime都没有（那还算是一个合格的 ETL 系统吗？），那么只能这样了，每五分钟同步一次：</p>
-<p>SELECT * FROM User WHERE UpdateTime &gt;= DATE_SUB(NOW(),INTERVAL 10 MINUTE)</p>
-<p>利用阿里巴巴开源组件 canal<br>上面的方案虽说只支持中小型系统，但是你们的数据库表真的会有频繁变更吗？如果没有，那么上面的方案一直是适用的。</p>
-<p>但是如果你们系统的更新真的非常频繁，而且你们要接近实时的同步效率那怎么办？</p>
-<p>如果有这样需求的话，建议尝试看看阿里巴巴的canal，项目地址在这里：<a href="https://github.com/alibaba/canal" target="_blank" rel="external">https://github.com/alibaba/canal</a></p>
-]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> 最终一致 </tag>
-            
-            <tag> 数据同步 </tag>
             
         </tags>
         
@@ -767,7 +767,7 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     <entry>
       <title><![CDATA[Java技能图谱]]></title>
       <url>http://Melodylican.github.io/2017/11/01/java%E6%8A%80%E8%83%BD%E5%9B%BE%E8%B0%B1/</url>
-      <content type="html"><![CDATA[<center><br><img src="http://ojwkevhas.bkt.clouddn.com/2.1%20JVM%E5%9E%83%E5%9C%BE%E5%9B%9E%E5%9B%BE%E8%B0%B1.png" alt=""><br><a id="more"></a><br><img src="http://ojwkevhas.bkt.clouddn.com/1.2%20Java%E6%9E%B6%E6%9E%84%E5%B8%88%E5%9B%BE%E8%B0%B1.jpg" alt=""><br><br><img src="http://ojwkevhas.bkt.clouddn.com/2.3%20Java%E9%9B%86%E5%90%88%E5%9B%BE%E8%B0%B1.jpg" alt=""><br><br><img src="http://ojwkevhas.bkt.clouddn.com/2.7%20Java%20Set%E7%B1%BB%E5%9B%BE.jpg" alt=""><br><br><img src="http://ojwkevhas.bkt.clouddn.com/2.5%20Java%20List%E7%B1%BB%E5%9B%BE.jpg" alt=""><br><br><img src="http://ojwkevhas.bkt.clouddn.com/2.4%20Java%E9%9B%86%E5%90%88%E7%B1%BB%E5%9B%BE.jpg" alt=""><br><br><img src="http://ojwkevhas.bkt.clouddn.com/2.2%20Java%E5%B9%B6%E5%8F%91%E5%9B%BE%E8%B0%B1.jpg" alt=""><br></center>]]></content>
+      <content type="html"><![CDATA[<center><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/2.1%20JVM%E5%9E%83%E5%9C%BE%E5%9B%9E%E5%9B%BE%E8%B0%B1.png?q-sign-algorithm=sha1&amp;q-ak=AKID1v5lNSVKpzaHsrb2V6a6kbP6dnWwyHxr&amp;q-sign-time=1546568399;1546570199&amp;q-key-time=1546568399;1546570199&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=bf4131f52cdb986e34f7d33a11cf1be18fd23bb3&amp;x-cos-security-token=97d9e4dee0455eecd89cba322daeea99fe72abc510001" alt=""><br><a id="more"></a><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/1.2%20Java%E6%9E%B6%E6%9E%84%E5%B8%88%E5%9B%BE%E8%B0%B1.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDTfkIX15DLQawAnl9IzP3QSfyOmiHLFlw&amp;q-sign-time=1546568435;1546570235&amp;q-key-time=1546568435;1546570235&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=bbd4217c41b2ea48f4ef2308499e6616f5e74049&amp;x-cos-security-token=eb33a72708fcbdfd389abbb4c7defdb6ff56842610001" alt=""><br><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/2.3%20Java%E9%9B%86%E5%90%88%E5%9B%BE%E8%B0%B1.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDD5ymiGwP6PVdKogCgfraIqQ4MvSSIauj&amp;q-sign-time=1546568467;1546570267&amp;q-key-time=1546568467;1546570267&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=fe7b8938edaa4434d944409a56cc8b773a444e6d&amp;x-cos-security-token=06a988994e0f6639392c4bf8c72ce70bdfd0945510001" alt=""><br><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/2.7%20Java%20Set%E7%B1%BB%E5%9B%BE.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDkC2xNgoV2HbycCqj3Rs9NFjtowHmcMVu&amp;q-sign-time=1546568494;1546570294&amp;q-key-time=1546568494;1546570294&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=7fd38565cacb1c1a093ea1aa866bed52df27c01b&amp;x-cos-security-token=efcfb54a9ed116e06f0c3339339ad3fc6ed6dc7e10001" alt=""><br><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/2.5%20Java%20List%E7%B1%BB%E5%9B%BE.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDHajLZhu11y75fJDK7229pyIR52tT089V&amp;q-sign-time=1546568518;1546570318&amp;q-key-time=1546568518;1546570318&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=d5f085caa76cbf03f1c0ccc889b3af183a6ce57a&amp;x-cos-security-token=34a80e81fd653babff76c7250b0fe82e1a46b7ab10001" alt=""><br><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/2.4%20Java%E9%9B%86%E5%90%88%E7%B1%BB%E5%9B%BE.jpg?q-sign-algorithm=sha1&amp;q-ak=AKID5llN0GZXGe6jngk42wGNfYLoEenl9d4e&amp;q-sign-time=1546568537;1546570337&amp;q-key-time=1546568537;1546570337&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=2170264ec3a85382ba44d6c34461d2c7a07ccb40&amp;x-cos-security-token=aa9a5e968e6ea752752ab47b8c54d7d17c966c8310001" alt=""><br><br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/2.2%20Java%E5%B9%B6%E5%8F%91%E5%9B%BE%E8%B0%B1.jpg?q-sign-algorithm=sha1&amp;q-ak=AKIDwsBnLrXPmPh3ZqM0rQ6w2v2Ty1n4jqZZ&amp;q-sign-time=1546568557;1546570357&amp;q-key-time=1546568557;1546570357&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=b6fcb52e70b9f5c7de321c27d391cbb3ad8e6a8a&amp;x-cos-security-token=1b6658b05c1acc6d4f668c45670c8dee4a707ba210001" alt=""><br></center>]]></content>
       
         <categories>
             
@@ -1026,10 +1026,9 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Spark优化]]></title>
-      <url>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</url>
-      <content type="html"><![CDATA[<center><br><br><img src="http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png" alt=""><br><br></center>
-
+      <title><![CDATA[Spark应用案例-Spark完成PV和UV的计算]]></title>
+      <url>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</url>
+      <content type="html"><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content>
       
         <categories>
@@ -1050,9 +1049,10 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Spark应用案例-Spark完成PV和UV的计算]]></title>
-      <url>http://Melodylican.github.io/2017/08/20/spark%E5%AE%8C%E6%88%90PV%E5%92%8CUV%E7%9A%84%E8%AE%A1%E7%AE%97/</url>
-      <content type="html"><![CDATA[<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">object</span> <span class="title">LogPVAndUV</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args:<span class="type">Array</span>[<span class="type">String</span>]):<span class="type">Unit</span>=&#123;</div><div class="line">        <span class="keyword">val</span> conf=<span class="keyword">new</span> <span class="type">SparkConf</span>()</div><div class="line">            .setMaster(<span class="string">"local[*]"</span>)</div><div class="line">            .setAppName(<span class="string">"PVAndUV"</span>)</div><div class="line">        <span class="keyword">val</span> sc=<span class="type">SparkContext</span>.getOrCreate(conf)</div><div class="line">        <span class="keyword">val</span> logPath=<span class="string">"/user/***/spark/logs/page_views.data"</span></div><div class="line">        <span class="keyword">val</span> logRDD=sc.textFile(logPath)</div><div class="line">        <span class="keyword">val</span> filterRDD=logRDD.filter(_.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//转换</span></div><div class="line">        <span class="keyword">val</span> mapRDD=filterRDD.map(line=&gt;&#123;</div><div class="line">            <span class="keyword">val</span> arr=line.split(<span class="string">"\t"</span>)</div><div class="line">            <span class="keyword">if</span>(arr.length==<span class="number">7</span>)&#123;</div><div class="line">                <span class="keyword">val</span> date=arr(<span class="number">0</span>).trim</div><div class="line">                <span class="keyword">val</span> url=arr(<span class="number">1</span>)</div><div class="line">                <span class="keyword">val</span> uuid=arr(<span class="number">2</span>)</div><div class="line">                (date.subString(<span class="number">0</span>,<span class="type">Math</span>.min(<span class="number">10.</span>date.length)).trim,url,uuid)</div><div class="line">            &#125;<span class="keyword">else</span>&#123;</div><div class="line">                (<span class="literal">null</span>,<span class="literal">null</span>,<span class="literal">null</span>)</div><div class="line">            &#125;</div><div class="line">        &#125;).filter(tuple=&gt;tuple._1!=<span class="literal">null</span>&amp;&amp;tuple._1.length&gt;<span class="number">0</span>)</div><div class="line">        <span class="comment">//PV计算</span></div><div class="line">        <span class="keyword">val</span> pvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._2.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,<span class="number">1</span>))</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//UV计算</span></div><div class="line">        <span class="keyword">val</span> uvRDD=mapRDD</div><div class="line">            .filter(tuple=&gt;tuple._3.length&gt;<span class="number">0</span>)</div><div class="line">            .map(tuple=&gt;(tuple._1,tuple._3))</div><div class="line">            .distinct</div><div class="line">            .reduceByKey(_+_)</div><div class="line">        <span class="comment">//合并</span></div><div class="line">        <span class="keyword">val</span> pvAndUv=pvRDD.join(uvRDD).map&#123;</div><div class="line">            <span class="keyword">case</span> (date,(pv,uv))=&gt;&#123;</div><div class="line">                (date,pv,uv)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//输出</span></div><div class="line">        pvAndUv.saveAsTextFile(<span class="string">"/user/***/spark/output/"</span>+<span class="type">System</span>.currentTimeMillis())</div><div class="line">        sc.stop()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      <title><![CDATA[Spark优化]]></title>
+      <url>http://Melodylican.github.io/2017/08/20/spark%E4%BC%98%E5%8C%96/</url>
+      <content type="html"><![CDATA[<center><br><br><img src="http://ojwkevhas.bkt.clouddn.com/spark%E4%BC%98%E5%8C%96.png" alt=""><br><br></center>
+
 <font color="grey" size="1">注：此博客仅供博主自身复习用</font>]]></content>
       
         <categories>
@@ -2137,28 +2137,6 @@ Note: This will have no impact if delete.topic.enable is not set to true.
     </entry>
     
     <entry>
-      <title><![CDATA[Spark入门 第四章 第七节 Spark - 读写Hive数据(DataFrame)]]></title>
-      <url>http://Melodylican.github.io/2017/03/12/Spark%E8%AF%BB%E5%86%99Hive%E6%95%B0%E6%8D%AE/</url>
-      <content type="html"><![CDATA[<div class="note success"><p>该节内容待补充完整</p>
-</div>
-<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
-      
-        <categories>
-            
-            <category> 笔记 </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> Spark </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[Spark入门 第四章 第六节 Spark - 通过JDBC连接数据库(DataFrame)]]></title>
       <url>http://Melodylican.github.io/2017/03/12/Spark%E9%80%9A%E8%BF%87JDBC%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93/</url>
       <content type="html"><![CDATA[<p>这里以关系数据库MySQL为例。首先，请参考厦门大学数据库实验室博客教程（Ubuntu安装MySQL），在Linux系统中安装好MySQL数据库。这里假设你已经成功安装了MySQL数据库。下面我们要新建一个测试Spark程序的数据库，数据库名称是“spark”，表的名称是“student”。<br><a id="more"></a><br>请执行下面命令在Linux中启动MySQL数据库，并完成数据库和表的创建，以及样例数据的录入：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">service mysql start</div><div class="line">mysql -u root -p</div><div class="line">//屏幕会提示你输入密码</div></pre></td></tr></table></figure></p>
@@ -2177,6 +2155,28 @@ Note: This will have no impact if delete.topic.enable is not set to true.
 <p>上面的命令行中，在一行的末尾加入斜杠\，是为了告诉spark-shell，命令还没有结束。</p>
 <p>启动进入spark-shell以后，可以执行以下命令连接数据库，写入数据，程序如下（你可以把下面程序一条条拷贝到spark-shell中执行）：<br><figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.<span class="type">Properties</span></div><div class="line"><span class="keyword">import</span> org.apache.spark.sql.types._</div><div class="line"><span class="keyword">import</span> org.apache.spark.sql.<span class="type">Row</span></div><div class="line"> </div><div class="line"><span class="comment">//下面我们设置两条数据表示两个学生信息</span></div><div class="line"><span class="keyword">val</span> studentRDD = spark.sparkContext.parallelize(<span class="type">Array</span>(<span class="string">"3 Rongcheng M 26"</span>,<span class="string">"4 Guanhua M 27"</span>)).map(_.split(<span class="string">" "</span>))</div><div class="line"> </div><div class="line"><span class="comment">//下面要设置模式信息</span></div><div class="line"><span class="keyword">val</span> schema = <span class="type">StructType</span>(<span class="type">List</span>(<span class="type">StructField</span>(<span class="string">"id"</span>, <span class="type">IntegerType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"name"</span>, <span class="type">StringType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"gender"</span>, <span class="type">StringType</span>, <span class="literal">true</span>),<span class="type">StructField</span>(<span class="string">"age"</span>, <span class="type">IntegerType</span>, <span class="literal">true</span>)))</div><div class="line"> </div><div class="line"><span class="comment">//下面创建Row对象，每个Row对象都是rowRDD中的一行</span></div><div class="line"><span class="keyword">val</span> rowRDD = studentRDD.map(p =&gt; <span class="type">Row</span>(p(<span class="number">0</span>).toInt, p(<span class="number">1</span>).trim, p(<span class="number">2</span>).trim, p(<span class="number">3</span>).toInt))</div><div class="line"> </div><div class="line"><span class="comment">//建立起Row对象和模式之间的对应关系，也就是把数据和模式对应起来</span></div><div class="line"><span class="keyword">val</span> studentDF = spark.createDataFrame(rowRDD, schema)</div><div class="line"> </div><div class="line"><span class="comment">//下面创建一个prop变量用来保存JDBC连接参数</span></div><div class="line"><span class="keyword">val</span> prop = <span class="keyword">new</span> <span class="type">Properties</span>()</div><div class="line">prop.put(<span class="string">"user"</span>, <span class="string">"root"</span>) <span class="comment">//表示用户名是root</span></div><div class="line">prop.put(<span class="string">"password"</span>, <span class="string">"hadoop"</span>) <span class="comment">//表示密码是hadoop</span></div><div class="line">prop.put(<span class="string">"driver"</span>,<span class="string">"com.mysql.jdbc.Driver"</span>) <span class="comment">//表示驱动程序是com.mysql.jdbc.Driver</span></div><div class="line"> </div><div class="line"><span class="comment">//下面就可以连接数据库，采用append模式，表示追加记录到数据库spark的student表中</span></div><div class="line">studentDF.write.mode(<span class="string">"append"</span>).jdbc(<span class="string">"jdbc:mysql://localhost:3306/spark"</span>, <span class="string">"spark.student"</span>, prop)</div></pre></td></tr></table></figure></p>
 <p>在spark-shell中执行完上述程序后，我们可以看一下效果，看看MySQL数据库中的spark.student表发生了什么变化。请在刚才的另外一个窗口的MySQL命令提示符下面继续输入下面命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">mysql&gt; select * from student;</div><div class="line">+------+-----------+--------+------+</div><div class="line">| id   | name      | gender | age  |</div><div class="line">+------+-----------+--------+------+</div><div class="line">|    1 | Xueqian   | F      |   23 |</div><div class="line">|    2 | Weiliang  | M      |   24 |</div><div class="line">|    3 | Rongcheng | M      |   26 |</div><div class="line">|    4 | Guanhua   | M      |   27 |</div><div class="line">+------+-----------+--------+------+</div><div class="line">4 rows in set (0.00 sec)</div></pre></td></tr></table></figure></p>
+<font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
+      
+        <categories>
+            
+            <category> 笔记 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Spark </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Spark入门 第四章 第七节 Spark - 读写Hive数据(DataFrame)]]></title>
+      <url>http://Melodylican.github.io/2017/03/12/Spark%E8%AF%BB%E5%86%99Hive%E6%95%B0%E6%8D%AE/</url>
+      <content type="html"><![CDATA[<div class="note success"><p>该节内容待补充完整</p>
+</div>
 <font color="grey" size="1">注：此博客参考自 厦门大学林子雨老师博客 仅供博主自身复习用</font>]]></content>
       
         <categories>
