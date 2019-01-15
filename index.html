@@ -453,7 +453,18 @@
 <h2 id="创建PCollection数据"><a href="#创建PCollection数据" class="headerlink" title="创建PCollection数据"></a>创建PCollection数据</h2><p>PCollection抽象表示分布式数据集。<br>使用比较多的方式是从外部数据源读取。例如从外部文件中读取：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    // Create the pipeline.</span><br><span class="line">    PipelineOptions options =</span><br><span class="line">        PipelineOptionsFactory.fromArgs(args).create();</span><br><span class="line">    Pipeline p = Pipeline.create(options);</span><br><span class="line"></span><br><span class="line">    // Create the PCollection &apos;lines&apos; by applying a &apos;Read&apos; transform.</span><br><span class="line">    PCollection&lt;String&gt; lines = p.apply(</span><br><span class="line">      &quot;ReadMyFile&quot;, TextIO.read().from(&quot;protocol://path/to/some/inputData.txt&quot;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>当然也支持从内存中读取的方式，不过这种方式一般只会出现在调试程序分中：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    // Create a Java Collection, in this case a List of Strings.</span><br><span class="line">    static final List&lt;String&gt; LINES = Arrays.asList(</span><br><span class="line">      &quot;To be, or not to be: that is the question: &quot;,</span><br><span class="line">      &quot;Whether &apos;tis nobler in the mind to suffer &quot;,</span><br><span class="line">      &quot;The slings and arrows of outrageous fortune, &quot;,</span><br><span class="line">      &quot;Or to take arms against a sea of troubles, &quot;);</span><br><span class="line"></span><br><span class="line">    // Create the pipeline.</span><br><span class="line">    PipelineOptions options =</span><br><span class="line">        PipelineOptionsFactory.fromArgs(args).create();</span><br><span class="line">    Pipeline p = Pipeline.create(options);</span><br><span class="line"></span><br><span class="line">    // Apply Create, passing the list and the coder, to create the PCollection.</span><br><span class="line">    p.apply(Create.of(LINES)).setCoder(StringUtf8Coder.of())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="使用ParDo"><a href="#使用ParDo" class="headerlink" title="使用ParDo"></a>使用ParDo</h2><p>在PCollection 上调用apply 方法，用ParDo 作为参数，如下代码所示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 元素类型为字符串类型的输入PCollection</span><br><span class="line">PCollection&lt;String&gt; words = ...;</span><br><span class="line"></span><br><span class="line">// DoFn子类，用来具体计算每1个元素的长度</span><br><span class="line">static class ComputeWordLengthFn extends DoFn&lt;String, Integer&gt; &#123; ... &#125;</span><br><span class="line">// 使用ParDo计算PCollection &quot;words&quot; 中每一个单词的长度</span><br><span class="line">PCollection&lt;Integer&gt; wordLengths = words.apply(</span><br><span class="line">    ParDo</span><br><span class="line">.of(new ComputeWordLengthFn()));</span><br></pre></td></tr></table></figure></p>
+<h2 id="PCollection的Transforms采用如下的语法："><a href="#PCollection的Transforms采用如下的语法：" class="headerlink" title="PCollection的Transforms采用如下的语法："></a>PCollection的Transforms采用如下的语法：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[Output PCollection] = [Input PCollection].apply([Transform])</span><br><span class="line">或者采用链式的方式将多个Transform连接起来</span><br><span class="line">[Final Output PCollection] = [Initial Input PCollection].apply([First Transform])</span><br><span class="line">.apply([Second Transform])</span><br><span class="line">.apply([Third Transform])</span><br></pre></td></tr></table></figure>
+<p>PCollection的Transforms中比较核心方法如下：</p>
+<ul>
+<li>ParDo</li>
+<li>GroupByKey</li>
+<li>CoGroupByKey</li>
+<li>Combine</li>
+<li>Flatten</li>
+<li>Partition</li>
+</ul>
+<h2 id="使用ParDo"><a href="#使用ParDo" class="headerlink" title="使用ParDo"></a>使用ParDo</h2><p>ParDo处理范例与Map / Shuffle / Reduce样式算法的“Map”阶段相似：ParDo转换考虑了输入PCollection中的每个元素，对该元素执行一些处理函数（用户代码），并输出0个，1个或多个元素到输出PCollection。<br>在PCollection 上调用apply 方法，用ParDo 作为参数，如下代码所示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">// 元素类型为字符串类型的输入PCollection</span><br><span class="line">PCollection&lt;String&gt; words = ...;</span><br><span class="line"></span><br><span class="line">// DoFn子类，用来具体计算每1个元素的长度</span><br><span class="line">static class ComputeWordLengthFn extends DoFn&lt;String, Integer&gt; &#123;</span><br><span class="line">  @ProcessElement</span><br><span class="line">  public void processElement(ProcessContext c) &#123;</span><br><span class="line">    // Get the input element from ProcessContext.</span><br><span class="line">    String word = c.element();</span><br><span class="line">    // Use ProcessContext.output to emit the output element.</span><br><span class="line">    c.output(word.length());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 使用ParDo计算PCollection &quot;words&quot; 中每一个单词的长度</span><br><span class="line">PCollection&lt;Integer&gt; wordLengths = words.apply(</span><br><span class="line">    ParDo</span><br><span class="line">.of(new ComputeWordLengthFn()));</span><br></pre></td></tr></table></figure></p>
+<p>注意: 如果 PCollection 的元素是key/value键值对,可以通过ProcessContext.element().getKey()获取键(key)， ProcessContext.element().getValue()获取值(value)</p>
 
           
         
@@ -967,7 +978,7 @@
   
 
   <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/秒杀问题的数据库和SQL设计/">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/高性能最终一致性的数据同步方案/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Melodylican">
@@ -989,8 +1000,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/11/23/秒杀问题的数据库和SQL设计/" itemprop="url">
-                  “秒杀”问题的数据库和SQL设计
+                <a class="post-title-link" href="/2017/11/23/高性能最终一致性的数据同步方案/" itemprop="url">
+                  高性能、最终一致性的数据同步方案
                 </a>
               
             
@@ -1046,7 +1057,7 @@
 
           
           
-             <span id="/2017/11/23/秒杀问题的数据库和SQL设计/" class="leancloud_visitors" data-flag-title="“秒杀”问题的数据库和SQL设计">
+             <span id="/2017/11/23/高性能最终一致性的数据同步方案/" class="leancloud_visitors" data-flag-title="高性能、最终一致性的数据同步方案">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1076,17 +1087,11 @@
 
       
         
-          <h2 id="问题的来源"><a href="#问题的来源" class="headerlink" title="问题的来源"></a>问题的来源</h2><p>最近发现很多人被类似秒杀这样的设计困扰，其实这类问题可以很方便地解决，先来说说这类问题的关键点是什么：</p>
-<ol>
-<li>一定要高性能，不然还能叫秒杀吗？</li>
-<li>要强一致性，库存只有100个，不能卖出去101个吧？但是库存10000实际只卖了9999是否允许呢？</li>
-<li>既然这里说了是秒杀，那往往还会针对每个用户有购买数量的限制。<br>总结一下，还是那几个词：高性能强一致性！</li>
-</ol>
-<blockquote>
-<p>下文的所有解决方案是在 Mysql InnoDB 下做的。因为用到了很多数据库特性。其他的数据库或其他的数据库引擎会有不同的表现，请注意。<br></p></blockquote>
+          <p>问题的来源<br>先描述一下问题：</p>
+<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/23/秒杀问题的数据库和SQL设计/#more" rel="contents">
+            <a class="btn" href="/2017/11/23/高性能最终一致性的数据同步方案/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
