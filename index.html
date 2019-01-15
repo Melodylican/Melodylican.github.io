@@ -399,8 +399,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/算法/" itemprop="url" rel="index">
-                    <span itemprop="name">算法</span>
+                  <a href="/categories/学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">学习笔记</span>
                   </a>
                 </span>
 
@@ -447,7 +447,13 @@
       
         
           
-            <h2 id="创建Pipeline"><a href="#创建Pipeline" class="headerlink" title="创建Pipeline"></a>创建Pipeline</h2><h2 id="使用ParDo"><a href="#使用ParDo" class="headerlink" title="使用ParDo"></a>使用ParDo</h2><p>在PCollection 上调用apply 方法，用ParDo 作为参数，如下代码所示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 元素类型为字符串类型的输入PCollection</span><br><span class="line">PCollection&lt;String&gt; words = ...;</span><br><span class="line"></span><br><span class="line">// DoFn子类，用来具体计算每1个元素的长度</span><br><span class="line">static class ComputeWordLengthFn extends DoFn&lt;String, Integer&gt; &#123; ... &#125;</span><br><span class="line">// 使用ParDo计算PCollection &quot;words&quot; 中每一个单词的长度</span><br><span class="line">PCollection&lt;Integer&gt; wordLengths = words.apply(</span><br><span class="line">    ParDo</span><br><span class="line">.of(new ComputeWordLengthFn()));</span><br></pre></td></tr></table></figure></p>
+            <h2 id="创建Pipeline"><a href="#创建Pipeline" class="headerlink" title="创建Pipeline"></a>创建Pipeline</h2><p>管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个PipelinePipeline对象开始，然后使用该对象作为创建管道数据集作为PCollections的基础，并将其作为Transforms操作。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// Start by defining the options for the pipeline.</span><br><span class="line">PipelineOptions options = PipelineOptionsFactory.create();</span><br><span class="line"></span><br><span class="line">// Then create the pipeline.</span><br><span class="line">Pipeline p = Pipeline.create(options);</span><br><span class="line"></span><br><span class="line">或者通过命令行参数的方式：</span><br><span class="line">PipelineOptions options =</span><br><span class="line">    PipelineOptionsFactory.fromArgs(args).withValidation().create();</span><br><span class="line">// 参数的传递方式 --&lt;option&gt;=&lt;value&gt;</span><br></pre></td></tr></table></figure>
+<p>也可以通过如下的方式创建自定义的参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public interface MyOptions extends PipelineOptions &#123;</span><br><span class="line">    String getMyCustomOption();</span><br><span class="line">    void setMyCustomOption(String myCustomOption);</span><br><span class="line">&#125;</span><br><span class="line">或者</span><br><span class="line">public interface MyOptions extends PipelineOptions &#123;</span><br><span class="line">    @Description(&quot;My custom command line argument.&quot;)</span><br><span class="line">    @Default.String(&quot;DEFAULT&quot;)</span><br><span class="line">    String getMyCustomOption();</span><br><span class="line">    void setMyCustomOption(String myCustomOption);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">//通过如下方式使用：</span><br><span class="line"></span><br><span class="line">PipelineOptionsFactory.register(MyOptions.class);</span><br><span class="line">MyOptions options = PipelineOptionsFactory.fromArgs(args)</span><br><span class="line">                        .withValidation().as(MyOptions.class);</span><br><span class="line">//-myCustomOption=value</span><br></pre></td></tr></table></figure></p>
+<h2 id="创建PCollection数据"><a href="#创建PCollection数据" class="headerlink" title="创建PCollection数据"></a>创建PCollection数据</h2><p>PCollection抽象表示分布式数据集。<br>使用比较多的方式是从外部数据源读取。例如从外部文件中读取：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    // Create the pipeline.</span><br><span class="line">    PipelineOptions options =</span><br><span class="line">        PipelineOptionsFactory.fromArgs(args).create();</span><br><span class="line">    Pipeline p = Pipeline.create(options);</span><br><span class="line"></span><br><span class="line">    // Create the PCollection &apos;lines&apos; by applying a &apos;Read&apos; transform.</span><br><span class="line">    PCollection&lt;String&gt; lines = p.apply(</span><br><span class="line">      &quot;ReadMyFile&quot;, TextIO.read().from(&quot;protocol://path/to/some/inputData.txt&quot;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当然也支持从内存中读取的方式，不过这种方式一般只会出现在调试程序分中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    // Create a Java Collection, in this case a List of Strings.</span><br><span class="line">    static final List&lt;String&gt; LINES = Arrays.asList(</span><br><span class="line">      &quot;To be, or not to be: that is the question: &quot;,</span><br><span class="line">      &quot;Whether &apos;tis nobler in the mind to suffer &quot;,</span><br><span class="line">      &quot;The slings and arrows of outrageous fortune, &quot;,</span><br><span class="line">      &quot;Or to take arms against a sea of troubles, &quot;);</span><br><span class="line"></span><br><span class="line">    // Create the pipeline.</span><br><span class="line">    PipelineOptions options =</span><br><span class="line">        PipelineOptionsFactory.fromArgs(args).create();</span><br><span class="line">    Pipeline p = Pipeline.create(options);</span><br><span class="line"></span><br><span class="line">    // Apply Create, passing the list and the coder, to create the PCollection.</span><br><span class="line">    p.apply(Create.of(LINES)).setCoder(StringUtf8Coder.of())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="使用ParDo"><a href="#使用ParDo" class="headerlink" title="使用ParDo"></a>使用ParDo</h2><p>在PCollection 上调用apply 方法，用ParDo 作为参数，如下代码所示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 元素类型为字符串类型的输入PCollection</span><br><span class="line">PCollection&lt;String&gt; words = ...;</span><br><span class="line"></span><br><span class="line">// DoFn子类，用来具体计算每1个元素的长度</span><br><span class="line">static class ComputeWordLengthFn extends DoFn&lt;String, Integer&gt; &#123; ... &#125;</span><br><span class="line">// 使用ParDo计算PCollection &quot;words&quot; 中每一个单词的长度</span><br><span class="line">PCollection&lt;Integer&gt; wordLengths = words.apply(</span><br><span class="line">    ParDo</span><br><span class="line">.of(new ComputeWordLengthFn()));</span><br></pre></td></tr></table></figure></p>
 
           
         
@@ -961,7 +967,7 @@
   
 
   <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/Ansible-when-register使用/">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/秒杀问题的数据库和SQL设计/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Melodylican">
@@ -983,8 +989,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/11/23/Ansible-when-register使用/" itemprop="url">
-                  Ansible when register使用
+                <a class="post-title-link" href="/2017/11/23/秒杀问题的数据库和SQL设计/" itemprop="url">
+                  “秒杀”问题的数据库和SQL设计
                 </a>
               
             
@@ -1040,7 +1046,7 @@
 
           
           
-             <span id="/2017/11/23/Ansible-when-register使用/" class="leancloud_visitors" data-flag-title="Ansible when register使用">
+             <span id="/2017/11/23/秒杀问题的数据库和SQL设计/" class="leancloud_visitors" data-flag-title="“秒杀”问题的数据库和SQL设计">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1070,10 +1076,17 @@
 
       
         
-          <p>当一条命令执行不成功，执行另外的命令，可以使用when 与register ,使用如下<br>任务配置文件test.yml：<br><img src="https://blogimg1-1251194783.cos.ap-guangzhou.myqcloud.com/blog_img/ansible1.png?q-sign-algorithm=sha1&amp;q-ak=AKIDWWccuOFDJbOKypx8VD3lwstpVwBqcA75&amp;q-sign-time=1546519044;1546520844&amp;q-key-time=1546519044;1546520844&amp;q-header-list=&amp;q-url-param-list=&amp;q-signature=a5de5b7fc436801d119796aaf70f8020f9e8d138&amp;x-cos-security-token=ba7b08e2f4b38ad21232c7e3d5e650ce0ff4e1bb10001" alt=""></p>
+          <h2 id="问题的来源"><a href="#问题的来源" class="headerlink" title="问题的来源"></a>问题的来源</h2><p>最近发现很多人被类似秒杀这样的设计困扰，其实这类问题可以很方便地解决，先来说说这类问题的关键点是什么：</p>
+<ol>
+<li>一定要高性能，不然还能叫秒杀吗？</li>
+<li>要强一致性，库存只有100个，不能卖出去101个吧？但是库存10000实际只卖了9999是否允许呢？</li>
+<li>既然这里说了是秒杀，那往往还会针对每个用户有购买数量的限制。<br>总结一下，还是那几个词：高性能强一致性！</li>
+</ol>
+<blockquote>
+<p>下文的所有解决方案是在 Mysql InnoDB 下做的。因为用到了很多数据库特性。其他的数据库或其他的数据库引擎会有不同的表现，请注意。<br></p></blockquote>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/23/Ansible-when-register使用/#more" rel="contents">
+            <a class="btn" href="/2017/11/23/秒杀问题的数据库和SQL设计/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1165,7 +1178,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
