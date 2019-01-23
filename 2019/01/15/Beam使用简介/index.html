@@ -90,18 +90,18 @@
 
 
 
-<meta name="description" content="创建Pipeline管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个PipelinePipeline对象开始，然后使用该对象作为创建管道数据集作为PCollections的基础，并将其作为Transforms操作。 12345678910// Start by defining the options for the pipeline.PipelineOptions options =">
+<meta name="description" content="创建Pipeline管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个Pipeline对象开始，然后使用该对象作为创建管道数据集PCollections的基础，并对其作Transforms操作。 12345678910// Start by defining the options for the pipeline.PipelineOptions options = PipelineOp">
 <meta name="keywords" content="Java,Apache Beam">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Apache Beam使用简介">
 <meta property="og:url" content="http://Melodylican.github.io/2019/01/15/Beam使用简介/index.html">
 <meta property="og:site_name" content="不卑不亢不慌不忙">
-<meta property="og:description" content="创建Pipeline管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个PipelinePipeline对象开始，然后使用该对象作为创建管道数据集作为PCollections的基础，并将其作为Transforms操作。 12345678910// Start by defining the options for the pipeline.PipelineOptions options =">
+<meta property="og:description" content="创建Pipeline管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个Pipeline对象开始，然后使用该对象作为创建管道数据集PCollections的基础，并对其作Transforms操作。 12345678910// Start by defining the options for the pipeline.PipelineOptions options = PipelineOp">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-01-18T09:14:11.688Z">
+<meta property="og:updated_time" content="2019-01-22T11:26:45.784Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Apache Beam使用简介">
-<meta name="twitter:description" content="创建Pipeline管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个PipelinePipeline对象开始，然后使用该对象作为创建管道数据集作为PCollections的基础，并将其作为Transforms操作。 12345678910// Start by defining the options for the pipeline.PipelineOptions options =">
+<meta name="twitter:description" content="创建Pipeline管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个Pipeline对象开始，然后使用该对象作为创建管道数据集PCollections的基础，并对其作Transforms操作。 12345678910// Start by defining the options for the pipeline.PipelineOptions options = PipelineOp">
 
 
 
@@ -442,7 +442,7 @@
       
 
       
-        <h2 id="创建Pipeline"><a href="#创建Pipeline" class="headerlink" title="创建Pipeline"></a>创建Pipeline</h2><p>管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个PipelinePipeline对象开始，然后使用该对象作为创建管道数据集作为PCollections的基础，并将其作为Transforms操作。</p>
+        <h2 id="创建Pipeline"><a href="#创建Pipeline" class="headerlink" title="创建Pipeline"></a>创建Pipeline</h2><p>管道抽象封装了数据处理任务中的所有数据和步骤。通常从构建一个Pipeline对象开始，然后使用该对象作为创建管道数据集PCollections的基础，并对其作Transforms操作。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Start by defining the options for the pipeline.</span></span><br><span class="line">PipelineOptions options = PipelineOptionsFactory.create();</span><br><span class="line"></span><br><span class="line"><span class="comment">// Then create the pipeline.</span></span><br><span class="line">Pipeline p = Pipeline.create(options);</span><br><span class="line"></span><br><span class="line">或者通过命令行参数的方式：</span><br><span class="line">PipelineOptions options =</span><br><span class="line">    PipelineOptionsFactory.fromArgs(args).withValidation().create();</span><br><span class="line"><span class="comment">// 参数的传递方式 --&lt;option&gt;=&lt;value&gt;</span></span><br></pre></td></tr></table></figure>
 <a id="more"></a>
 <p>也可以通过如下的方式创建自定义的参数：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyOptions</span> <span class="keyword">extends</span> <span class="title">PipelineOptions</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">getMyCustomOption</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setMyCustomOption</span><span class="params">(String myCustomOption)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//或者</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyOptions</span> <span class="keyword">extends</span> <span class="title">PipelineOptions</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Description</span>(<span class="string">"My custom command line argument."</span>)</span><br><span class="line">    <span class="meta">@Default</span>.String(<span class="string">"DEFAULT"</span>)</span><br><span class="line">    <span class="function">String <span class="title">getMyCustomOption</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setMyCustomOption</span><span class="params">(String myCustomOption)</span></span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line"><span class="comment">//通过如下方式使用：</span></span><br><span class="line"></span><br><span class="line">PipelineOptionsFactory.register(MyOptions.class);</span><br><span class="line">MyOptions options = PipelineOptionsFactory.fromArgs(args)</span><br><span class="line">                        .withValidation().as(MyOptions.class);</span><br><span class="line"><span class="comment">//-myCustomOption=value</span></span><br></pre></td></tr></table></figure></p>
@@ -450,7 +450,7 @@
 <h3 id="PCollection-特性"><a href="#PCollection-特性" class="headerlink" title="PCollection 特性"></a>PCollection 特性</h3><ul>
 <li>元素类型</li>
 <li>不变性</li>
-<li>随机访问</li>
+<li>不支持随机访问</li>
 <li>Size和边界</li>
 <li>元素时间戳 </li>
 </ul>
