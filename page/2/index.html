@@ -337,7 +337,7 @@
   
 
   <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/秒杀问题的数据库和SQL设计/">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/23/高性能最终一致性的数据同步方案/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Melodylican">
@@ -359,8 +359,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/11/23/秒杀问题的数据库和SQL设计/" itemprop="url">
-                  “秒杀”问题的数据库和SQL设计
+                <a class="post-title-link" href="/2017/11/23/高性能最终一致性的数据同步方案/" itemprop="url">
+                  高性能、最终一致性的数据同步方案
                 </a>
               
             
@@ -416,7 +416,7 @@
 
           
           
-             <span id="/2017/11/23/秒杀问题的数据库和SQL设计/" class="leancloud_visitors" data-flag-title="“秒杀”问题的数据库和SQL设计">
+             <span id="/2017/11/23/高性能最终一致性的数据同步方案/" class="leancloud_visitors" data-flag-title="高性能、最终一致性的数据同步方案">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -446,17 +446,11 @@
 
       
         
-          <h2 id="问题的来源"><a href="#问题的来源" class="headerlink" title="问题的来源"></a>问题的来源</h2><p>最近发现很多人被类似秒杀这样的设计困扰，其实这类问题可以很方便地解决，先来说说这类问题的关键点是什么：</p>
-<ol>
-<li>一定要高性能，不然还能叫秒杀吗？</li>
-<li>要强一致性，库存只有100个，不能卖出去101个吧？但是库存10000实际只卖了9999是否允许呢？</li>
-<li>既然这里说了是秒杀，那往往还会针对每个用户有购买数量的限制。<br>总结一下，还是那几个词：高性能强一致性！</li>
-</ol>
-<blockquote>
-<p>下文的所有解决方案是在 Mysql InnoDB 下做的。因为用到了很多数据库特性。其他的数据库或其他的数据库引擎会有不同的表现，请注意。<br></p></blockquote>
+          <p>问题的来源<br>先描述一下问题：</p>
+<p>两个系统的数据需要做数据同步，可以是数据库到数据库，也可以是数据库到内存。要求高性能（速度快），最终一致性（数据不能错）。<br></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/11/23/秒杀问题的数据库和SQL设计/#more" rel="contents">
+            <a class="btn" href="/2017/11/23/高性能最终一致性的数据同步方案/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -658,158 +652,6 @@
   
 
   <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/17/Netty架构原理图/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Melodylican">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不卑不亢不慌不忙">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/11/17/Netty架构原理图/" itemprop="url">
-                  Netty 架构原理图
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-17T00:00:00+08:00">
-                2017-11-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2017/11/17/Netty架构原理图/" class="leancloud_visitors" data-flag-title="Netty 架构原理图">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-	
-
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/17/浅谈分布式锁/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -927,6 +769,158 @@
             </a>
           </div>
           <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+	
+
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope="" itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://Melodylican.github.io/2017/11/17/Netty架构原理图/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Melodylican">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不卑不亢不慌不忙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/11/17/Netty架构原理图/" itemprop="url">
+                  Netty 架构原理图
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-17T00:00:00+08:00">
+                2017-11-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/11/17/Netty架构原理图/" class="leancloud_visitors" data-flag-title="Netty 架构原理图">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <center><br><img src="http://ojwkevhas.bkt.clouddn.com/netty%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg" alt=""><br></center>
+          
         
       
     </div>
